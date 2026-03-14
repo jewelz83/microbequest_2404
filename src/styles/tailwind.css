@@ -1,0 +1,150 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Shadow utilities */
+@layer utilities {
+  .shadow-subtle {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .shadow-moderate {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  .shadow-pronounced {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Duration utilities for animations */
+@layer utilities {
+  .duration-fast {
+    transition-duration: 150ms;
+  }
+  
+  .duration-normal {
+    transition-duration: 300ms;
+  }
+  
+  .duration-slow {
+    transition-duration: 500ms;
+  }
+}
+
+@layer base {
+  :root {
+    /* Core System Colors - Default Game Theme */
+    --color-background: #FFFFFF; /* Clean white background */
+    --color-foreground: #1F2937; /* Dark gray text */
+    --color-border: #E5E7EB; /* Light gray borders */
+    --color-input: #FFFFFF; /* Pure white inputs */
+    --color-ring: #3B82F6; /* Blue focus rings */
+    
+    /* Card Colors */
+    --color-card: #FFFFFF; /* Pure white cards */
+    --color-card-foreground: #1F2937; /* Dark gray text on cards */
+    
+    /* Popover Colors */
+    --color-popover: #FFFFFF; /* Pure white popovers */
+    --color-popover-foreground: #1F2937; /* Dark gray text */
+    
+    /* Muted Colors */
+    --color-muted: #F3F4F6; /* Light gray muted areas */
+    --color-muted-foreground: #6B7280; /* Medium gray text */
+    
+    /* Primary Colors - Bright Blue */
+    --color-primary: #3B82F6; /* Bright blue primary */
+    --color-primary-foreground: #FFFFFF; /* White text on primary */
+    
+    /* Secondary Colors - Light Gray */
+    --color-secondary: #F3F4F6; /* Light gray secondary */
+    --color-secondary-foreground: #1F2937; /* Dark gray text on secondary */
+    
+    /* Accent Colors - Purple */
+    --color-accent: #8B5CF6; /* Purple accents */
+    --color-accent-foreground: #FFFFFF; /* White text on accents */
+    
+    /* State Colors */
+    --color-success: #10B981; /* Green for success */
+    --color-success-foreground: #FFFFFF; /* White text on success */
+    
+    --color-warning: #F59E0B; /* Orange for warnings */
+    --color-warning-foreground: #FFFFFF; /* White text on warnings */
+    
+    --color-error: #EF4444; /* Red for errors */
+    --color-error-foreground: #FFFFFF; /* White text on errors */
+    
+    --color-destructive: #EF4444; /* Red for destructive actions */
+    --color-destructive-foreground: #FFFFFF; /* White text on destructive */
+    
+    /* Animation Variables */
+    --animation-duration-fast: 200ms;
+    --animation-duration-normal: 400ms;
+    --animation-timing: cubic-bezier(0.4, 0.0, 0.2, 1);
+    
+    /* Shadow Variables */
+    --shadow-subtle: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-moderate: 0 8px 16px rgba(0, 0, 0, 0.1);
+    --shadow-pronounced: 0 16px 32px rgba(0, 0, 0, 0.15);
+    
+    /* Border Radius */
+    --radius-card: 8px;
+    --radius-button: 12px;
+  }
+  
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Typography Base Styles */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Fredoka One', cursive;
+    font-weight: 400;
+  }
+  
+  body, p, span, div {
+    font-family: 'Open Sans', sans-serif;
+  }
+  
+  .font-caption {
+    font-family: 'Nunito', sans-serif;
+  }
+  
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+  
+  /* Animation Classes */
+  .animate-smooth {
+    transition-timing-function: var(--animation-timing);
+    transition-duration: var(--animation-duration-normal);
+  }
+  
+  .animate-fast {
+    transition-timing-function: var(--animation-timing);
+    transition-duration: var(--animation-duration-fast);
+  }
+  
+  /* Reduced Motion Support */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
