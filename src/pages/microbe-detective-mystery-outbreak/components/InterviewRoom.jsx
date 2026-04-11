@@ -475,6 +475,39 @@ const InterviewRoom = ({ selectedCase, onClueFound, collectedClues }) => {
     return witnessesByCase?.[selectedCase?.id] || witnessesByCase[1];
   };
 
+  // Witness portrait images by role type
+  const witnessPortraits = {
+    principal: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&q=80',
+    cook: 'https://images.unsplash.com/photo-1607631568010-a87245c0daf8?w=200&q=80',
+    nurse: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=200&q=80',
+    director: 'https://images.unsplash.com/photo-1573496799515-eebbb63814f2?w=200&q=80',
+    counselor: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80',
+    'dr-smith': 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=200&q=80',
+    doctor: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=200&q=80',
+    pharmacist: 'https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=200&q=80',
+    patient: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80',
+    janitor: 'https://images.unsplash.com/photo-1545167622-3a6ac756afa4?w=200&q=80',
+    teacher: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80',
+    'health-inspector': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
+    victim: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80',
+    vendor: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200&q=80',
+  };
+
+  const caseBackgrounds = {
+    1: 'https://images.unsplash.com/photo-1567521464027-f127ff144326?w=800&q=70',
+    2: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&q=70',
+    3: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=70',
+    4: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&q=70',
+    5: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&q=70',
+    6: 'https://images.unsplash.com/photo-1551076805-e1869033e561?w=800&q=70',
+  };
+
+  const getWitnessPortrait = (witnessId) =>
+    witnessPortraits[witnessId] || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80';
+
+  const getCaseBackground = () =>
+    caseBackgrounds[selectedCase?.id] || caseBackgrounds[1];
+
   const witnesses = getWitnessesForCase();
   const currentWitnessData = witnesses?.find(w => w?.id === currentWitness);
   const isWitnessInterviewed = (witnessId) => interviewComplete?.includes(witnessId);
@@ -530,7 +563,7 @@ const InterviewRoom = ({ selectedCase, onClueFound, collectedClues }) => {
                 return (
                   <motion.button
                     key={witness?.id}
-                    className={`relative p-6 rounded-xl border-2 text-left transition-all ${
+                    className={`relative rounded-xl border-2 text-left overflow-hidden transition-all ${
                       interviewed
                         ? 'bg-green-500/20 border-green-400/50'
                         : 'bg-white/10 border-white/20 hover:border-white/40 hover:bg-white/15'
@@ -539,27 +572,55 @@ const InterviewRoom = ({ selectedCase, onClueFound, collectedClues }) => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    whileHover={!interviewed ? { scale: 1.05, y: -5 } : {}}
+                    whileHover={!interviewed ? { scale: 1.03, y: -4 } : {}}
                   >
-                    {interviewed && (
-                      <div className="absolute -top-3 -right-3 bg-green-500 rounded-full p-2">
-                        <CheckCircle className="w-5 h-5 text-white" />
-                      </div>
-                    )}
+                    {/* Portrait image */}
+                    <div className="relative h-40 overflow-hidden">
+                      <img
+                        src={getWitnessPortrait(witness?.id)}
+                        alt={witness?.name}
+                        className={`w-full h-full object-cover object-top transition-all duration-500 ${
+                          interviewed ? 'opacity-70 grayscale-0' : 'opacity-80'
+                        }`}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-                    <div className="text-6xl mb-4 text-center">{witness?.avatar}</div>
-                    <h4 className="font-bold text-white text-lg mb-1">{witness?.name}</h4>
-                    <p className="text-white/70 text-sm mb-4">{witness?.role}</p>
-                    
-                    <div className="flex items-center justify-between text-sm">
-                      {interviewed ? (
-                        <span className="text-green-300">✓ Interviewed</span>
-                      ) : (
-                        <>
-                          <span className="text-orange-300">{witness?.questions?.length} questions</span>
-                          <ChevronRight className="w-4 h-4 text-white/50" />
-                        </>
+                      {/* Interviewed badge */}
+                      {interviewed && (
+                        <motion.div
+                          className="absolute top-3 right-3 bg-green-500 rounded-full p-1.5 shadow-lg"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: 'spring', stiffness: 200 }}
+                        >
+                          <CheckCircle className="w-4 h-4 text-white" />
+                        </motion.div>
                       )}
+
+                      {/* Question count badge */}
+                      {!interviewed && (
+                        <div className="absolute top-3 left-3 bg-orange-500/80 rounded-full px-2 py-1 text-xs text-white font-semibold">
+                          {witness?.questions?.length} questions
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Info */}
+                    <div className="p-4">
+                      <h4 className="font-bold text-white text-lg mb-1">{witness?.name}</h4>
+                      <p className="text-white/70 text-sm mb-3">{witness?.role}</p>
+                      <div className="flex items-center justify-between text-sm">
+                        {interviewed ? (
+                          <span className="text-green-300 flex items-center gap-1">
+                            <CheckCircle className="w-4 h-4" /> Interviewed
+                          </span>
+                        ) : (
+                          <>
+                            <span className="text-orange-300">Click to interview</span>
+                            <ChevronRight className="w-4 h-4 text-white/50" />
+                          </>
+                        )}
+                      </div>
                     </div>
                   </motion.button>
                 );
@@ -589,34 +650,51 @@ const InterviewRoom = ({ selectedCase, onClueFound, collectedClues }) => {
           <AnimatePresence mode="wait">
             <motion.div
               key={currentWitness}
-              className="bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl p-8"
+              className="bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl overflow-hidden"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
             >
-              {/* Witness Info */}
-              <div className="flex items-center gap-6 mb-8 pb-6 border-b border-white/20">
-                <div className="text-7xl">{currentWitnessData?.avatar}</div>
-                <div className="flex-1">
-                  <h3 className="text-2xl font-bold text-white mb-1">{currentWitnessData?.name}</h3>
-                  <p className="text-white/70 text-lg">{currentWitnessData?.role}</p>
-                  <div className="mt-2 flex items-center gap-2 text-sm text-white/60">
-                    <MessageCircle className="w-4 h-4" />
-                    <span>Question {currentQuestion + 1} of {currentWitnessData?.questions?.length}</span>
+              {/* Scene Background Header with Portrait */}
+              <div className="relative h-48 overflow-hidden">
+                <img
+                  src={getCaseBackground()}
+                  alt="Interview scene"
+                  className="w-full h-full object-cover opacity-40"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/80" />
+
+                {/* Witness portrait + info overlay */}
+                <div className="absolute bottom-0 left-0 right-0 p-6 flex items-end gap-5">
+                  <div className="w-20 h-20 rounded-full overflow-hidden border-3 border-orange-400 shadow-xl flex-shrink-0">
+                    <img
+                      src={getWitnessPortrait(currentWitness)}
+                      alt={currentWitnessData?.name}
+                      className="w-full h-full object-cover object-top"
+                    />
                   </div>
+                  <div className="flex-1">
+                    <h3 className="text-2xl font-bold text-white mb-0.5">{currentWitnessData?.name}</h3>
+                    <p className="text-orange-200">{currentWitnessData?.role}</p>
+                    <div className="flex items-center gap-2 text-sm text-white/60 mt-1">
+                      <MessageCircle className="w-4 h-4" />
+                      <span>Question {currentQuestion + 1} of {currentWitnessData?.questions?.length}</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setCurrentWitness(null);
+                      setCurrentQuestion(0);
+                    }}
+                    className="text-white/60 hover:text-white transition-colors bg-black/30 rounded-full px-3 py-1 text-sm"
+                  >
+                    ✕ End
+                  </button>
                 </div>
-                <button
-                  onClick={() => {
-                    setCurrentWitness(null);
-                    setCurrentQuestion(0);
-                  }}
-                  className="text-white/60 hover:text-white transition-colors"
-                >
-                  ✕ End Interview
-                </button>
               </div>
 
               {/* Question & Answer */}
+              <div className="p-8">
               <motion.div
                 key={currentQuestion}
                 initial={{ opacity: 0, x: 20 }}
@@ -708,6 +786,7 @@ const InterviewRoom = ({ selectedCase, onClueFound, collectedClues }) => {
                     }`}
                   />
                 ))}
+              </div>
               </div>
             </motion.div>
           </AnimatePresence>

@@ -176,7 +176,7 @@ const DigitalLab = ({ selectedCase, collectedClues, onMicrobeIdentified, identif
       }
     };
 
-    return microbesByCase?.[selectedCase?.id] || microbesByCase[1];
+    return microbesByCase?.[selectedCase?.id] || microbesByCase?.[1];
   };
 
   // Lab tests available
@@ -217,7 +217,6 @@ const DigitalLab = ({ selectedCase, collectedClues, onMicrobeIdentified, identif
 
   const handleTestSelect = (test) => {
     if (collectedClues?.length < test?.requiresClues) {
-      alert(`You need at least ${test?.requiresClues} clues to run this test!`);
       return;
     }
 
@@ -248,7 +247,7 @@ const DigitalLab = ({ selectedCase, collectedClues, onMicrobeIdentified, identif
   };
 
   const microbeOptions = getMicrobeOptions();
-  const allOptions = [microbeOptions?.correct, ...(microbeOptions?.wrong || [])].sort(() => Math.random() - 0.5);
+  const allOptions = [microbeOptions?.correct, ...(microbeOptions?.wrong || [])]?.sort(() => Math.random() - 0.5);
 
   const getColorClasses = (color) => {
     const colors = {
@@ -281,7 +280,7 @@ const DigitalLab = ({ selectedCase, collectedClues, onMicrobeIdentified, identif
 
         {identifiedMicrobe ? (
           /* Microbe Identified - Show Results */
-          <motion.div
+          (<motion.div
             className="bg-gradient-to-br from-green-500/20 to-blue-500/20 border-2 border-green-400/50 rounded-2xl p-8"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -297,7 +296,6 @@ const DigitalLab = ({ selectedCase, collectedClues, onMicrobeIdentified, identif
               <h3 className="text-3xl font-bold text-white mb-2">Microbe Identified!</h3>
               <p className="text-green-200 text-lg">Excellent detective work!</p>
             </div>
-
             <div className="bg-white/10 rounded-xl p-6 space-y-4">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
@@ -336,13 +334,12 @@ const DigitalLab = ({ selectedCase, collectedClues, onMicrobeIdentified, identif
                 </div>
               </div>
             </div>
-
             <div className="mt-6 text-center">
               <p className="text-green-200 mb-4">
                 Now that you've identified the microbe, head to the Analysis Center to recommend solutions!
               </p>
             </div>
-          </motion.div>
+          </motion.div>)
         ) : (
           <>
             {/* Lab Tests Grid */}
@@ -366,8 +363,7 @@ const DigitalLab = ({ selectedCase, collectedClues, onMicrobeIdentified, identif
                         completed
                           ? 'bg-green-500/20 border-green-400/50'
                           : canRun
-                            ? 'bg-white/10 border-white/20 hover:border-white/40 hover:bg-white/15'
-                            : 'bg-gray-800/50 border-gray-600/30 cursor-not-allowed opacity-50'
+                            ? 'bg-white/10 border-white/20 hover:border-white/40 hover:bg-white/15' :'bg-gray-800/50 border-gray-600/30 cursor-not-allowed opacity-50'
                       }`}
                       onClick={() => canRun && !completed && handleTestSelect(test)}
                       disabled={!canRun || completed || testing}
@@ -378,11 +374,9 @@ const DigitalLab = ({ selectedCase, collectedClues, onMicrobeIdentified, identif
                           <CheckCircle className="w-4 h-4 text-white" />
                         </div>
                       )}
-
                       <IconComponent className={`w-8 h-8 mx-auto mb-3 ${completed ? 'text-green-300' : 'text-white/80'}`} />
                       <h4 className="font-bold text-white text-center mb-2">{test?.name}</h4>
                       <p className="text-white/70 text-xs text-center">{test?.description}</p>
-                      
                       <div className="mt-3 text-center">
                         {completed ? (
                           <span className="text-green-300 text-xs">✓ Complete</span>
@@ -452,8 +446,7 @@ const DigitalLab = ({ selectedCase, collectedClues, onMicrobeIdentified, identif
                           showResult
                             ? isCorrect
                               ? 'bg-green-500/30 border-green-400 shadow-lg shadow-green-500/50'
-                              : 'bg-red-500/30 border-red-400 shadow-lg shadow-red-500/50'
-                            : 'bg-white/10 border-white/20 hover:border-white/40 hover:bg-white/15'
+                              : 'bg-red-500/30 border-red-400 shadow-lg shadow-red-500/50' :'bg-white/10 border-white/20 hover:border-white/40 hover:bg-white/15'
                         }`}
                         onClick={() => !selectedAnswer && handleMicrobeSelection(option)}
                         disabled={!!selectedAnswer}
@@ -472,10 +465,8 @@ const DigitalLab = ({ selectedCase, collectedClues, onMicrobeIdentified, identif
                             )}
                           </div>
                         )}
-
                         <h4 className="font-bold text-white text-lg mb-2">{option?.name}</h4>
                         <p className="text-white/70 text-sm">{option?.type}</p>
-                        
                         {showResult && !isCorrect && option?.reason && (
                           <p className="text-red-200 text-xs mt-3 italic">{option?.reason}</p>
                         )}

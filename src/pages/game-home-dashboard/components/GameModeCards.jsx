@@ -20,6 +20,7 @@ const GameModeCards = ({ className = "" }) => {
       points: '50-100',
       color: 'primary',
       bgGradient: 'from-primary/20 to-primary/5',
+      buttonClass: 'bg-primary',
       microbes: [
         { type: 'bacteria', icon: 'Circle', color: 'text-green-600' },
         { type: 'virus', icon: 'Zap', color: 'text-orange-600' },
@@ -39,6 +40,7 @@ const GameModeCards = ({ className = "" }) => {
       points: '100-200',
       color: 'accent',
       bgGradient: 'from-accent/20 to-accent/5',
+      buttonClass: 'bg-accent',
       microbes: [
         { type: 'history', icon: 'BookOpen', color: 'text-blue-600' },
         { type: 'scientist', icon: 'User', color: 'text-indigo-600' },
@@ -58,6 +60,7 @@ const GameModeCards = ({ className = "" }) => {
       points: '150-250',
       color: 'secondary',
       bgGradient: 'from-secondary/20 to-secondary/5',
+      buttonClass: 'bg-rose-600',
       microbes: [
         { type: 'evidence', icon: 'FileText', color: 'text-red-600' },
         { type: 'analysis', icon: 'Microscope', color: 'text-cyan-600' },
@@ -77,6 +80,7 @@ const GameModeCards = ({ className = "" }) => {
       points: '75-150',
       color: 'secondary',
       bgGradient: 'from-secondary/20 to-secondary/5',
+      buttonClass: 'bg-teal-600',
       microbes: [
         { type: 'protozoa', icon: 'Waves', color: 'text-teal-600' },
         { type: 'algae', icon: 'Leaf', color: 'text-lime-600' },
@@ -96,6 +100,7 @@ const GameModeCards = ({ className = "" }) => {
       points: '25-75',
       color: 'accent',
       bgGradient: 'from-accent/20 to-accent/5',
+      buttonClass: 'bg-accent',
       microbes: [
         { type: 'mixed', icon: 'HelpCircle', color: 'text-violet-600' },
         { type: 'facts', icon: 'BookOpen', color: 'text-rose-600' },
@@ -115,6 +120,7 @@ const GameModeCards = ({ className = "" }) => {
       points: '100-200',
       color: 'secondary',
       bgGradient: 'from-secondary/20 to-secondary/5',
+      buttonClass: 'bg-orange-500',
       microbes: [
         { type: 'immune-cell', icon: 'Zap', color: 'text-blue-600' },
         { type: 'antibiotic', icon: 'Shield', color: 'text-purple-600' },
@@ -240,7 +246,7 @@ const GameModeCards = ({ className = "" }) => {
                 {/* Action Button */}
                 <div className="pt-2">
                   <div className={`
-                    w-full py-3 px-4 bg-${mode?.color} text-white
+                    w-full py-3 px-4 ${mode?.buttonClass || 'bg-primary'} text-white
                     rounded-button text-center font-body font-semibold text-sm
                     transition-all duration-fast group-hover:shadow-moderate
                     flex items-center justify-center space-x-2

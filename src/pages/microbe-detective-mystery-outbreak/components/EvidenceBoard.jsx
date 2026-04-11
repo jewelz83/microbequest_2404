@@ -6,6 +6,72 @@ const EvidenceBoard = ({ selectedCase, collectedClues, onClueFound, onSwitchTool
   const [hoveredClue, setHoveredClue] = useState(null);
   const [revealingClue, setRevealingClue] = useState(null);
 
+  // Unsplash images by clue type
+  const clueImages = {
+    location: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80',
+    timeline: 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=400&q=80',
+    witness: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&q=80',
+    symptom: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&q=80',
+    evidence: 'https://images.unsplash.com/photo-1582719471384-894fbb16e074?w=400&q=80',
+  };
+
+  // Case-specific images for richer visuals
+  const caseImages = {
+    // Case 1 - Cafeteria
+    'cafeteria-1': 'https://images.unsplash.com/photo-1567521464027-f127ff144326?w=400&q=80',
+    'cafeteria-2': 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=400&q=80',
+    'cafeteria-3': 'https://images.unsplash.com/photo-1607631568010-a87245c0daf8?w=400&q=80',
+    'cafeteria-4': 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&q=80',
+    'cafeteria-5': 'https://images.unsplash.com/photo-1582719471384-894fbb16e074?w=400&q=80',
+    // Case 2 - Water Well
+    'well-1': 'https://images.unsplash.com/photo-1543674892-7d64d45df18b?w=400&q=80',
+    'well-2': 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=400&q=80',
+    'well-3': 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&q=80',
+    'well-4': 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&q=80',
+    'well-5': 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=400&q=80',
+    'well-6': 'https://images.unsplash.com/photo-1563089145-599997674d42?w=400&q=80',
+    // Case 3 - Hospital
+    'hospital-1': 'https://images.unsplash.com/photo-1585421514738-01798e348b17?w=400&q=80',
+    'hospital-2': 'https://images.unsplash.com/photo-1551076805-e1869033e561?w=400&q=80',
+    'hospital-3': 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80',
+    'hospital-4': 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&q=80',
+    'hospital-5': 'https://images.unsplash.com/photo-1582719471384-894fbb16e074?w=400&q=80',
+    'hospital-6': 'https://images.unsplash.com/photo-1530026405186-ed1f139313f8?w=400&q=80',
+    'hospital-7': 'https://images.unsplash.com/photo-1516549655169-df83a0774514?w=400&q=80',
+    // Case 4 - Mold
+    'mold-1': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80',
+    'mold-2': 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=400&q=80',
+    'mold-3': 'https://images.unsplash.com/photo-1544717302-de2939b7ef71?w=400&q=80',
+    'mold-4': 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&q=80',
+    'mold-5': 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=400&q=80',
+    'mold-6': 'https://images.unsplash.com/photo-1563089145-599997674d42?w=400&q=80',
+    'mold-7': 'https://images.unsplash.com/photo-1558618047-3f0e6afbc4d2?w=400&q=80',
+    'mold-8': 'https://images.unsplash.com/photo-1597738928789-5e5dab79c4c9?w=400&q=80',
+    // Case 5 - Food Festival
+    'festival-1': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80',
+    'festival-2': 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=400&q=80',
+    'festival-3': 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=400&q=80',
+    'festival-4': 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&q=80',
+    'festival-5': 'https://images.unsplash.com/photo-1448907503123-67254d59ca4f?w=400&q=80',
+    'festival-6': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80',
+    'festival-7': 'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=400&q=80',
+    'festival-8': 'https://images.unsplash.com/photo-1585421514738-01798e348b17?w=400&q=80',
+    'festival-9': 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&q=80',
+    'festival-10': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80',
+    // Case 6 - Antibiotic Resistance
+    'antibiotic-1': 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400&q=80',
+    'antibiotic-2': 'https://images.unsplash.com/photo-1551076805-e1869033e561?w=400&q=80',
+    'antibiotic-3': 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80',
+    'antibiotic-4': 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&q=80',
+    'antibiotic-5': 'https://images.unsplash.com/photo-1530026405186-ed1f139313f8?w=400&q=80',
+    'antibiotic-6': 'https://images.unsplash.com/photo-1582719471384-894fbb16e074?w=400&q=80',
+    'antibiotic-7': 'https://images.unsplash.com/photo-1526256262350-7da7584cf5eb?w=400&q=80',
+    'antibiotic-8': 'https://images.unsplash.com/photo-1516549655169-df83a0774514?w=400&q=80',
+    'antibiotic-9': 'https://images.unsplash.com/photo-1607631568010-a87245c0daf8?w=400&q=80',
+  };
+
+  const getClueImage = (clue) => caseImages[clue?.id] || clueImages[clue?.type] || clueImages.evidence;
+
   // Generate clues based on case
   const getCaseClues = () => {
     const cluesByCase = {
@@ -498,7 +564,7 @@ const EvidenceBoard = ({ selectedCase, collectedClues, onClueFound, onSwitchTool
             return (
               <motion.div
                 key={clue?.id}
-                className={`relative rounded-xl border-2 p-6 cursor-pointer transition-all duration-300 ${
+                className={`relative rounded-xl border-2 overflow-hidden cursor-pointer transition-all duration-300 ${
                   collected 
                     ? getColorClasses(clue?.color) + ' ' + getGlowColor(clue?.color) + ' shadow-lg'
                     : 'bg-slate-800/50 border-slate-600/50 hover:border-white/30 hover:bg-slate-700/50'
@@ -506,53 +572,80 @@ const EvidenceBoard = ({ selectedCase, collectedClues, onClueFound, onSwitchTool
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: index * 0.05 }}
-                whileHover={{ scale: collected ? 1 : 1.05, y: collected ? 0 : -5 }}
+                whileHover={{ scale: collected ? 1 : 1.03, y: collected ? 0 : -4 }}
                 onClick={() => !collected && handleClueClick(clue)}
                 onMouseEnter={() => setHoveredClue(clue?.id)}
                 onMouseLeave={() => setHoveredClue(null)}
               >
-                {/* Collection Badge */}
-                {collected && (
-                  <motion.div
-                    className="absolute -top-3 -right-3 bg-green-500 rounded-full p-2 shadow-lg"
-                    initial={{ scale: 0, rotate: -180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ type: 'spring', stiffness: 200 }}
-                  >
-                    <CheckCircle className="w-5 h-5 text-white" />
-                  </motion.div>
-                )}
+                {/* Image Header */}
+                <div className="relative h-36 overflow-hidden">
+                  <img
+                    src={getClueImage(clue)}
+                    alt={clue?.title}
+                    className={`w-full h-full object-cover transition-all duration-500 ${
+                      collected ? 'opacity-90 scale-100' : 'opacity-30 scale-110 blur-sm grayscale'
+                    }`}
+                  />
+                  {/* Overlay gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
-                {/* Revealing Animation */}
-                {revealing && (
-                  <motion.div
-                    className="absolute inset-0 flex items-center justify-center bg-yellow-500/20 rounded-xl"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                  >
+                  {/* Type badge */}
+                  <div className="absolute top-3 left-3">
+                    <span className={`text-xs uppercase tracking-wider font-bold px-2 py-1 rounded-full
+                      ${collected ? 'bg-white/20 text-white' : 'bg-black/40 text-white/60'}`}>
+                      {clue?.type}
+                    </span>
+                  </div>
+
+                  {/* Collection Badge */}
+                  {collected && (
                     <motion.div
-                      animate={{ rotate: 360, scale: [1, 1.2, 1] }}
-                      transition={{ duration: 1, repeat: Infinity }}
+                      className="absolute top-3 right-3 bg-green-500 rounded-full p-1.5 shadow-lg"
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ type: 'spring', stiffness: 200 }}
                     >
-                      <Sparkles className="w-12 h-12 text-yellow-300" />
+                      <CheckCircle className="w-4 h-4 text-white" />
                     </motion.div>
-                  </motion.div>
-                )}
+                  )}
 
-                {/* Clue Content */}
-                <div className={`${collected ? 'opacity-100' : 'opacity-60'}`}>
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className={`p-3 rounded-lg ${collected ? 'bg-white/10' : 'bg-slate-700/50'}`}>
-                      <IconComponent className="w-6 h-6" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-xs uppercase tracking-wider mb-1 opacity-70">
-                        {clue?.type}
+                  {/* Lock icon for uncollected */}
+                  {!collected && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="bg-black/50 rounded-full p-3">
+                        <Search className="w-8 h-8 text-white/70" />
                       </div>
-                      <h3 className="font-bold text-white text-lg">{clue?.title}</h3>
+                    </div>
+                  )}
+
+                  {/* Icon bottom left */}
+                  <div className="absolute bottom-3 left-3">
+                    <div className={`p-2 rounded-lg ${collected ? 'bg-white/20' : 'bg-black/40'}`}>
+                      <IconComponent className="w-5 h-5 text-white" />
                     </div>
                   </div>
+
+                  {/* Revealing Animation */}
+                  {revealing && (
+                    <motion.div
+                      className="absolute inset-0 flex items-center justify-center bg-yellow-500/30"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      <motion.div
+                        animate={{ rotate: 360, scale: [1, 1.2, 1] }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                      >
+                        <Sparkles className="w-12 h-12 text-yellow-300" />
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </div>
+
+                {/* Card Content */}
+                <div className="p-4">
+                  <h3 className="font-bold text-white text-base mb-2">{clue?.title}</h3>
 
                   {collected ? (
                     <>
@@ -572,13 +665,13 @@ const EvidenceBoard = ({ selectedCase, collectedClues, onClueFound, onSwitchTool
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-white/50 text-sm">
                         <Search className="w-4 h-4" />
-                        <span>Click to investigate</span>
+                        <span>Click to investigate this clue</span>
                       </div>
                       {hoveredClue === clue?.id && (
                         <motion.div
-                          initial={{ opacity: 0, y: 10 }}
+                          initial={{ opacity: 0, y: 5 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className="text-xs text-white/60 italic"
+                          className="text-xs text-white/50 italic"
                         >
                           {clue?.type?.toUpperCase()} evidence available...
                         </motion.div>

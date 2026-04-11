@@ -70,10 +70,6 @@ const TimelineBar = ({
                     <button
                       onClick={() => {
                         if (isUnlocked) {
-                          // STEP 2: Add click test with more detailed logging
-                          const eraNumber = index + 1;
-                          console.log(`Era ${eraNumber} clicked`);
-                          alert(`You clicked Era ${eraNumber}!`);
                           onEraSelect(era?.id);
                         }
                       }}

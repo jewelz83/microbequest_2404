@@ -279,11 +279,11 @@ const AnalysisCenter = ({ selectedCase, collectedClues, identifiedMicrobe, onSol
       }
     };
 
-    return solutionsByCase?.[selectedCase?.id] || solutionsByCase[1];
+    return solutionsByCase?.[selectedCase?.id] || solutionsByCase?.[1];
   };
 
   const solutions = getSolutionOptions();
-  const allSolutions = [...solutions?.correctSolutions, ...solutions?.wrongSolutions].sort(() => Math.random() - 0.5);
+  const allSolutions = [...solutions?.correctSolutions, ...solutions?.wrongSolutions]?.sort(() => Math.random() - 0.5);
 
   const handleSolutionToggle = (solutionId) => {
     if (showResults) return;
@@ -297,7 +297,6 @@ const AnalysisCenter = ({ selectedCase, collectedClues, identifiedMicrobe, onSol
 
   const handleSubmit = () => {
     if (selectedSolutions?.length === 0) {
-      alert('Please select at least one solution before submitting!');
       return;
     }
 
@@ -415,12 +414,10 @@ const AnalysisCenter = ({ selectedCase, collectedClues, identifiedMicrobe, onSol
                     {/* Selection Indicator */}
                     <div className={`absolute top-4 right-4 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
                       selected 
-                        ? 'bg-blue-500 border-blue-400' 
-                        : 'border-white/30'
+                        ? 'bg-blue-500 border-blue-400' :'border-white/30'
                     }`}>
                       {selected && <CheckCircle className="w-4 h-4 text-white" />}
                     </div>
-
                     {/* Content */}
                     <div className="pr-8">
                       <div className="flex items-start gap-4 mb-4">
@@ -469,7 +466,7 @@ const AnalysisCenter = ({ selectedCase, collectedClues, identifiedMicrobe, onSol
           </div>
         ) : (
           /* Results Display */
-          <motion.div
+          (<motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
           >
@@ -488,8 +485,7 @@ const AnalysisCenter = ({ selectedCase, collectedClues, identifiedMicrobe, onSol
                         key={solution?.id}
                         className={`p-4 rounded-lg border ${
                           wasSelected
-                            ? 'bg-green-500/20 border-green-400/50'
-                            : 'bg-red-500/20 border-red-400/50'
+                            ? 'bg-green-500/20 border-green-400/50' :'bg-red-500/20 border-red-400/50'
                         }`}
                       >
                         <div className="flex items-start gap-3">
@@ -523,8 +519,7 @@ const AnalysisCenter = ({ selectedCase, collectedClues, identifiedMicrobe, onSol
                         key={solution?.id}
                         className={`p-4 rounded-lg border ${
                           wasSelected
-                            ? 'bg-red-500/20 border-red-400/50'
-                            : 'bg-green-500/20 border-green-400/50'
+                            ? 'bg-red-500/20 border-red-400/50' :'bg-green-500/20 border-green-400/50'
                         }`}
                       >
                         <div className="flex items-start gap-3">
@@ -546,7 +541,6 @@ const AnalysisCenter = ({ selectedCase, collectedClues, identifiedMicrobe, onSol
                 </div>
               </div>
             </div>
-
             {/* Final Message */}
             <motion.div
               className="bg-gradient-to-r from-green-500/20 to-blue-500/20 border border-green-400/30 rounded-xl p-8 text-center"
@@ -563,7 +557,7 @@ const AnalysisCenter = ({ selectedCase, collectedClues, identifiedMicrobe, onSol
                 Your recommendations will help prevent future outbreaks and protect the community!
               </p>
             </motion.div>
-          </motion.div>
+          </motion.div>)
         )}
       </div>
     </div>
