@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Microscope, Search, FileText, Users, Award, ChevronLeft, Play } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +12,7 @@ import CharacterSpriteSystem from '../../components/ui/CharacterSpriteSystem';
 import { saveGameScore, unlockAchievement } from '../../services/gameProgressService';
 
 const MicrobeDetectiveMysteryOutbreak = () => {
+  const completedCaseIds = useRef(new Set());
   const [currentView, setCurrentView] = useState('home'); // home, case-selection, investigation, career
   const [selectedCase, setSelectedCase] = useState(null);
   const [unlockedCases, setUnlockedCases] = useState([1, 2]); // Start with first 2 cases unlocked
@@ -43,9 +44,12 @@ const MicrobeDetectiveMysteryOutbreak = () => {
   };
 
   const handleCaseComplete = (caseId, score, perfect) => {
-    setCompletedCases(prev => [...new Set([...prev, caseId])]);
-    setPlayerStats(prev => {
-      const newStats = {
+    setCurrentView('case-selection');
+    if (completedCaseIds.current.has(caseId)) return;
+    completedCaseIds.current.add(caseId);
+    setCompletedCases([...completedCaseIds.current]);
+    const prev = playerStats;
+    const newStats = {
         ...prev,
         totalPoints: prev?.totalPoints + score,
         casesCompleted: prev?.casesCompleted + 1,
@@ -81,8 +85,8 @@ const MicrobeDetectiveMysteryOutbreak = () => {
         unlockAchievement('perfect-detective', 'Perfect Detective');
       }
 
-      return newStats;
-    });
+      newStats.badgesEarned = [...new Set(newStats.badgesEarned)];
+      setPlayerStats(newStats);
 
     // Unlock next cases based on progress
     if (caseId === 2 && !unlockedCases?.includes(3)) {

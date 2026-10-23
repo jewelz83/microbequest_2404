@@ -142,7 +142,7 @@ export const getEnvironmentData = () => {
         id: 'soil-organic-matter',
         name: 'Organic Matter Zone',
         description: 'Rich in decomposing materials where microbes thrive',
-        x: 25, y: 40, width: 30, height: 20,
+        x: 15, y: 25, width: 30, height: 20,
         color: 'bg-green-500/30',
         borderColor: 'border-green-400',
         icon: 'Leaf',

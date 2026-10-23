@@ -19,6 +19,9 @@ const ExplorationEnvironment = ({
   const [pulsingAreas, setPulsingAreas] = useState([]);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const containerRef = useRef(null);
+  const discoveryTimer = useRef(null);
+  const discoveryPending = useRef(false);
+  useEffect(() => () => clearTimeout(discoveryTimer.current), []);
 
   const environments = getEnvironmentData();
   const currentEnv = environments?.[currentEnvironment];
@@ -54,7 +57,7 @@ const ExplorationEnvironment = ({
   };
 
   const handleInteraction = (e) => {
-    if (!isExploring) return;
+    if (!isExploring || discoveryPending.current) return;
     // Prevent scroll on touch
     if (e?.touches) e?.preventDefault();
 
@@ -71,16 +74,23 @@ const ExplorationEnvironment = ({
       return distance < hitRadius && !discoveredMicrobes?.includes(microbe?.id);
     });
 
-    if (foundMicrobe) {
-      setZoomTarget({ x: pos?.x, y: pos?.y });
-      setIsZooming(true);
-      setTimeout(() => {
-        onMicrobeDiscovered(foundMicrobe);
-        setIsZooming(false);
-        setZoomTarget(null);
-      }, 1000);
-    }
+    discover(foundMicrobe);
   };
+
+  const discover = (microbe) => {
+    if (!microbe || !isExploring || discoveryPending.current || discoveredMicrobes.includes(microbe.id)) return;
+    discoveryPending.current = true;
+    setZoomTarget({x:microbe.x,y:microbe.y});
+    setIsZooming(true);
+    discoveryTimer.current = setTimeout(() => {
+      onMicrobeDiscovered(microbe);
+      discoveryPending.current = false;
+      setIsZooming(false);
+      setZoomTarget(null);
+    }, 1000);
+  };
+  const discoverArea = area => discover(currentEnv.hiddenMicrobes.find(m =>
+    !discoveredMicrobes.includes(m.id) && m.x >= area.x && m.x <= area.x + area.width && m.y >= area.y && m.y <= area.y + area.height));
 
   const handleAreaHover = (area) => setHoveredArea(area);
   const handleAreaLeave = () => setHoveredArea(null);
@@ -123,6 +133,10 @@ const ExplorationEnvironment = ({
         {/* Highlighted Areas */}
         {showHints && currentEnv?.highlightedAreas?.map((area) => (
           <div key={area?.id}
+            role="button" tabIndex={0} aria-label={`Search ${area.name}`}
+            onClick={e => {e.stopPropagation(); discoverArea(area);}}
+            onTouchStart={e => e.stopPropagation()}
+            onKeyDown={e => {if (["Enter", " "].includes(e.key)) {e.preventDefault(); e.stopPropagation(); discoverArea(area);}}}
             className={`absolute border-2 ${area?.borderColor} ${area?.color} rounded-lg transition-all duration-500 cursor-pointer
               ${pulsingAreas?.includes(area?.id) ? 'animate-pulse' : ''}
               ${hoveredArea?.id === area?.id ? 'scale-105 shadow-lg' : ''}`}
@@ -254,7 +268,11 @@ const ExplorationEnvironment = ({
           <h5 className="font-heading text-xs text-foreground mb-2">Body Systems Guide</h5>
           <div className="space-y-1">
             {currentEnv?.highlightedAreas?.slice(0, 3)?.map((area) => (
-              <div key={area?.id} className="flex items-center space-x-2">
+              <div key={area?.id}
+            role="button" tabIndex={0} aria-label={`Search ${area.name}`}
+            onClick={e => {e.stopPropagation(); discoverArea(area);}}
+            onTouchStart={e => e.stopPropagation()}
+            onKeyDown={e => {if (["Enter", " "].includes(e.key)) {e.preventDefault(); e.stopPropagation(); discoverArea(area);}}} className="flex items-center space-x-2">
                 <div className={`w-3 h-3 rounded ${area?.color} ${area?.borderColor} border`}></div>
                 <span className="font-caption text-xs text-muted-foreground">{area?.systemName}</span>
               </div>

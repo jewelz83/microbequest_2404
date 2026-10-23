@@ -1,6 +1,6 @@
 import { useDifficultyCeiling } from '../../components/GameAccessGate';
 import { permitsDifficulty } from '../../services/gameAccessPolicy.mjs';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
@@ -22,6 +22,8 @@ const QuizChallengeSystem = () => {
   const [score, setScore] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(60);
+  const [timeSpent, setTimeSpent] = useState(0);
+  const answered = useRef(false);
   const [quizStarted, setQuizStarted] = useState(false);
   const [hostEmotion, setHostEmotion] = useState('happy');
   const [hostMessage, setHostMessage] = useState('');
@@ -527,17 +529,19 @@ const QuizChallengeSystem = () => {
   // Timer effect
   useEffect(() => {
     let timer;
-    if (quizStarted && timeRemaining > 0 && !showResult && !showFeedback) {
+    if (quizStarted && !showResults && timeRemaining > 0 && !showResult && !showFeedback) {
       timer = setInterval(() => {
-        setTimeRemaining((prev) => prev - 1);
+        setTimeRemaining((prev) => Math.max(0, prev - 1));
+        setTimeSpent(prev => prev + 1);
       }, 1000);
-    } else if (timeRemaining === 0 && !showResult) {
+    } else if (quizStarted && !showResults && timeRemaining === 0 && !showResult) {
       handleTimeUp();
     }
     return () => clearInterval(timer);
-  }, [quizStarted, timeRemaining, showResult, showFeedback]);
+  }, [quizStarted, timeRemaining, showResult, showFeedback, showResults]);
 
   const startQuiz = () => {
+    setTimeRemaining(quizQuestions[0]?.timeLimit || 60);
     setQuizStarted(true);
     trackGameModeStart('quiz-challenge');
     setHostEmotion('excited');
@@ -545,7 +549,8 @@ const QuizChallengeSystem = () => {
   };
 
   const handleAnswerSelect = (answerId) => {
-    if (showResult) return;
+    if (!quizStarted || showResults || answered.current) return;
+    answered.current = true;
 
     setSelectedAnswer(answerId);
     setShowResult(true);
@@ -563,30 +568,24 @@ const QuizChallengeSystem = () => {
       setHostMessage('That\'s okay! Learning from mistakes makes us better scientists!');
     }
 
-    setTimeout(() => {
-      setShowFeedback(true);
-    }, 1500);
   };
 
-  const handleTimeUp = () => {
-    if (!selectedAnswer) {
-      setSelectedAnswer(null);
-      setShowResult(true);
-      setHostEmotion('encouraging');
-      setHostMessage('Time\'s up! Don\'t worry, let\'s learn from this question together.');
+  const handleTimeUp = () => handleAnswerSelect(null);
 
-      setTimeout(() => {
-        setShowFeedback(true);
-      }, 1500);
-    }
-  };
+  useEffect(() => {
+    if (!showResult || showResults) return;
+    const timer = setTimeout(() => setShowFeedback(true), 1500);
+    return () => clearTimeout(timer);
+  }, [showResult, showResults, currentQuestionIndex]);
 
   const handleContinue = () => {
+    if (!showFeedback || showResults) return;
     setShowFeedback(false);
-    setShowResult(false);
     setSelectedAnswer(null);
 
     if (currentQuestionIndex < totalQuestions - 1) {
+      answered.current = false;
+      setShowResult(false);
       setCurrentQuestionIndex((prev) => prev + 1);
       setTimeRemaining(quizQuestions?.[currentQuestionIndex + 1]?.timeLimit || 60);
       setHostEmotion('happy');
@@ -602,7 +601,7 @@ const QuizChallengeSystem = () => {
         score,
         correctAnswers,
         totalQuestions,
-        timeElapsed: 0,
+        timeElapsed: timeSpent,
         difficulty: 'mixed',
         metadata: {},
       })?.catch((err) => console.error('Failed to save quiz score:', err));
@@ -610,6 +609,8 @@ const QuizChallengeSystem = () => {
   };
 
   const handleRetry = () => {
+    answered.current = false;
+    setTimeSpent(0);
     setCurrentQuestionIndex(0);
     setSelectedAnswer(null);
     setShowResult(false);
@@ -617,7 +618,7 @@ const QuizChallengeSystem = () => {
     setShowResults(false);
     setScore(0);
     setCorrectAnswers(0);
-    setTimeRemaining(60);
+    setTimeRemaining(quizQuestions[0]?.timeLimit || 60);
     setQuizStarted(false);
     setHostEmotion('happy');
     setHostMessage('');
@@ -630,22 +631,19 @@ const QuizChallengeSystem = () => {
     if (accuracy === 100) {
       achievements?.push({
         title: 'Perfect Score!',
-        description: 'Answered all questions correctly',
-        points: 50
+        description: 'Answered all questions correctly'
       });
     } else if (accuracy >= 80) {
       achievements?.push({
         title: 'Microbe Master',
-        description: 'Scored 80% or higher',
-        points: 25
+        description: 'Scored 80% or higher'
       });
     }
 
     if (correctAnswers >= 2) {
       achievements?.push({
         title: 'Quick Learner',
-        description: 'Got multiple questions right',
-        points: 15
+        description: 'Got multiple questions right'
       });
     }
 
@@ -689,7 +687,7 @@ const QuizChallengeSystem = () => {
                     <div className="flex items-center space-x-3">
                       <Icon name="Clock" size={20} className="text-secondary flex-shrink-0" />
                       <span className="font-body text-sm sm:text-base text-foreground">
-                        60 seconds per question with helpful hints
+                        A timed challenge for each question
                       </span>
                     </div>
                     <div className="flex items-center space-x-3">
@@ -759,6 +757,8 @@ const QuizChallengeSystem = () => {
                 <div className="lg:col-span-3 space-y-4 sm:space-y-6">
                   {/* Progress */}
                   <QuizProgress
+                  answeredQuestions={currentQuestionIndex + (showResult ? 1 : 0)}
+                  correctAnswers={correctAnswers}
                   currentQuestion={currentQuestionIndex + 1}
                   totalQuestions={totalQuestions}
                   score={score}
@@ -792,6 +792,7 @@ const QuizChallengeSystem = () => {
 
           {/* Answer Feedback Modal */}
           <AnswerFeedback
+            pointsEarned={selectedAnswer === currentQuestion?.correctAnswer ? currentQuestion.points : 0}
             isCorrect={selectedAnswer === currentQuestion?.correctAnswer}
             explanation={currentQuestion?.explanation}
             microbeInfo={currentQuestion?.microbeInfo}
@@ -804,7 +805,8 @@ const QuizChallengeSystem = () => {
             score={score}
             totalQuestions={totalQuestions}
             correctAnswers={correctAnswers}
-            timeSpent={totalQuestions * 60 - timeRemaining}
+            timeSpent={timeSpent}
+            maxScore={quizQuestions.reduce((sum, q) => sum + q.points, 0)}
             achievements={getAchievements()}
             onRetry={handleRetry}
             onContinue={() => window.location.href = '/world-explorer-mode'}

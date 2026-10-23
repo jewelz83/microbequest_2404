@@ -1,3 +1,4 @@
+import { quizMetrics } from '../../../services/quizMetrics.mjs';
 import React, { useState, useEffect } from 'react';
 import Icon from '../../../components/AppIcon';
 
@@ -5,6 +6,7 @@ import Button from '../../../components/ui/Button';
 
 const QuizResults = ({
   score = 0,
+  maxScore = 0,
   totalQuestions = 10,
   correctAnswers = 0,
   timeSpent = 0,
@@ -18,9 +20,7 @@ const QuizResults = ({
   const [isAnimating, setIsAnimating] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
 
-  const accuracy = Math.round((correctAnswers / totalQuestions) * 100);
-  const maxScore = totalQuestions * 10;
-  const scorePercentage = (score / maxScore) * 100;
+  const { accuracy, scorePercentage } = quizMetrics({ totalQuestions, answeredQuestions: totalQuestions, correctAnswers, score, maxScore });
 
   const getPerformanceLevel = () => {
     if (accuracy >= 90) return { level: 'Excellent', color: 'text-success', icon: 'Trophy' };
@@ -163,9 +163,7 @@ const QuizResults = ({
                       <p className="font-body font-semibold text-foreground">{achievement?.title}</p>
                       <p className="font-caption text-sm text-muted-foreground">{achievement?.description}</p>
                     </div>
-                    <div className="text-accent font-mono text-sm font-semibold">
-                      +{achievement?.points}
-                    </div>
+
                   </div>
                 ))}
               </div>
@@ -182,13 +180,13 @@ const QuizResults = ({
             <div className="space-y-3">
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-caption text-xs text-muted-foreground">Microbiology Knowledge</span>
-                  <span className="font-mono text-xs text-primary">{Math.min(accuracy + 10, 100)}%</span>
+                  <span className="font-caption text-xs text-muted-foreground">Accuracy in this quiz</span>
+                  <span className="font-mono text-xs text-primary">{accuracy}%</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
                   <div 
                     className="h-full bg-primary rounded-full transition-all duration-normal"
-                    style={{ width: `${Math.min(accuracy + 10, 100)}%` }}
+                    style={{ width: `${accuracy}%` }}
                   ></div>
                 </div>
               </div>
@@ -199,7 +197,7 @@ const QuizResults = ({
                 </span>
                 <div className="flex items-center space-x-1">
                   <Icon name="Microscope" size={12} className="text-secondary" />
-                  <span className="font-mono text-secondary">+3 discoveries</span>
+                  <span className="font-mono text-secondary">Keep discovering</span>
                 </div>
               </div>
             </div>

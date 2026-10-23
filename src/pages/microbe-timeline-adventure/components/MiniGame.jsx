@@ -865,6 +865,10 @@ const BacteriaDrawingGame = ({ gameData, eventData, onComplete, selectedShapes, 
 // MAIN MINIGAME COMPONENT
 // ─────────────────────────────────────────────
 const MiniGame = ({ id, eventData, onComplete, onClose }) => {
+  const mounted = useRef(true);
+  const completionPending = useRef(false);
+  const completionTimer = useRef(null);
+  useEffect(() => {mounted.current = true; return () => {mounted.current = false; clearTimeout(completionTimer.current);};}, []);
   const [gameState, setGameState] = useState('instructions');
   const [attempts, setAttempts] = useState(0);
   const [gameData, setGameData] = useState({});
@@ -912,8 +916,10 @@ const MiniGame = ({ id, eventData, onComplete, onClose }) => {
   const adjustFocus = (direction) => setFocusLevel(prev => direction === 'up' ? Math.min(prev + 5, 100) : Math.max(prev - 5, 0));
 
   const handleComplete = (result) => {
+    if (!mounted.current || completionPending.current) return;
+    completionPending.current = true;
     setGameState('success');
-    setTimeout(() => onComplete({ eventId: eventData?.id, score: result?.score, perfect: result?.perfect }), 2000);
+    completionTimer.current = setTimeout(() => onComplete({ eventId: eventData?.id, score: result?.score, perfect: result?.perfect }), 2000);
   };
 
   const isDragDropGame = ['vaccination-timeline','swan-flask-experiment','kochs-postulates','dna-copying','vaccine-development']?.includes(id);
@@ -979,7 +985,7 @@ const MiniGame = ({ id, eventData, onComplete, onClose }) => {
                   <div className="bg-yellow-500/20 border border-yellow-400/30 rounded-lg p-3"><p className="text-yellow-200 font-semibold text-sm">Task: {gameData?.task}</p></div>
                 </div>
                 <button onClick={startGame} className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-green-700 hover:to-blue-700 transition-all flex items-center gap-3 mx-auto">Start Mini-Game <ArrowRight className="w-6 h-6"/></button>
-                <p className="text-white/50 text-sm flex items-center justify-center gap-2"><Lightbulb className="w-4 h-4"/> Earn {eventData?.points} points!</p>
+                <p className="text-white/50 text-sm flex items-center justify-center gap-2"><Lightbulb className="w-4 h-4"/> {eventData?.alreadyCompleted ? "Practice this discovery again" : `Earn ${eventData?.points} points!`}</p>
               </motion.div>
             )}
             {gameState === 'playing' && <motion.div initial={{opacity:0}} animate={{opacity:1}}>{renderGameContent()}</motion.div>}
@@ -998,7 +1004,7 @@ const MiniGame = ({ id, eventData, onComplete, onClose }) => {
                   <motion.div animate={{rotate:[0,360],scale:[1,1.2,1]}} transition={{duration:0.6}} className="inline-block mb-4"><CheckCircle className="w-20 h-20 text-green-400"/></motion.div>
                   <h3 className="text-3xl font-bold text-white mb-3">Excellent Work!</h3>
                   <p className="text-white/90 mb-4">You've completed {eventData?.title}!</p>
-                  <div className="bg-white/10 rounded-lg p-4 inline-block mb-4"><div className="flex items-center gap-3 text-yellow-300"><Star className="w-8 h-8"/><span className="text-3xl font-bold">+{eventData?.points}</span><span className="text-xl">points</span></div></div>
+                  <div className="bg-white/10 rounded-lg p-4 inline-block mb-4"><div className="flex items-center gap-3 text-yellow-300"><Star className="w-8 h-8"/><span className="text-3xl font-bold">{eventData?.alreadyCompleted ? "Practice complete" : `+${eventData?.points} points`}</span></div></div>
                   <div className="bg-blue-500/20 border border-blue-400/30 rounded-lg p-4"><p className="text-blue-200 text-sm"><strong>Fun Fact:</strong> {eventData?.fact}</p></div>
                   <div className="mt-4">
                     {!showTutor ? (

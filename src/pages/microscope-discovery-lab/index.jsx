@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
@@ -14,6 +14,11 @@ import LabEnvironment from './components/LabEnvironment';
 import { saveGameScore } from '../../services/gameProgressService';
 
 const MicroscopeDiscoveryLab = () => {
+  const examinedSpecimens = useRef(new Set());
+  const featureIds = useRef(new Set());
+  const factIds = useRef(new Set());
+  const selectionTimer = useRef(null);
+  useEffect(() => () => clearTimeout(selectionTimer.current), []);
   const [selectedSpecimen, setSelectedSpecimen] = useState(null);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [focusLevel, setFocusLevel] = useState(50);
@@ -36,7 +41,7 @@ const MicroscopeDiscoveryLab = () => {
 
   // Update guide based on user actions
   useEffect(() => {
-    if (selectedSpecimen && !discoveredFeatures?.has(selectedSpecimen?.id)) {
+    if (selectedSpecimen && !activeHotspot) {
       setGuideMessage(`Great choice! You're now examining ${selectedSpecimen?.name}. Use the zoom controls to get a closer look and click on the glowing hotspots to discover special features!`);
     } else if (activeHotspot) {
       setGuideMessage(`Excellent discovery! You found the ${activeHotspot?.label}. Check the educational panel to learn more about this important structure.`);
@@ -46,17 +51,19 @@ const MicroscopeDiscoveryLab = () => {
   }, [selectedSpecimen, activeHotspot, discoveredFeatures]);
 
   const handleSpecimenSelect = (specimen) => {
+    clearTimeout(selectionTimer.current);
     setIsLoading(true);
     setActiveHotspot(null);
 
-    setTimeout(() => {
+    selectionTimer.current = setTimeout(() => {
       setSelectedSpecimen(specimen);
       setZoomLevel(1);
       setFocusLevel(50);
       setIsLoading(false);
 
       // Update progress
-      if (!discoveredFeatures?.has(specimen?.id)) {
+      if (!examinedSpecimens.current.has(specimen.id)) {
+        examinedSpecimens.current.add(specimen.id);
         setLabProgress(prev => ({
           ...prev,
           specimensExamined: prev?.specimensExamined + 1
@@ -66,11 +73,13 @@ const MicroscopeDiscoveryLab = () => {
   };
 
   const handleHotspotClick = (hotspot) => {
+    if (isLoading || !selectedSpecimen) return;
     setActiveHotspot(hotspot);
 
     // Mark feature as discovered
     const featureKey = `${selectedSpecimen?.id}-${hotspot?.id}`;
-    if (!discoveredFeatures?.has(featureKey)) {
+    if (!featureIds.current.has(featureKey)) {
+      featureIds.current.add(featureKey);
       setDiscoveredFeatures(prev => new Set([...prev, featureKey]));
       setLabProgress(prev => ({
         ...prev,
@@ -81,28 +90,18 @@ const MicroscopeDiscoveryLab = () => {
 
   const handleFactComplete = (specimen) => {
     const factKey = `facts-${specimen?.id}`;
-    if (!completedFacts?.has(factKey)) {
-      setCompletedFacts(prev => new Set([...prev, factKey]));
-      setLabProgress(prev => {
-        const newFacts = prev?.factsLearned + 1;
-        const newProgress = { ...prev, factsLearned: newFacts };
-        // Persist score to Supabase when facts are learned
-        saveGameScore({
-          gameMode: 'microscope-lab',
-          score: newProgress?.specimensExamined * 50 + newProgress?.featuresDiscovered * 30 + newFacts * 20,
-          correctAnswers: newFacts,
-          totalQuestions: newProgress?.specimensExamined || 1,
-          timeElapsed: 0,
-          difficulty: 'easy',
-          metadata: {
-            specimensExamined: newProgress?.specimensExamined,
-            featuresDiscovered: newProgress?.featuresDiscovered,
-            factsLearned: newFacts,
-            specimenName: specimen?.name,
-          },
-        })?.catch((err) => console.error('Failed to save lab score:', err));
-        return newProgress;
-      });
+    if (!factIds.current.has(factKey)) {
+      factIds.current.add(factKey);
+      setCompletedFacts(new Set(factIds.current));
+      const newFacts = factIds.current.size;
+      setLabProgress(prev => ({...prev, factsLearned:newFacts}));
+      saveGameScore({
+        gameMode:'microscope-lab',
+        score:examinedSpecimens.current.size*50+featureIds.current.size*30+newFacts*20,
+        correctAnswers:newFacts, totalQuestions:examinedSpecimens.current.size || 1,
+        timeElapsed:0,difficulty:'easy',
+        metadata:{specimensExamined:examinedSpecimens.current.size,featuresDiscovered:featureIds.current.size,factsLearned:newFacts,specimenName:specimen?.name}
+      }).catch(err => console.error('Failed to save lab score:',err));
 
       setGuideMessage("Fantastic! You've learned all the facts about this microorganism. You're well on your way to becoming a microbe expert!");
     }
@@ -121,9 +120,8 @@ const MicroscopeDiscoveryLab = () => {
   };
 
   const achievements = [
-    "First Discovery",
-    "Zoom Master",
-    "Feature Hunter"
+    ...(labProgress.specimensExamined > 0 ? ['First Specimen'] : []),
+    ...(labProgress.featuresDiscovered > 0 ? ['Feature Hunter'] : [])
   ];
 
   return (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
 
@@ -29,6 +29,7 @@ const defaultProgress = {
 };
 
 const MicrobeTimelineAdventure = () => {
+  const completedIds = useRef(new Set());
   const [selectedEra, setSelectedEra] = useState('discovery');
   const { shouldShowGuide, hideGuide } = useGuideVisibility('microbe-timeline-adventure');
   const { isPremium } = useAuth();
@@ -54,7 +55,8 @@ const MicrobeTimelineAdventure = () => {
       if (cancelled) return;
       setUnlockedEras(saved?.unlockedEras ?? defaultProgress?.unlockedEras);
       setUnlockedEvents(saved?.unlockedEvents ?? defaultProgress?.unlockedEvents);
-      setCompletedEvents(saved?.completedEvents ?? defaultProgress?.completedEvents);
+      completedIds.current = new Set(saved?.completedEvents ?? []);
+      setCompletedEvents([...completedIds.current]);
       setTotalPoints(saved?.totalPoints ?? 0);
       setCollectedCards(saved?.collectedCards ?? []);
       setAchievements(saved?.achievements ?? []);
@@ -85,6 +87,7 @@ const MicrobeTimelineAdventure = () => {
       await resetProgressService();
       setUnlockedEras(defaultProgress?.unlockedEras);
       setUnlockedEvents(defaultProgress?.unlockedEvents);
+      completedIds.current.clear();
       setCompletedEvents(defaultProgress?.completedEvents);
       setTotalPoints(defaultProgress?.totalPoints);
       setCollectedCards(defaultProgress?.collectedCards);
@@ -217,9 +220,9 @@ const MicrobeTimelineAdventure = () => {
   const handleBackToTimeline = () => setShowTimeline(true);
 
   const handleEventComplete = (eventId, points) => {
-    if (!completedEvents?.includes(eventId)) {
-      setCompletedEvents(prev => [...prev, eventId]);
-    }
+    if (completedIds.current.has(eventId)) return;
+    completedIds.current.add(eventId);
+    setCompletedEvents([...completedIds.current]);
     setTotalPoints(prev => prev + points);
     trackTimelineEventComplete(eventId, selectedEra, points);
 
@@ -270,9 +273,9 @@ const MicrobeTimelineAdventure = () => {
   const handleMinigameLaunch = (minigameId, eventData) => {
     setActiveMinigame({
       id: minigameId,
-      eventData: eventData,
+      eventData: {...eventData, alreadyCompleted:completedIds.current.has(eventData.id)},
       onComplete: (result) => {
-        handleEventComplete(eventData?.id, eventData?.points + (result?.score || 0));
+        handleEventComplete(eventData?.id, eventData?.points || 0);
         setActiveMinigame(null);
       },
       onClose: () => setActiveMinigame(null)
@@ -428,7 +431,7 @@ const MicrobeTimelineAdventure = () => {
           </div>
         </main>
 
-        <TimelineBar eras={Object?.values(timelineEras)} selectedEra={selectedEra} unlockedEras={unlockedEras} onEraSelect={handleEraSelect} />
+        <TimelineBar eras={Object.values(timelineEras).map(era => ({...era, completed:era.keyEvents.every(event => completedEvents.includes(event.id)), keyEvents:era.keyEvents.map(event => ({...event, completed:completedEvents.includes(event.id)}))}))} selectedEra={selectedEra} unlockedEras={unlockedEras} onEraSelect={handleEraSelect} />
         <CharacterGuide character="aunt-juju" message={getCharacterMessage(selectedEra)} emotion="excited" position="bottom-right" isVisible={shouldShowGuide} onClose={hideGuide} showHint={true} hintText="Click on any unlocked event card to start a mini-game and earn points!" />
         <FunFactModal isOpen={showFunFact} onClose={() => setShowFunFact(false)} title={currentFunFact?.title} content={currentFunFact?.content} type={currentFunFact?.type} microbe={null} onViewDetails={() => {}} />
         {activeMinigame && <MiniGame id={activeMinigame?.id} eventData={activeMinigame?.eventData} onComplete={activeMinigame?.onComplete} onClose={activeMinigame?.onClose} />}
@@ -524,7 +527,7 @@ const MicrobeTimelineAdventure = () => {
           </section>
         </div>
 
-        <TimelineBar eras={Object?.values(timelineEras)} selectedEra={selectedEra} unlockedEras={unlockedEras} onEraSelect={handleEraSelect} />
+        <TimelineBar eras={Object.values(timelineEras).map(era => ({...era, completed:era.keyEvents.every(event => completedEvents.includes(event.id)), keyEvents:era.keyEvents.map(event => ({...event, completed:completedEvents.includes(event.id)}))}))} selectedEra={selectedEra} unlockedEras={unlockedEras} onEraSelect={handleEraSelect} />
       </main>
 
       <CharacterGuide character="aunt-juju" message={getCharacterMessage(selectedEra)} emotion="excited" position="bottom-right" isVisible={shouldShowGuide} onClose={hideGuide} showHint={true} hintText="Click on any unlocked event to start a mini-game and learn about that discovery!" />

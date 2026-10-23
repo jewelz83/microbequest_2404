@@ -4,7 +4,6 @@ import Icon from '../../../components/AppIcon';
 const GameBoard = ({
   location,
   bacteria,
-  setBacteria,
   defenseTowers,
   selectedTool,
   onUseTool,
@@ -68,41 +67,6 @@ const GameBoard = ({
       activeProjectileIds?.includes(trail?.projectileId)
     ));
   }, [projectiles]);
-
-  // Animate bacteria movement
-  useEffect(() => {
-    if (gameState !== 'playing') return;
-
-    const interval = setInterval(() => {
-      setBacteria(prev => prev?.map(bacterium => {
-        if (!bacterium?.isAlive || bacterium?.spawnDelay > 0) {
-          return {
-            ...bacterium,
-            spawnDelay: Math.max(0, bacterium?.spawnDelay - 100)
-          };
-        }
-
-        const newX = bacterium?.x + (bacterium?.speed === 'fast' ? 2 : bacterium?.speed === 'medium' ? 1.5 : 1);
-
-        // Check if bacterium reached the end
-        if (newX > 800) {
-          // Bacterium reached the body - cause damage
-          return { ...bacterium, isAlive: false, reachedEnd: true };
-        }
-
-        return { ...bacterium, x: newX };
-      }));
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [gameState, setBacteria]);
-
-  // Remove dead bacteria
-  useEffect(() => {
-    setBacteria(prev => prev?.filter(bacterium =>
-      bacterium?.currentHealth > 0 && bacterium?.isAlive
-    ));
-  }, [bacteria, setBacteria]);
 
   // NEW: Clean up old hit effects
   useEffect(() => {
@@ -330,11 +294,14 @@ const GameBoard = ({
   };
 
   return (
-    <div className="relative">
+    <div className="relative overflow-x-auto">
       {/* Enhanced Game Board - Biological Environment Style */}
       <div
         className="relative w-full h-96 border-2 border-border rounded-xl overflow-hidden bg-white cursor-crosshair game-board game-interactive"
-        style={{ touchAction: 'none' }}
+        style={{ touchAction: 'none', width: 800, height: 400 }}
+        tabIndex={0}
+        role="region"
+        aria-label="Immune defense playfield"
         onClick={handleBoardClick}
         onMouseMove={onMouseMove}
         onTouchMove={onTouchMove}
@@ -705,18 +672,6 @@ const GameBoard = ({
 
         {/* Enhanced Damage Number Indicators */}
         {hitIndicators?.map((indicator) => {
-          // NEW: Create hit effect when damage indicator appears
-          React.useEffect(() => {
-            setHitEffects(prev => [...prev, {
-              id: Date.now() + Math.random(),
-              x: indicator?.x,
-              y: indicator?.y,
-              type: 'damage',
-              color: indicator?.type === 'good' ? '#ef4444' : '#22c55e',
-              timestamp: Date.now()
-            }]);
-          }, []);
-
           return (
             <div
               key={indicator?.id}

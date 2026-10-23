@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/ui/Header';
 import CharacterGuide from '../../components/ui/CharacterGuide';
@@ -19,6 +19,11 @@ import EnvironmentSelector from './components/EnvironmentSelector';
 
 const WorldExplorerMode = () => {
   const navigate = useNavigate();
+
+  const discoveredIds = useRef(new Set());
+  const completedEnvironments = useRef(new Set());
+  const factTimer = useRef(null);
+  useEffect(() => () => clearTimeout(factTimer.current), []);
 
   // Game state
   const [currentEnvironment, setCurrentEnvironment] = useState('soil');
@@ -62,6 +67,8 @@ const WorldExplorerMode = () => {
       setGamePhase('completed');
       setGuideMessage(`Amazing work! You've discovered all microorganisms in the ${currentEnvironment} environment!`);
       setGuideEmotion('celebrating');
+      if (completedEnvironments.current.has(currentEnvironment)) return;
+      completedEnvironments.current.add(currentEnvironment);
       // Persist score to Supabase
       const totalDiscoveredNow = Object.values(counts)?.reduce((sum, c) => sum + c, 0);
       trackGameModeComplete('world-explorer', { score: totalDiscoveredNow * 100, environment: currentEnvironment, discoveredMicrobes: discoveredMicrobes?.length });
@@ -107,7 +114,8 @@ const WorldExplorerMode = () => {
   };
 
   const handleMicrobeDiscovered = (microbe) => {
-    if (!discoveredMicrobes?.includes(microbe?.id)) {
+    if (!discoveredIds.current.has(microbe?.id)) {
+      discoveredIds.current.add(microbe.id);
       setDiscoveredMicrobes(prev => [...prev, microbe?.id]);
       trackMicrobeDiscovery(microbe?.name, currentEnvironment);
 
@@ -137,7 +145,8 @@ const WorldExplorerMode = () => {
 
     // Show next pending fun fact if available
     if (pendingFunFacts?.length > 0) {
-      setTimeout(() => {
+      clearTimeout(factTimer.current);
+      factTimer.current = setTimeout(() => {
         setCurrentFunFactMicrobe(pendingFunFacts?.[0]);
         setShowFunFact(true);
         setPendingFunFacts(prev => prev?.slice(1));

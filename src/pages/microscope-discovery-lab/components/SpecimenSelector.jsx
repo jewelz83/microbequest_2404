@@ -84,11 +84,7 @@ const SpecimenSelector = ({
   const handleSpecimenSelect = (specimen) => {
     if (specimen?.id === selectedSpecimen?.id) return;
 
-    setIsTransitioning(true);
-    setTimeout(() => {
-      onSpecimenSelect(specimen);
-      setIsTransitioning(false);
-    }, 300);
+    onSpecimenSelect(specimen);
   };
 
   const getDifficultyColor = (difficulty) => {

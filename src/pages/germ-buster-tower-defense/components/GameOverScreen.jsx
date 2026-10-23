@@ -100,21 +100,7 @@ const GameOverScreen = ({
                 <p className="font-caption text-xs text-muted-foreground">Final Score</p>
               </div>
               
-              {/* Score Breakdown */}
-              <div className="space-y-1 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Bacteria eliminated:</span>
-                  <span className="text-green-600 font-mono">+{Math.floor(score * 0.6)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Balance maintained:</span>
-                  <span className="text-blue-600 font-mono">+{Math.floor(score * 0.3)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Bonus points:</span>
-                  <span className="text-purple-600 font-mono">+{Math.floor(score * 0.1)}</span>
-                </div>
-              </div>
+
             </div>
           </div>
 
@@ -159,9 +145,7 @@ const GameOverScreen = ({
               <div className="space-y-1">
                 {[
                   "Balance Master - Maintain 90%+ good bacteria",
-                  "Immune Champion - Keep immune health above 90%", 
-                  "Fast Hands - Complete wave in under 60s",
-                  "Antibiotic Wisdom - Minimize antibiotic overuse"
+                  "Immune Champion - Keep immune health at 90% or above"
                 ]?.map((hint, index) => (
                   <div key={index} className="flex items-center space-x-1">
                     <Icon name="Circle" size={8} className="text-muted-foreground" />
@@ -269,24 +253,9 @@ const GameOverScreen = ({
               MicrobeQuest Progress
             </span>
           </div>
-          <p className="font-caption text-xs text-muted-foreground mb-3">
-            Your Germ Buster performance contributes to your overall MicrobeQuest journey!
+          <p className="font-caption text-xs text-muted-foreground">
+            This result reflects this mission. Sign in with progress saving enabled to save completed missions to your account.
           </p>
-          
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <span className="font-mono text-sm font-semibold text-foreground block">+{score}</span>
-              <span className="font-caption text-xs text-muted-foreground">Total Points</span>
-            </div>
-            <div>
-              <span className="font-mono text-sm font-semibold text-foreground block">+{achievements?.length}</span>
-              <span className="font-caption text-xs text-muted-foreground">New Badges</span>
-            </div>
-            <div>
-              <span className="font-mono text-sm font-semibold text-foreground block">+1</span>
-              <span className="font-caption text-xs text-muted-foreground">Game Completed</span>
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Search, MapPin, Clock, Users, AlertCircle, CheckCircle, Sparkles, Eye } from 'lucide-react';
 
@@ -500,11 +500,16 @@ const EvidenceBoard = ({ selectedCase, collectedClues, onClueFound, onSwitchTool
   const allClues = getCaseClues();
   const isClueCollected = (clueId) => collectedClues?.some(c => c?.id === clueId);
 
+  const revealTimer = useRef(null);
+  const revealing = useRef(false);
+  useEffect(() => () => clearTimeout(revealTimer.current), []);
   const handleClueClick = (clue) => {
-    if (isClueCollected(clue?.id)) return;
+    if (revealing.current || isClueCollected(clue?.id)) return;
+    revealing.current = true;
 
     setRevealingClue(clue);
-    setTimeout(() => {
+    revealTimer.current = setTimeout(() => {
+      revealing.current = false;
       onClueFound(clue);
       setRevealingClue(null);
     }, 2000);

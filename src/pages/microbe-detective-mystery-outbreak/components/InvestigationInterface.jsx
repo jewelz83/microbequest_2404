@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, Search, FileText, Users, Beaker, CheckCircle, Clock, Target } from 'lucide-react';
 import EvidenceBoard from './EvidenceBoard';
@@ -8,6 +8,10 @@ import AnalysisCenter from './AnalysisCenter';
 import CharacterBriefing from './CharacterBriefing';
 
 const InvestigationInterface = ({ selectedCase, onComplete, onBack, playerStats }) => {
+  const completionTimer = useRef(null);
+  const completing = useRef(false);
+  const clueIds = useRef(new Set());
+  useEffect(() => () => clearTimeout(completionTimer.current), []);
   const [currentTool, setCurrentTool] = useState('briefing');
   const [collectedClues, setCollectedClues] = useState([]);
   const [identifiedMicrobe, setIdentifiedMicrobe] = useState(null);
@@ -34,7 +38,8 @@ const InvestigationInterface = ({ selectedCase, onComplete, onBack, playerStats 
   ];
 
   const handleClueFound = (clue) => {
-    if (!collectedClues?.find(c => c?.id === clue?.id)) {
+    if (!clueIds.current.has(clue.id)) {
+      clueIds.current.add(clue.id);
       setCollectedClues(prev => [...prev, clue]);
       setCaseProgress(prev => ({ ...prev, cluesFound: prev?.cluesFound + 1 }));
     }
@@ -46,6 +51,8 @@ const InvestigationInterface = ({ selectedCase, onComplete, onBack, playerStats 
   };
 
   const handleSolutionSubmit = (solution) => {
+    if (completing.current || !solution?.isPerfect || !identifiedMicrobe || collectedClues.length === 0) return;
+    completing.current = true;
     setSolutionSubmitted(true);
     setCaseProgress(prev => ({ ...prev, solutionRecommended: true }));
     const baseScore = selectedCase?.points || 50;
@@ -53,7 +60,7 @@ const InvestigationInterface = ({ selectedCase, onComplete, onBack, playerStats 
     const perfectBonus = caseProgress?.cluesFound === caseProgress?.totalClues ? 25 : 0;
     const totalScore = baseScore + timeBonus + perfectBonus;
     const isPerfect = caseProgress?.cluesFound === caseProgress?.totalClues && timeElapsed < 300;
-    setTimeout(() => onComplete(selectedCase?.id, totalScore, isPerfect), 2000);
+    completionTimer.current = setTimeout(() => onComplete(selectedCase?.id, totalScore, isPerfect), 2000);
   };
 
   const getToolColor = (color) => {
@@ -131,6 +138,7 @@ const InvestigationInterface = ({ selectedCase, onComplete, onBack, playerStats 
               const done = isCompleted(tool?.id);
               return (
                 <button key={tool?.id} onClick={() => setCurrentTool(tool?.id)}
+                  disabled={tool.id === 'analysis' && (!identifiedMicrobe || collectedClues.length === 0)}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all text-sm ${
                     active ? 'bg-gradient-to-r ' + getToolColor(tool?.color) + ' text-white shadow-lg' : 'text-white/70 hover:text-white hover:bg-white/10'}`}>
                   <ToolIcon size={18} />
@@ -181,6 +189,7 @@ const InvestigationInterface = ({ selectedCase, onComplete, onBack, playerStats 
             const done = isCompleted(tool?.id);
             return (
               <button key={tool?.id} onClick={() => setCurrentTool(tool?.id)}
+                  disabled={tool.id === 'analysis' && (!identifiedMicrobe || collectedClues.length === 0)}
                 className={`flex-1 flex flex-col items-center gap-1 py-3 px-1 transition-all relative ${
                   active ? 'text-white' : 'text-white/40 hover:text-white/70'}`}>
                 {active && <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-400 to-blue-400" />}
