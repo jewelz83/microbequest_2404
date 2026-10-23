@@ -44,6 +44,7 @@ const MicrobeTimelineAdventure = () => {
   const [completedEvents, setCompletedEvents] = useState(defaultProgress?.completedEvents);
   const [unlockedEvents, setUnlockedEvents] = useState(defaultProgress?.unlockedEvents);
   const [showSaveNotice, setShowSaveNotice] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
   const [progressLoaded, setProgressLoaded] = useState(false);
 
   // Load progress from Supabase (with localStorage fallback) on mount
@@ -65,7 +66,18 @@ const MicrobeTimelineAdventure = () => {
   // Auto-save whenever progress state changes (after initial load)
   useEffect(() => {
     if (!progressLoaded) return;
-    saveProgress({ unlockedEras, unlockedEvents, completedEvents, totalPoints, collectedCards, achievements });
+    let cancelled = false;
+    let timer;
+    saveProgress({ unlockedEras, unlockedEvents, completedEvents, totalPoints, collectedCards, achievements }).then((result) => {
+      if (cancelled) return;
+      const message = result?.skipped ? 'Progress saving is off or unavailable. You can keep playing.'
+        : result?.cloud ? 'Progress saved to your account.'
+        : result?.local ? 'Progress saved on this device.' : 'Progress could not be saved.';
+      setSaveMessage(message);
+      setShowSaveNotice(true);
+      timer = setTimeout(() => setShowSaveNotice(false), 4000);
+    });
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [unlockedEras, unlockedEvents, completedEvents, totalPoints, collectedCards, achievements, progressLoaded]);
 
   const handleResetProgress = async () => {
@@ -243,9 +255,6 @@ const MicrobeTimelineAdventure = () => {
       }
     }
 
-    // Show save notice
-    setShowSaveNotice(true);
-    setTimeout(() => setShowSaveNotice(false), 2500);
   };
 
   const handleCollectScientist = (scientistId) => {
@@ -282,8 +291,8 @@ const MicrobeTimelineAdventure = () => {
 
   // Save notice toast
   const SaveNotice = () => showSaveNotice ? (
-    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-green-700/90 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 shadow-lg animate-fade-in">
-      <Icon name="Save" size={14} /> Progress saved!
+    <div role="status" className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-slate-800/95 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 shadow-lg animate-fade-in">
+      <Icon name="Save" size={14} /> {saveMessage}
     </div>
   ) : null;
 

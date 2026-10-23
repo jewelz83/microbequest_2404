@@ -5,6 +5,11 @@ const CONSENT_AUDIT_KEY = 'microbequest_consent_audit';
 const PIN_KEY = 'microbequest_parent_pin';
 const DELETION_RECEIPT_KEY = 'microbequest_deletion_receipts';
 export const COPPA_CONSENT_VERSION = '1.0';
+let accountOwner;
+let accountEpoch = 0;
+export const setParentalControlsIdentity = (id) => {
+  if (accountOwner !== id) { accountOwner = id; accountEpoch += 1; }
+};
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
 
@@ -20,7 +25,7 @@ export const defaultControls = {
   educationalContentOnly: false,
   analyticsConsent: false,
   personalizationConsent: false,
-  progressTrackingConsent: true,
+  progressTrackingConsent: false,
   dataRetentionDays: 90,
   // COPPA consent fields
   parentEmail: '',
@@ -130,11 +135,14 @@ export const getRetentionWarning = (controls) => {
 // ─── DB Helpers ───────────────────────────────────────────────────────────────
 
 const getCurrentUserId = async () => {
+  const ticket = accountEpoch;
   try {
-    const { data: { user } } = await supabase?.auth?.getUser();
-    return user?.id ?? null;
+    const { data, error } = await supabase.auth.getSession();
+    const id = data?.session?.user?.id ?? null;
+    if (error || ticket !== accountEpoch || (accountOwner !== undefined && accountOwner !== id)) return undefined;
+    return id;
   } catch {
-    return null;
+    return undefined;
   }
 };
 
@@ -212,7 +220,8 @@ export const logConsentAction = async (action, details = {}) => {
 
 export const loadParentalControls = async () => {
   const userId = await getCurrentUserId();
-  if (!userId) return loadLocalControls();
+  if (userId === undefined) return { ...defaultControls };
+  if (userId === null) return loadLocalControls();
 
   try {
     const { data, error } = await supabase
@@ -223,29 +232,29 @@ export const loadParentalControls = async () => {
 
     if (error) {
       console.error('Error loading parental controls:', error?.message);
-      return loadLocalControls();
+      return { ...defaultControls };
     }
 
     if (!data) {
-      const local = loadLocalControls();
-      await saveParentalControls(local);
-      return local;
+      // A browser cache is not evidence of this account's parental consent.
+      return { ...defaultControls };
     }
 
     const controls = dbToControls(data);
-    saveLocalControls(controls);
     return controls;
   } catch (err) {
     console.error('Unexpected error loading parental controls:', err);
-    return loadLocalControls();
+    return { ...defaultControls };
   }
 };
 
 export const saveParentalControls = async (controls) => {
-  saveLocalControls(controls);
-
   const userId = await getCurrentUserId();
-  if (!userId) return { error: null };
+  if (userId === undefined) return { error: new Error('Could not verify the current account. Settings were not saved.') };
+  if (userId === null) {
+    saveLocalControls(controls);
+    return { error: null };
+  }
 
   try {
     const { error } = await supabase
@@ -266,6 +275,7 @@ export const saveParentalControls = async (controls) => {
 // ─── Grant / Withdraw Consent ─────────────────────────────────────────────────
 
 export const grantVerifiableConsent = async (controls, parentEmail) => {
+  const ticket = accountEpoch;
   const now = new Date()?.toISOString();
   let updated = {
     ...controls,
@@ -274,7 +284,9 @@ export const grantVerifiableConsent = async (controls, parentEmail) => {
     consentWithdrawnAt: null,
     consentVersion: COPPA_CONSENT_VERSION,
   };
-  await saveParentalControls(updated);
+  const { error } = await saveParentalControls(updated);
+  if (error) throw error;
+  if (ticket !== accountEpoch) throw new Error('The account changed. Reload settings before continuing.');
   await logConsentAction('consent_granted', {
     parentEmail,
     consentVersion: COPPA_CONSENT_VERSION,
@@ -288,6 +300,7 @@ export const grantVerifiableConsent = async (controls, parentEmail) => {
 };
 
 export const withdrawConsent = async (controls, consentType) => {
+  const ticket = accountEpoch;
   const now = new Date()?.toISOString();
   let updated = { ...controls, consentWithdrawnAt: now };
   if (consentType === 'all') {
@@ -299,7 +312,9 @@ export const withdrawConsent = async (controls, consentType) => {
   } else if (consentType === 'progress_tracking') {
     updated = { ...updated, progressTrackingConsent: false };
   }
-  await saveParentalControls(updated);
+  const { error } = await saveParentalControls(updated);
+  if (error) throw error;
+  if (ticket !== accountEpoch) throw new Error('The account changed. Reload settings before continuing.');
   await logConsentAction('consent_withdrawn', { consentType, metadata: { withdrawnAt: now } });
   return updated;
 };
@@ -384,13 +399,16 @@ export const deleteAllChildData = async () => {
     dataTypes: ['game_scores', 'game_progress', 'parental_controls', 'localStorage'],
   });
 
-  // Clear localStorage
+  const userId = await getCurrentUserId();
+  if (userId === undefined) return { error: new Error('Could not verify the account for deletion.'), deletedAt };
+
+  // Clear this account's new cache as well as legacy keys. Other accounts stay separate.
   try {
     localStorage.removeItem('microbequest_parental_controls');
     localStorage.removeItem('microbequest_progress');
+    localStorage.removeItem(`microbequest_progress:v2:${userId ? `user:${userId}` : 'guest'}`);
   } catch (e) {}
 
-  const userId = await getCurrentUserId();
   if (!userId) return { error: null, deletedAt };
 
   const errors = [];

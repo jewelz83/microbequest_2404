@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { syncProgressOnLogin } from '../services/gameProgressService';
+import { setProgressIdentity } from '../services/gameProgressService';
+import { setParentalControlsIdentity } from '../services/parentalControlsService';
 
 const AuthContext = createContext(undefined)
 
@@ -13,6 +14,7 @@ export const useAuth = () => {
 }
 
 export const AuthProvider = ({ children }) => {
+  const currentUserId = useRef(null)
   const [user, setUser] = useState(null)
   const [userProfile, setUserProfile] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -27,11 +29,11 @@ export const AuthProvider = ({ children }) => {
       setProfileLoading(true)
       try {
         const { data, error } = await supabase?.from('user_profiles')?.select('*')?.eq('id', userId)?.single()
-        if (!error) setUserProfile(data)
+        if (!error && currentUserId.current === userId) setUserProfile(data)
       } catch (error) {
         console.error('Profile load error:', error)
       } finally {
-        setProfileLoading(false)
+        if (currentUserId.current === userId) setProfileLoading(false)
       }
     },
 
@@ -54,6 +56,7 @@ export const AuthProvider = ({ children }) => {
           ?.order('created_at', { ascending: false })
           ?.limit(1)
           ?.single()
+        if (currentUserId.current !== userId) return
         if (!error && data) {
           setSubscription(data)
         } else {
@@ -61,9 +64,9 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (error) {
         console.error('Subscription load error:', error)
-        setSubscription(null)
+        if (currentUserId.current === userId) setSubscription(null)
       } finally {
-        setSubscriptionLoading(false)
+        if (currentUserId.current === userId) setSubscriptionLoading(false)
       }
     },
 
@@ -77,18 +80,20 @@ export const AuthProvider = ({ children }) => {
   const authStateHandlers = {
     // This handler MUST remain synchronous - Supabase requirement
     onChange: (event, session) => {
+      const nextUserId = session?.user?.id ?? null
+      if (currentUserId.current !== nextUserId) {
+        currentUserId.current = nextUserId
+        profileOperations.clear()
+        subscriptionOperations.clear()
+      }
+      setProgressIdentity(session?.user?.id ?? null)
+      setParentalControlsIdentity(session?.user?.id ?? null)
       setUser(session?.user ?? null)
       setLoading(false)
 
       if (session?.user) {
         profileOperations?.load(session?.user?.id) // Fire-and-forget
         subscriptionOperations?.load(session?.user?.id) // Fire-and-forget
-        // Sync localStorage progress to Supabase on login
-        if (event === 'SIGNED_IN') {
-          syncProgressOnLogin()?.catch((err) =>
-            console.error('Progress sync error:', err)
-          )
-        }
       } else {
         profileOperations?.clear()
         subscriptionOperations?.clear()
@@ -97,17 +102,23 @@ export const AuthProvider = ({ children }) => {
   }
 
   useEffect(() => {
+    let active = true
+    let authEventObserved = false
     // Initial session check
     supabase?.auth?.getSession()?.then(({ data: { session } }) => {
-      authStateHandlers?.onChange(null, session)
+      if (active && !authEventObserved) authStateHandlers.onChange(null, session)
     })
 
     // CRITICAL: This must remain synchronous
     const { data: { subscription: authSubscription } } = supabase?.auth?.onAuthStateChange(
-      authStateHandlers?.onChange
+      (event, session) => {
+        if (!active) return
+        authEventObserved = true
+        authStateHandlers.onChange(event, session)
+      }
     )
 
-    return () => authSubscription?.unsubscribe()
+    return () => { active = false; authSubscription?.unsubscribe() }
   }, [])
 
   // Auth methods
