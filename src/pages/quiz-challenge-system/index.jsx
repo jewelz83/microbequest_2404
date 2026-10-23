@@ -8,6 +8,8 @@ import QuestionCard from './components/QuestionCard';
 import AnswerFeedback from './components/AnswerFeedback';
 import QuizProgress from './components/QuizProgress';
 import QuizResults from './components/QuizResults';
+import { saveGameScore } from '../../services/gameProgressService';
+import { trackGameModeStart, trackGameModeComplete, trackQuizAnswer } from '../../services/analyticsService';
 
 const QuizChallengeSystem = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -28,7 +30,7 @@ const QuizChallengeSystem = () => {
     id: 1,
     title: "Bacterial Structure",
     text: "Which part of a bacterial cell helps it move around?",
-    image: "https://images.unsplash.com/photo-1714844437234-8debef441744",
+    image: "https://img.rocket.new/generatedImages/rocket_gen_img_15494222b-1767981434996.png",
     imageAlt: "Microscopic view of bacterial cells showing flagella structures for movement",
     imageCaption: "Bacterial cells under microscope magnification",
     difficulty: "easy",
@@ -38,25 +40,25 @@ const QuizChallengeSystem = () => {
     {
       id: 'a',
       text: "Cell wall - provides structural support",
-      image: "https://images.unsplash.com/photo-1586019117154-e0965c16a3ef",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1b5fba6a0-1766069416862.png",
       imageAlt: "Diagram showing bacterial cell wall structure"
     },
     {
       id: 'b',
       text: "Flagella - whip-like structures for swimming",
-      image: "https://images.unsplash.com/photo-1631824683860-9a7aa1fe0713",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_16e05f651-1775173127353.png",
       imageAlt: "Illustration of bacterial flagella in motion"
     },
     {
       id: 'c',
       text: "Nucleus - controls cell activities",
-      image: "https://images.unsplash.com/photo-1714846428077-42363bcae622",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_18f949fae-1775916873171.png",
       imageAlt: "Cross-section diagram of cell nucleus"
     },
     {
       id: 'd',
       text: "Ribosomes - make proteins for the cell",
-      image: "https://images.unsplash.com/photo-1706647154179-c1fe7bf2f1a9",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1d9e5c54a-1767981434954.png",
       imageAlt: "Microscopic view of ribosomes in bacterial cell"
     }],
 
@@ -65,7 +67,7 @@ const QuizChallengeSystem = () => {
     microbeInfo: {
       name: "E. coli",
       description: "A rod-shaped bacterium that uses multiple flagella to swim through your intestines.",
-      image: "https://images.unsplash.com/photo-1574341792525-683b103fffe8",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_16e05f651-1775173127353.png",
       imageAlt: "Detailed microscopic image of E. coli bacteria showing flagella",
       facts: [
       "Can swim 10 times its body length per second",
@@ -77,7 +79,7 @@ const QuizChallengeSystem = () => {
     id: 2,
     title: "Virus Characteristics",
     text: "What do viruses need to reproduce and make copies of themselves?",
-    image: "https://images.unsplash.com/photo-1579781403337-de692320718a",
+    image: "https://images.unsplash.com/flagged/photo-1584036561584-b03c19da874c",
     imageAlt: "3D rendered visualization of virus particles with spike proteins",
     imageCaption: "Computer model of virus structure and components",
     difficulty: "medium",
@@ -87,25 +89,25 @@ const QuizChallengeSystem = () => {
     {
       id: 'a',
       text: "Sunlight and water like plants do",
-      image: "https://images.unsplash.com/photo-1560881410-b659d32d8be0",
+      image: "https://images.unsplash.com/photo-1462885775124-e861c44bb4fe",
       imageAlt: "Bright sunlight streaming through water droplets"
     },
     {
       id: 'b',
       text: "A host cell to hijack and use",
-      image: "https://images.unsplash.com/photo-1706639448451-02a56cd7b0eb",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1776e9550-1775916852395.png",
       imageAlt: "Diagram showing virus entering and taking over host cell"
     },
     {
       id: 'c',
       text: "Special food from the environment",
-      image: "https://images.unsplash.com/photo-1579803165101-cfc62dfdbe45",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_10ffa772f-1775916855456.png",
       imageAlt: "Various nutrients and minerals in laboratory setting"
     },
     {
       id: 'd',
       text: "Other viruses to combine with",
-      image: "https://images.unsplash.com/photo-1707861107901-4a98927cbc61",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1653122b3-1775916857358.png",
       imageAlt: "Multiple virus particles clustering together"
     }],
 
@@ -114,7 +116,7 @@ const QuizChallengeSystem = () => {
     microbeInfo: {
       name: "Influenza Virus",
       description: "A respiratory virus that hijacks your cells to make thousands of copies of itself.",
-      image: "https://images.unsplash.com/photo-1580377968211-b6425102326b",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1b04d2fb9-1772811835111.png",
       imageAlt: "Detailed 3D model of influenza virus showing surface proteins",
       facts: [
       "Can make 1000 copies of itself in just 8 hours",
@@ -126,7 +128,7 @@ const QuizChallengeSystem = () => {
     id: 3,
     title: "Fungal Growth",
     text: "How do fungi like mushrooms get their food and energy?",
-    image: "https://images.unsplash.com/photo-1729830125745-235c84569ff0",
+    image: "https://images.unsplash.com/photo-1605638408557-a4bbd0941775",
     imageAlt: "Close-up view of mushroom fungi growing on decaying wood in forest",
     imageCaption: "Fungi breaking down organic matter in their natural habitat",
     difficulty: "medium",
@@ -136,13 +138,13 @@ const QuizChallengeSystem = () => {
     {
       id: 'a',
       text: "They make their own food using sunlight",
-      image: "https://images.unsplash.com/photo-1626872574777-f9c4ca9e0e03",
+      image: "https://images.unsplash.com/photo-1601313460844-932d78ccc82b",
       imageAlt: "Green plants photosynthesizing in bright sunlight"
     },
     {
       id: 'b',
       text: "They hunt and eat other small organisms",
-      image: "https://images.unsplash.com/photo-1631824680987-8bae525fc696",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1ba3863a6-1775916852311.png",
       imageAlt: "Predatory microorganisms hunting smaller prey"
     },
     {
@@ -154,7 +156,7 @@ const QuizChallengeSystem = () => {
     {
       id: 'd',
       text: "They absorb nutrients from the air",
-      image: "https://images.unsplash.com/photo-1545150724-ba225035114f",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1c25ac532-1768024583815.png",
       imageAlt: "Microscopic particles floating in air currents"
     }],
 
@@ -175,343 +177,342 @@ const QuizChallengeSystem = () => {
     id: 4,
     title: "Good Bacteria Heroes",
     text: "Which type of good bacteria helps you digest food and keeps your tummy healthy?",
-    image: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063",
+    image: "https://images.unsplash.com/photo-1702258780335-4b12ed8c35db",
     imageAlt: "Colorful probiotic bacteria colonies in microscopic view",
     imageCaption: "Beneficial bacteria that live in your intestines",
     difficulty: "easy",
     points: 10,
     timeLimit: 60,
     options: [
-      {
-        id: 'a',
-        text: "Lactobacillus - helps break down dairy and make vitamins",
-        image: "https://images.unsplash.com/photo-1628088062854-d1870b4553da",
-        imageAlt: "Healthy probiotic bacteria helping with digestion"
-      },
-      {
-        id: 'b',
-        text: "Streptococcus - causes strep throat infections",
-        image: "https://images.unsplash.com/photo-1630094556251-2a1e50b60e7d",
-        imageAlt: "Harmful streptococcus bacteria chains"
-      },
-      {
-        id: 'c',
-        text: "Salmonella - makes you sick from bad food",
-        image: "https://images.unsplash.com/photo-1628527304948-06157ee3c8a6",
-        imageAlt: "Dangerous salmonella bacteria causing food poisoning"
-      },
-      {
-        id: 'd',
-        text: "None - all bacteria are harmful to humans",
-        image: "https://images.unsplash.com/photo-1582719471137-c3967ffb1c42",
-        imageAlt: "Warning symbol representing harmful bacteria"
-      }
-    ],
+    {
+      id: 'a',
+      text: "Lactobacillus - helps break down dairy and make vitamins",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1039862b4-1771242482354.png",
+      imageAlt: "Healthy probiotic bacteria helping with digestion"
+    },
+    {
+      id: 'b',
+      text: "Streptococcus - causes strep throat infections",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_16338b106-1775916853000.png",
+      imageAlt: "Harmful streptococcus bacteria chains"
+    },
+    {
+      id: 'c',
+      text: "Salmonella - makes you sick from bad food",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1b94c787e-1775916871965.png",
+      imageAlt: "Dangerous salmonella bacteria causing food poisoning"
+    },
+    {
+      id: 'd',
+      text: "None - all bacteria are harmful to humans",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_19e4fbec9-1775916870664.png",
+      imageAlt: "Warning symbol representing harmful bacteria"
+    }],
+
     correctAnswer: 'a',
     explanation: `Lactobacillus is a friendly bacteria superhero! It lives in your gut and helps digest lactose (milk sugar), produces vitamin K for blood clotting, and fights off bad bacteria. You can find it in yogurt, cheese, and fermented foods!`,
     microbeInfo: {
       name: "Lactobacillus acidophilus",
       description: "A friendly bacterium that makes your tummy happy and healthy!",
-      image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_197d56b1d-1775916872258.png",
       imageAlt: "Lactobacillus bacteria helping with digestion",
       facts: [
-        "Makes lactic acid that gives yogurt its tangy taste",
-        "Can survive the acidic environment of your stomach!"
-      ]
+      "Makes lactic acid that gives yogurt its tangy taste",
+      "Can survive the acidic environment of your stomach!"]
+
     }
   },
   {
     id: 5,
     title: "Microbe Size Challenge",
     text: "How many bacteria could fit on the period at the end of this sentence?",
-    image: "https://images.unsplash.com/photo-1576086213369-97a306d36557",
+    image: "https://images.unsplash.com/flagged/photo-1586703252585-8da4639b096c",
     imageAlt: "Extreme magnification showing tiny bacteria cells",
     imageCaption: "Bacteria are incredibly tiny - smaller than you can imagine!",
     difficulty: "hard",
     points: 20,
     timeLimit: 50,
     options: [
-      {
-        id: 'a',
-        text: "About 10 bacteria",
-        image: "https://images.unsplash.com/photo-1617791160536-598cf32026fb",
-        imageAlt: "Small number of bacteria"
-      },
-      {
-        id: 'b',
-        text: "About 100 bacteria",
-        image: "https://images.unsplash.com/photo-1614935151651-0bea6508db6b",
-        imageAlt: "Moderate number of bacteria"
-      },
-      {
-        id: 'c',
-        text: "About 1,000 bacteria",
-        image: "https://images.unsplash.com/photo-1583911860205-72f8ac8ddcbe",
-        imageAlt: "Large colony of bacteria"
-      },
-      {
-        id: 'd',
-        text: "About 1,000,000 bacteria!",
-        image: "https://images.unsplash.com/photo-1580377968211-b6425102326b",
-        imageAlt: "Massive bacterial population"
-      }
-    ],
+    {
+      id: 'a',
+      text: "About 10 bacteria",
+      image: "https://images.unsplash.com/photo-1706203678409-ef1526a0078a",
+      imageAlt: "Small number of bacteria"
+    },
+    {
+      id: 'b',
+      text: "About 100 bacteria",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_167fe57e2-1765311504022.png",
+      imageAlt: "Moderate number of bacteria"
+    },
+    {
+      id: 'c',
+      text: "About 1,000 bacteria",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_16e05f651-1775173127353.png",
+      imageAlt: "Large colony of bacteria"
+    },
+    {
+      id: 'd',
+      text: "About 1,000,000 bacteria!",
+      image: "https://images.unsplash.com/photo-1521403684205-044b4ce8f4d3",
+      imageAlt: "Massive bacterial population"
+    }],
+
     correctAnswer: 'd',
     explanation: `Bacteria are SO tiny that about 1 MILLION bacteria could fit on a period at the end of a sentence! That's because bacteria are only about 1-2 micrometers long - you'd need a powerful microscope just to see one!`,
     microbeInfo: {
       name: "Size Comparison",
       description: "Understanding just how incredibly small microbes really are!",
-      image: "https://images.unsplash.com/photo-1530587191325-3db32d826c18",
+      image: "https://images.unsplash.com/photo-1631824681077-ffb294002a88",
       imageAlt: "Scale comparison showing bacteria size",
       facts: [
-        "A typical bacteria is about 2 micrometers (0.000002 meters) long",
-        "1000 bacteria lined up = width of a human hair!"
-      ]
+      "A typical bacteria is about 2 micrometers (0.000002 meters) long",
+      "1000 bacteria lined up = width of a human hair!"]
+
     }
   },
   {
     id: 6,
     title: "Hand Washing Science",
     text: "Why does washing your hands with soap help remove germs better than just water?",
-    image: "https://images.unsplash.com/photo-1584515933487-779824d29309",
+    image: "https://images.unsplash.com/photo-1601372292857-536b935210a6",
     imageAlt: "Hands being washed with soap and bubbles",
     imageCaption: "Proper hand washing is one of the best ways to stay healthy!",
     difficulty: "medium",
     points: 15,
     timeLimit: 60,
     options: [
-      {
-        id: 'a',
-        text: "Soap is sticky and traps germs like glue",
-        image: "https://images.unsplash.com/photo-1563620396-b45187b1a2c0",
-        imageAlt: "Sticky soap trapping particles"
-      },
-      {
-        id: 'b',
-        text: "Soap molecules grab germs and water washes them away",
-        image: "https://images.unsplash.com/photo-1585421514284-efb74c2b69ba",
-        imageAlt: "Soap molecules surrounding and removing bacteria"
-      },
-      {
-        id: 'c',
-        text: "Soap kills all germs instantly on contact",
-        image: "https://images.unsplash.com/photo-1628527304948-06157ee3c8a6",
-        imageAlt: "Antibacterial soap killing germs"
-      },
-      {
-        id: 'd',
-        text: "Soap makes your hands too slippery for germs",
-        image: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6",
-        imageAlt: "Slippery soapy hands"
-      }
-    ],
+    {
+      id: 'a',
+      text: "Soap is sticky and traps germs like glue",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1e10e63ef-1775916870287.png",
+      imageAlt: "Sticky soap trapping particles"
+    },
+    {
+      id: 'b',
+      text: "Soap molecules grab germs and water washes them away",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_116230a48-1775916855667.png",
+      imageAlt: "Soap molecules surrounding and removing bacteria"
+    },
+    {
+      id: 'c',
+      text: "Soap kills all germs instantly on contact",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1bd793930-1775916852986.png",
+      imageAlt: "Antibacterial soap killing germs"
+    },
+    {
+      id: 'd',
+      text: "Soap makes your hands too slippery for germs",
+      image: "https://images.unsplash.com/photo-1721620958961-cccc239cbb49",
+      imageAlt: "Slippery soapy hands"
+    }],
+
     correctAnswer: 'b',
     explanation: `Soap molecules are super clever! One end loves water (hydrophilic) and the other end loves oil and germs (hydrophobic). When you wash, soap surrounds germs and lifts them off your skin, then water rinses everything away. That's why you need to scrub for at least 20 seconds!`,
     microbeInfo: {
       name: "Hand Washing Chemistry",
       description: "The science behind why soap is a germ-fighting superhero!",
-      image: "https://images.unsplash.com/photo-1587556930116-0d19ab50411e",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_13a26e13f-1775917123798.png",
       imageAlt: "Diagram showing how soap removes germs",
       facts: [
-        "Singing 'Happy Birthday' twice = perfect 20-second hand wash!",
-        "Soap doesn't kill germs, it just helps remove them"
-      ]
+      "Singing 'Happy Birthday' twice = perfect 20-second hand wash!",
+      "Soap doesn't kill germs, it just helps remove them"]
+
     }
   },
   {
     id: 7,
-    title: "Antibiotic Knowledge",
-    text: "Why won't antibiotics help you feel better if you have a cold or the flu?",
-    image: "https://images.unsplash.com/photo-1587370560942-ad2a04eabb6d",
+    title: "Antibiotic Knowledge", text: "Why won't antibiotics help you feel better if you have a cold or the flu?",
+    image: "https://img.rocket.new/generatedImages/rocket_gen_img_1683ec86f-1775916852647.png",
     imageAlt: "Antibiotic medicine pills and tablets",
     imageCaption: "Understanding when antibiotics work is important!",
     difficulty: "medium",
     points: 15,
     timeLimit: 55,
     options: [
-      {
-        id: 'a',
-        text: "Antibiotics are too weak to fight cold viruses",
-        image: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de",
-        imageAlt: "Weak medicine"
-      },
-      {
-        id: 'b',
-        text: "Antibiotics only work on bacteria, not viruses!",
-        image: "https://images.unsplash.com/photo-1579780672346-ece80a74b74c",
-        imageAlt: "Antibiotics targeting bacteria specifically"
-      },
-      {
-        id: 'c',
-        text: "Cold viruses are immune to all medicines",
-        image: "https://images.unsplash.com/photo-1585559604959-d99b3a46e8c6",
-        imageAlt: "Protected virus particles"
-      },
-      {
-        id: 'd',
-        text: "You need to take them for a full month to work",
-        image: "https://images.unsplash.com/photo-1587370560942-ad2a04eabb6d",
-        imageAlt: "Long-term medication"
-      }
-    ],
+    {
+      id: 'a',
+      text: "Antibiotics are too weak to fight cold viruses",
+      image: "https://images.unsplash.com/photo-1688678004194-e22d547ed705",
+      imageAlt: "Weak medicine"
+    },
+    {
+      id: 'b',
+      text: "Antibiotics only work on bacteria, not viruses!",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_11e0c3f71-1775916869659.png",
+      imageAlt: "Antibiotics targeting bacteria specifically"
+    },
+    {
+      id: 'c',
+      text: "Cold viruses are immune to all medicines",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1adf4d006-1775916852489.png",
+      imageAlt: "Protected virus particles"
+    },
+    {
+      id: 'd',
+      text: "You need to take them for a full month to work",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1fc5cd61f-1772057253733.png",
+      imageAlt: "Long-term medication"
+    }],
+
     correctAnswer: 'b',
     explanation: `Antibiotics are designed to kill bacteria by attacking their cell walls or stopping them from reproducing. But viruses don't have cell walls and work completely differently - they hide inside your cells! That's why antibiotics can't touch them. Your immune system is your best defense against viruses!`,
     microbeInfo: {
       name: "Antibiotic Resistance",
       description: "Why we need to use antibiotics wisely and only when necessary!",
-      image: "https://images.unsplash.com/photo-1631549916768-4119b2e5f926",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1c33cabdd-1775916853007.png",
       imageAlt: "Bacteria becoming resistant to antibiotics",
       facts: [
-        "Taking antibiotics when you don't need them creates 'superbugs'",
-        "Always finish your full antibiotic prescription!"
-      ]
+      "Taking antibiotics when you don't need them creates 'superbugs'",
+      "Always finish your full antibiotic prescription!"]
+
     }
   },
   {
     id: 8,
     title: "Fungal Friends",
     text: "Which of these delicious foods is made with the help of friendly fungi?",
-    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff",
+    image: "https://images.unsplash.com/photo-1719921020132-7757bde0ddf6",
     imageAlt: "Various bread and baked goods",
     imageCaption: "Fungi help us make lots of tasty foods!",
     difficulty: "easy",
     points: 10,
     timeLimit: 60,
     options: [
-      {
-        id: 'a',
-        text: "Bread - yeast makes it rise and fluffy!",
-        image: "https://images.unsplash.com/photo-1509440159596-0249088772ff",
-        imageAlt: "Fresh baked bread loaves"
-      },
-      {
-        id: 'b',
-        text: "Orange juice - fresh squeezed from fruit",
-        image: "https://images.unsplash.com/photo-1600271886742-f049cd451bba",
-        imageAlt: "Glass of fresh orange juice"
-      },
-      {
-        id: 'c',
-        text: "French fries - fried potato slices",
-        image: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877",
-        imageAlt: "Crispy french fries"
-      },
-      {
-        id: 'd',
-        text: "Chocolate milk - cocoa mixed with milk",
-        image: "https://images.unsplash.com/photo-1556530990-3a91c90c0df8",
-        imageAlt: "Glass of chocolate milk"
-      }
-    ],
+    {
+      id: 'a',
+      text: "Bread - yeast makes it rise and fluffy!",
+      image: "https://images.unsplash.com/photo-1612982593409-5d926522b5ba",
+      imageAlt: "Fresh baked bread loaves"
+    },
+    {
+      id: 'b',
+      text: "Orange juice - fresh squeezed from fruit",
+      image: "https://images.unsplash.com/photo-1503624141236-2bd972ca51f7",
+      imageAlt: "Glass of fresh orange juice"
+    },
+    {
+      id: 'c',
+      text: "French fries - fried potato slices",
+      image: "https://images.unsplash.com/photo-1639744505770-1b27d5316fea",
+      imageAlt: "Crispy french fries"
+    },
+    {
+      id: 'd',
+      text: "Chocolate milk - cocoa mixed with milk",
+      image: "https://images.unsplash.com/photo-1631461352830-c37149298088",
+      imageAlt: "Glass of chocolate milk"
+    }],
+
     correctAnswer: 'a',
     explanation: `Bread is made with yeast, which is a type of fungus! When yeast eats sugar in the dough, it burps out carbon dioxide gas bubbles that make bread rise and become soft and fluffy. Yeast also makes the delicious bread smell we all love!`,
     microbeInfo: {
       name: "Saccharomyces cerevisiae (Baker's Yeast)",
       description: "The friendly fungus that helps make bread, pizza dough, and even beer!",
-      image: "https://images.unsplash.com/photo-1598972334790-8e67e00ec6e1",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_123e5eaf5-1765095178139.png",
       imageAlt: "Yeast cells under microscope",
       facts: [
-        "One packet of yeast contains billions of tiny yeast cells!",
-        "Yeast has been helping humans make bread for over 5,000 years"
-      ]
+      "One packet of yeast contains billions of tiny yeast cells!",
+      "Yeast has been helping humans make bread for over 5,000 years"]
+
     }
   },
   {
     id: 9,
     title: "Microbe Habitats",
     text: "Where in your body do you have the MOST microorganisms living?",
-    image: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063",
+    image: "https://img.rocket.new/generatedImages/rocket_gen_img_1f129c161-1767642789391.png",
     imageAlt: "Human body outline showing microbiome locations",
-    imageCaption: "You're like a walking microbe hotel!",
+    imageCaption: "You\'re like a walking microbe hotel!",
     difficulty: "medium",
     points: 15,
     timeLimit: 50,
     options: [
-      {
-        id: 'a',
-        text: "Your mouth and teeth",
-        image: "https://images.unsplash.com/photo-1606811971618-4486d14f3f99",
-        imageAlt: "Person smiling showing teeth"
-      },
-      {
-        id: 'b',
-        text: "Your skin surface",
-        image: "https://images.unsplash.com/photo-1625073612670-970a91e0e97f",
-        imageAlt: "Close-up of human skin"
-      },
-      {
-        id: 'c',
-        text: "Your gut and intestines",
-        image: "https://images.unsplash.com/photo-1551076805-e1869033e561",
-        imageAlt: "Digestive system diagram"
-      },
-      {
-        id: 'd',
-        text: "Your lungs when you breathe",
-        image: "https://images.unsplash.com/photo-1591228127791-8e2eaef098d3",
-        imageAlt: "Respiratory system diagram"
-      }
-    ],
+    {
+      id: 'a',
+      text: "Your mouth and teeth",
+      image: "https://images.unsplash.com/photo-1731269451218-7786410c838c",
+      imageAlt: "Person smiling showing teeth"
+    },
+    {
+      id: 'b',
+      text: "Your skin surface",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1e0c4ef70-1772073487804.png",
+      imageAlt: "Close-up of human skin"
+    },
+    {
+      id: 'c',
+      text: "Your gut and intestines",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_118737b8d-1773161063807.png",
+      imageAlt: "Digestive system diagram"
+    },
+    {
+      id: 'd',
+      text: "Your lungs when you breathe",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_199e93b22-1764705540120.png",
+      imageAlt: "Respiratory system diagram"
+    }],
+
     correctAnswer: 'c',
     explanation: `Your gut is home to trillions of microbes - more than there are stars in our galaxy! These gut bacteria help you digest food, make vitamins, train your immune system, and even affect your mood. You have about 3 pounds of bacteria in your intestines!`,
     microbeInfo: {
       name: "Gut Microbiome",
       description: "The amazing ecosystem of microbes living in your digestive system!",
-      image: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1fc418809-1775916852436.png",
       imageAlt: "Diverse gut bacteria colonies",
       facts: [
-        "You have more bacterial cells than human cells in your body!",
-        "Your gut bacteria produce serotonin, the 'happy chemical'"
-      ]
+      "You have more bacterial cells than human cells in your body!",
+      "Your gut bacteria produce serotonin, the 'happy chemical'"]
+
     }
   },
   {
     id: 10,
     title: "Discovery History",
     text: "Who was the first person to see and draw microorganisms using a microscope?",
-    image: "https://images.unsplash.com/photo-1530587191325-3db32d826c18",
+    image: "https://img.rocket.new/generatedImages/rocket_gen_img_1adc2f5db-1767895188769.png",
     imageAlt: "Historical antique microscope",
     imageCaption: "Early microscopes opened up a whole new world!",
     difficulty: "hard",
     points: 20,
     timeLimit: 60,
     options: [
-      {
-        id: 'a',
-        text: "Louis Pasteur - invented pasteurization",
-        image: "https://images.unsplash.com/photo-1551076805-e1869033e561",
-        imageAlt: "Portrait of Louis Pasteur"
-      },
-      {
-        id: 'b',
-        text: "Alexander Fleming - discovered penicillin",
-        image: "https://images.unsplash.com/photo-1583911860205-72f8ac8ddcbe",
-        imageAlt: "Penicillin growing on a petri dish"
-      },
-      {
-        id: 'c',
-        text: "Antoni van Leeuwenhoek - the microscope pioneer",
-        image: "https://images.unsplash.com/photo-1614935151651-0bea6508db6b",
-        imageAlt: "Historical microscope from 1600s"
-      },
-      {
-        id: 'd',
-        text: "Marie Curie - discovered radioactivity",
-        image: "https://images.unsplash.com/photo-1581093458791-9d42e1c5f0c6",
-        imageAlt: "Laboratory with scientific equipment"
-      }
-    ],
+    {
+      id: 'a',
+      text: "Louis Pasteur - invented pasteurization",
+      image: "https://images.unsplash.com/photo-1676037887624-5a2009b9f429",
+      imageAlt: "Portrait of Louis Pasteur"
+    },
+    {
+      id: 'b',
+      text: "Alexander Fleming - discovered penicillin",
+      image: "https://images.unsplash.com/photo-1579165466693-28649e0bf0bd",
+      imageAlt: "Penicillin growing on a petri dish"
+    },
+    {
+      id: 'c',
+      text: "Antoni van Leeuwenhoek - the microscope pioneer",
+      image: "https://images.unsplash.com/photo-1614290335665-03caa2185a82",
+      imageAlt: "Historical microscope from 1600s"
+    },
+    {
+      id: 'd',
+      text: "Marie Curie - discovered radioactivity",
+      image: "https://images.unsplash.com/photo-1576669801838-1b1c52121e6a",
+      imageAlt: "Laboratory with scientific equipment"
+    }],
+
     correctAnswer: 'c',
     explanation: `Antoni van Leeuwenhoek was a Dutch scientist who made his own microscopes in the 1670s and became the first person to see bacteria! He called them "animalcules" (little animals) and drew detailed pictures of what he saw. His discovery opened up an entirely new world of science!`,
     microbeInfo: {
       name: "The Father of Microbiology",
-      description: "Antoni van Leeuwenhoek's amazing discovery changed science forever!",
-      image: "https://images.unsplash.com/photo-1530587191325-3db32d826c18",
-      imageAlt: "Replica of Leeuwenhoek's microscope",
+      description: "Antoni van Leeuwenhoek\'s amazing discovery changed science forever!",
+      image: "https://images.unsplash.com/photo-1663363913215-9db927aa77ea",
+      imageAlt: "Replica of Leeuwenhoek\'s microscope",
       facts: [
-        "He made over 500 microscopes by hand!",
-        "His best microscope could magnify objects 275 times"
-      ]
+      "He made over 500 microscopes by hand!",
+      "His best microscope could magnify objects 275 times"]
+
     }
   }];
 
@@ -534,6 +535,7 @@ const QuizChallengeSystem = () => {
 
   const startQuiz = () => {
     setQuizStarted(true);
+    trackGameModeStart('quiz-challenge');
     setHostEmotion('excited');
     setHostMessage('Let\'s begin our scientific adventure! Take your time and think carefully about each question.');
   };
@@ -545,6 +547,7 @@ const QuizChallengeSystem = () => {
     setShowResult(true);
 
     const isCorrect = answerId === currentQuestion?.correctAnswer;
+    trackQuizAnswer(currentQuestionIndex, isCorrect, currentQuestion?.points);
 
     if (isCorrect) {
       setScore((prev) => prev + currentQuestion?.points);
@@ -588,6 +591,17 @@ const QuizChallengeSystem = () => {
       setShowResults(true);
       setHostEmotion('celebrating');
       setHostMessage('Congratulations! You\'ve completed the quiz!');
+      trackGameModeComplete('quiz-challenge', { score, correctAnswers, totalQuestions });
+      // Persist quiz score to Supabase
+      saveGameScore({
+        gameMode: 'quiz-challenge',
+        score,
+        correctAnswers,
+        totalQuestions,
+        timeElapsed: 0,
+        difficulty: 'mixed',
+        metadata: {},
+      })?.catch((err) => console.error('Failed to save quiz score:', err));
     }
   };
 
@@ -638,51 +652,51 @@ const QuizChallengeSystem = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="pt-16">
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-6 sm:py-8">
           {/* Quiz Introduction */}
           {!quizStarted &&
           <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-8">
-                <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-primary via-secondary to-accent rounded-full flex items-center justify-center shadow-pronounced">
-                  <Icon name="Brain" size={40} color="white" strokeWidth={2.5} />
+              <div className="text-center mb-6 sm:mb-8">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 bg-gradient-to-br from-primary via-secondary to-accent rounded-full flex items-center justify-center shadow-pronounced">
+                  <Icon name="Brain" size={32} color="white" strokeWidth={2.5} />
                 </div>
-                <h1 className="text-4xl font-heading text-foreground mb-4">
+                <h1 className="text-2xl sm:text-4xl font-heading text-foreground mb-3 sm:mb-4">
                   Quiz Challenge System
                 </h1>
-                <p className="text-lg font-body text-muted-foreground max-w-2xl mx-auto">
-                  Test your microbiology knowledge with interactive questions and learn fascinating facts about the microscopic world around us!
+                <p className="text-base sm:text-lg font-body text-muted-foreground max-w-2xl mx-auto">
+                  Test your microbiology knowledge with interactive questions!
                 </p>
               </div>
 
-              <div className="grid lg:grid-cols-2 gap-8 items-start">
+              <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 items-start">
                 {/* Quiz Info */}
-                <div className="bg-card rounded-2xl shadow-moderate border border-border p-6">
-                  <h2 className="text-2xl font-heading text-foreground mb-6">
+                <div className="bg-card rounded-2xl shadow-moderate border border-border p-5 sm:p-6">
+                  <h2 className="text-xl sm:text-2xl font-heading text-foreground mb-4 sm:mb-6">
                     Ready to Begin?
                   </h2>
-                  
-                  <div className="space-y-4 mb-6">
+
+                  <div className="space-y-3 sm:space-y-4 mb-5 sm:mb-6">
                     <div className="flex items-center space-x-3">
-                      <Icon name="HelpCircle" size={20} className="text-primary" />
-                      <span className="font-body text-foreground">
+                      <Icon name="HelpCircle" size={20} className="text-primary flex-shrink-0" />
+                      <span className="font-body text-sm sm:text-base text-foreground">
                         {totalQuestions} engaging questions about microorganisms
                       </span>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <Icon name="Clock" size={20} className="text-secondary" />
-                      <span className="font-body text-foreground">
+                      <Icon name="Clock" size={20} className="text-secondary flex-shrink-0" />
+                      <span className="font-body text-sm sm:text-base text-foreground">
                         60 seconds per question with helpful hints
                       </span>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <Icon name="Star" size={20} className="text-accent" />
-                      <span className="font-body text-foreground">
+                      <Icon name="Star" size={20} className="text-accent flex-shrink-0" />
+                      <span className="font-body text-sm sm:text-base text-foreground">
                         Earn points and unlock achievements
                       </span>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <Icon name="Microscope" size={20} className="text-success" />
-                      <span className="font-body text-foreground">
+                      <Icon name="Microscope" size={20} className="text-success flex-shrink-0" />
+                      <span className="font-body text-sm sm:text-base text-foreground">
                         Learn with visual diagrams and character guides
                       </span>
                     </div>
@@ -694,7 +708,7 @@ const QuizChallengeSystem = () => {
                   onClick={startQuiz}
                   iconName="Play"
                   iconPosition="left"
-                  className="text-lg py-3">
+                  className="text-base sm:text-lg py-3">
 
                     Start Quiz Adventure
                   </Button>
@@ -711,11 +725,11 @@ const QuizChallengeSystem = () => {
               </div>
 
               {/* Navigation Links */}
-              <div className="mt-12 text-center">
-                <div className="flex flex-wrap justify-center gap-4">
+              <div className="mt-8 sm:mt-12 text-center">
+                <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
                   <Link to="/game-home-dashboard">
                     <Button variant="outline" iconName="Home" iconPosition="left">
-                      Back to Dashboard
+                      Dashboard
                     </Button>
                   </Link>
                   <Link to="/world-explorer-mode">
@@ -736,9 +750,9 @@ const QuizChallengeSystem = () => {
           {/* Active Quiz */}
           {quizStarted && !showResults &&
           <div className="max-w-6xl mx-auto">
-              <div className="grid lg:grid-cols-4 gap-6">
+              <div className="grid lg:grid-cols-4 gap-4 sm:gap-6">
                 {/* Main Quiz Area */}
-                <div className="lg:col-span-3 space-y-6">
+                <div className="lg:col-span-3 space-y-4 sm:space-y-6">
                   {/* Progress */}
                   <QuizProgress
                   currentQuestion={currentQuestionIndex + 1}
@@ -758,8 +772,8 @@ const QuizChallengeSystem = () => {
 
                 </div>
 
-                {/* Side Panel */}
-                <div className="lg:col-span-1">
+                {/* Side Panel — hidden on mobile to save space */}
+                <div className="hidden lg:block lg:col-span-1">
                   <QuizHost
                   character="aunt-juju"
                   emotion={hostEmotion}

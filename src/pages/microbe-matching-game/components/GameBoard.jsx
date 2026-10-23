@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 
-const GameBoard = ({ 
-  cards = [], 
-  onCardClick, 
-  flippedCards = [], 
-  matchedCards = [], 
+const GameBoard = ({
+  cards = [],
+  onCardClick,
+  flippedCards = [],
+  matchedCards = [],
   gameState = 'playing',
   difficulty = 'easy',
-  className = "" 
+  className = ""
 }) => {
   const [animatingCards, setAnimatingCards] = useState([]);
   const [celebratingPairs, setCelebratingPairs] = useState([]);
@@ -62,33 +62,43 @@ const GameBoard = ({
     if (gameState !== 'playing') return;
     if (isCardFlipped(card?.id)) return;
     if (flippedCards?.length >= 2) return;
-    
+
     onCardClick(card);
   };
 
+  // Touch handler — prevents ghost click double-fire on mobile
+  const handleCardTouch = (card, e) => {
+    e?.preventDefault();
+    handleCardClick(card);
+  };
+
   return (
-    <div className={`w-full max-w-4xl mx-auto ${className}`}>
+    <div className={`w-full max-w-4xl mx-auto game-board game-interactive ${className}`}>
       {/* Game Board Grid */}
-      <div 
+      <div
         className={`
-          grid gap-3 sm:gap-4 p-4 bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5 
+          grid gap-2 sm:gap-3 md:gap-4 p-3 sm:p-4 bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5
           rounded-2xl border-2 border-primary/20 shadow-moderate
         `}
         style={{
           gridTemplateColumns: `repeat(${currentConfig?.cols}, 1fr)`,
-          aspectRatio: `${currentConfig?.cols}/${currentConfig?.rows}`
         }}
       >
         {cards?.map((card) => (
           <div
             key={card?.id}
             onClick={() => handleCardClick(card)}
+            onTouchEnd={(e) => handleCardTouch(card, e)}
+            role="button"
+            aria-label={`Card: ${isCardFlipped(card?.id) ? card?.name : 'Hidden microbe'}`}
+            aria-pressed={isCardFlipped(card?.id)}
             className={`
-              relative aspect-square cursor-pointer group
-              ${isCardFlipped(card?.id) ? 'pointer-events-none' : 'hover:scale-105'}
+              relative aspect-square cursor-pointer group game-card
+              ${isCardFlipped(card?.id) ? 'pointer-events-none' : 'touch-no-hover hover:scale-105'}
               transition-all duration-300 animate-smooth
               ${isCardCelebrating(card?.id) ? 'animate-bounce-gentle' : ''}
             `}
+            style={{ minHeight: difficulty === 'hard' ? '52px' : '64px' }}
           >
             {/* Card Container */}
             <div className={`
@@ -105,16 +115,16 @@ const GameBoard = ({
                 ${isCardFlipped(card?.id) ? 'opacity-0' : 'opacity-100'}
               `}>
                 <div className="text-center">
-                  <Icon 
-                    name="Microscope" 
-                    size={32} 
-                    color="white" 
+                  <Icon
+                    name="Microscope"
+                    size={32}
+                    color="white"
                     strokeWidth={2.5}
                     className="mx-auto mb-2"
                   />
                   <div className="w-8 h-1 bg-white/30 rounded-full mx-auto"></div>
                 </div>
-                
+
                 {/* Hover Effect */}
                 <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-fast"></div>
               </div>
@@ -133,7 +143,7 @@ const GameBoard = ({
                     alt={card?.imageAlt}
                     className="w-full h-full object-contain rounded-lg"
                   />
-                  
+
                   {/* Celebration Particles */}
                   {isCardCelebrating(card?.id) && (
                     <div className="absolute inset-0 pointer-events-none">

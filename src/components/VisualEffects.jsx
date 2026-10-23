@@ -14,19 +14,19 @@ export const Confetti = ({ active = true, particleCount = 50 }) => {
     x: Math.random() * 100,
     delay: Math.random() * 0.5,
     duration: 2 + Math.random() * 2,
-    color: ['#FFD700', '#FF69B4', '#00CED1', '#FF4500', '#32CD32'][Math.floor(Math.random() * 5)]
+    color: ['#FFD700', '#FF69B4', '#00CED1', '#FF4500', '#32CD32']?.[Math.floor(Math.random() * 5)]
   }));
 
   return (
     <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
-      {particles.map((particle) => (
+      {particles?.map((particle) => (
         <motion.div
-          key={particle.id}
+          key={particle?.id}
           className="absolute w-2 h-2 rounded-full"
           style={{
-            left: `${particle.x}%`,
+            left: `${particle?.x}%`,
             top: '-10%',
-            backgroundColor: particle.color,
+            backgroundColor: particle?.color,
           }}
           initial={{ y: 0, opacity: 1, rotate: 0 }}
           animate={{
@@ -36,8 +36,8 @@ export const Confetti = ({ active = true, particleCount = 50 }) => {
             rotate: [0, 360 * (Math.random() > 0.5 ? 1 : -1)],
           }}
           transition={{
-            duration: particle.duration,
-            delay: particle.delay,
+            duration: particle?.duration,
+            delay: particle?.delay,
             ease: 'easeOut',
           }}
         />
@@ -57,7 +57,7 @@ export const Sparkles = ({ children, active = true }) => {
   return (
     <div className="relative">
       {children}
-      {active && sparklePositions.map((pos, i) => (
+      {active && sparklePositions?.map((pos, i) => (
         <motion.div
           key={i}
           className="absolute w-2 h-2 bg-yellow-300 rounded-full"
@@ -82,7 +82,7 @@ export const FloatingMicrobes = ({ count = 10 }) => {
   const microbes = ['🦠', '🧫', '🔬', '🧬'];
   const particles = Array.from({ length: count }, (_, i) => ({
     id: i,
-    emoji: microbes[Math.floor(Math.random() * microbes.length)],
+    emoji: microbes?.[Math.floor(Math.random() * microbes?.length)],
     x: Math.random() * 100,
     y: Math.random() * 100,
     duration: 20 + Math.random() * 10,
@@ -90,13 +90,13 @@ export const FloatingMicrobes = ({ count = 10 }) => {
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-10">
-      {particles.map((particle) => (
+      {particles?.map((particle) => (
         <motion.div
-          key={particle.id}
+          key={particle?.id}
           className="absolute text-4xl"
           style={{
-            left: `${particle.x}%`,
-            top: `${particle.y}%`,
+            left: `${particle?.x}%`,
+            top: `${particle?.y}%`,
           }}
           animate={{
             y: [0, -20, 0],
@@ -104,12 +104,12 @@ export const FloatingMicrobes = ({ count = 10 }) => {
             rotate: [0, 10, -10, 0],
           }}
           transition={{
-            duration: particle.duration,
+            duration: particle?.duration,
             repeat: Infinity,
             ease: 'easeInOut',
           }}
         >
-          {particle.emoji}
+          {particle?.emoji}
         </motion.div>
       ))}
     </div>
@@ -120,8 +120,8 @@ export const FloatingMicrobes = ({ count = 10 }) => {
 
 export const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     y: 0,
     transition: { duration: 0.6, ease: 'easeOut' }
   }
@@ -129,7 +129,7 @@ export const fadeInUp = {
 
 export const fadeIn = {
   hidden: { opacity: 0 },
-  visible: { 
+  visible: {
     opacity: 1,
     transition: { duration: 0.4 }
   }
@@ -137,21 +137,21 @@ export const fadeIn = {
 
 export const scaleIn = {
   hidden: { scale: 0.8, opacity: 0 },
-  visible: { 
-    scale: 1, 
+  visible: {
+    scale: 1,
     opacity: 1,
-    transition: { 
-      type: 'spring', 
-      stiffness: 200, 
-      damping: 20 
+    transition: {
+      type: 'spring',
+      stiffness: 200,
+      damping: 20
     }
   }
 };
 
 export const slideInLeft = {
   hidden: { x: -50, opacity: 0 },
-  visible: { 
-    x: 0, 
+  visible: {
+    x: 0,
     opacity: 1,
     transition: { duration: 0.5, ease: 'easeOut' }
   }
@@ -159,8 +159,8 @@ export const slideInLeft = {
 
 export const slideInRight = {
   hidden: { x: 50, opacity: 0 },
-  visible: { 
-    x: 0, 
+  visible: {
+    x: 0,
     opacity: 1,
     transition: { duration: 0.5, ease: 'easeOut' }
   }
@@ -168,13 +168,13 @@ export const slideInRight = {
 
 export const bounceIn = {
   hidden: { scale: 0, opacity: 0 },
-  visible: { 
-    scale: 1, 
+  visible: {
+    scale: 1,
     opacity: 1,
-    transition: { 
-      type: 'spring', 
-      stiffness: 400, 
-      damping: 15 
+    transition: {
+      type: 'spring',
+      stiffness: 400,
+      damping: 15
     }
   }
 };
@@ -195,7 +195,7 @@ export const staggerContainer = {
 export const PulsingButton = ({ children, className = '', ...props }) => (
   <motion.button
     className={className}
-    whileHover={{ 
+    whileHover={{
       scale: 1.05,
       boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)'
     }}
@@ -210,7 +210,7 @@ export const PulsingButton = ({ children, className = '', ...props }) => (
 export const GlowCard = ({ children, className = '', glow = true }) => (
   <motion.div
     className={`relative ${className}`}
-    whileHover={glow ? { 
+    whileHover={glow ? {
       boxShadow: '0 0 30px rgba(139, 92, 246, 0.5)',
       scale: 1.02
     } : {}}
@@ -301,7 +301,7 @@ export const SuccessCelebration = ({ show, onComplete }) => {
       >
         <motion.div
           className="text-9xl"
-          animate={{ 
+          animate={{
             rotate: [0, 10, -10, 10, 0],
             scale: [1, 1.2, 1]
           }}
@@ -348,7 +348,7 @@ export const LoadingSpinner = ({ size = 40, color = '#8B5CF6' }) => (
 
 export const PulsingDots = () => (
   <div className="flex space-x-2">
-    {[0, 1, 2].map((i) => (
+    {[0, 1, 2]?.map((i) => (
       <motion.div
         key={i}
         className="w-3 h-3 bg-purple-500 rounded-full"
@@ -382,20 +382,20 @@ export const BadgeReveal = ({ badge, show }) => {
         className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl p-8 text-center shadow-2xl"
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: 0 }}
-        transition={{ 
-          type: 'spring', 
-          stiffness: 200, 
+        transition={{
+          type: 'spring',
+          stiffness: 200,
           damping: 15,
           delay: 0.2
         }}
       >
         <motion.div
           className="text-8xl mb-4"
-          animate={{ 
+          animate={{
             rotate: [0, 10, -10, 10, -10, 0],
             scale: [1, 1.1, 1]
           }}
-          transition={{ 
+          transition={{
             duration: 0.8,
             delay: 0.5
           }}

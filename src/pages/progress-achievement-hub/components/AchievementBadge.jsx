@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 
-const AchievementBadge = ({ 
-  achievement, 
-  isUnlocked = false, 
+const AchievementBadge = ({
+  achievement,
+  isUnlocked = false,
   showDetails = false,
   onClick,
-  className = "" 
+  onShare,
+  className = ""
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -31,7 +32,7 @@ const AchievementBadge = ({
   };
 
   return (
-    <div 
+    <div
       className={`relative group cursor-pointer ${className}`}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
@@ -40,7 +41,7 @@ const AchievementBadge = ({
       {/* Badge Container */}
       <div className={`
         relative w-20 h-20 rounded-full border-4 transition-all duration-300
-        ${isUnlocked 
+        ${isUnlocked
           ? `bg-gradient-to-br ${rarityColors?.[achievement?.rarity]} ${getGlowEffect(achievement?.rarity)} shadow-lg`
           : 'bg-muted border-border grayscale opacity-50'
         }
@@ -49,9 +50,9 @@ const AchievementBadge = ({
         {/* Badge Icon */}
         <div className="absolute inset-2 flex items-center justify-center">
           {achievement?.icon ? (
-            <Icon 
-              name={achievement?.icon} 
-              size={28} 
+            <Icon
+              name={achievement?.icon}
+              size={28}
               color={isUnlocked ? "white" : "currentColor"}
               strokeWidth={2.5}
             />
@@ -128,6 +129,16 @@ const AchievementBadge = ({
           </p>
         )}
       </div>
+      {/* Share Button — visible on hover for unlocked badges */}
+      {isUnlocked && isHovered && onShare && (
+        <button
+          onClick={(e) => { e?.stopPropagation(); onShare(achievement); }}
+          className="absolute -top-2 -right-2 w-7 h-7 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors z-10"
+          title="Share this badge"
+        >
+          <Icon name="Share2" size={13} strokeWidth={2.5} />
+        </button>
+      )}
       {/* Tooltip */}
       {showDetails && isHovered && (
         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-10">
@@ -145,7 +156,15 @@ const AchievementBadge = ({
                 Unlocked: {new Date(achievement.unlockedAt)?.toLocaleDateString()}
               </p>
             )}
-            
+            {isUnlocked && onShare && (
+              <button
+                onClick={(e) => { e?.stopPropagation(); onShare(achievement); }}
+                className="mt-2 w-full flex items-center justify-center space-x-1 py-1.5 px-2 rounded-md bg-primary/10 hover:bg-primary/20 text-primary text-xs font-body transition-colors"
+              >
+                <Icon name="Share2" size={11} />
+                <span>Share Badge</span>
+              </button>
+            )}
             {/* Tooltip Arrow */}
             <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-popover"></div>
           </div>

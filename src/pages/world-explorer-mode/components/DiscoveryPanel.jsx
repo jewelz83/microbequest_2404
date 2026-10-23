@@ -18,7 +18,7 @@ const DiscoveryPanel = ({
       name: 'Bacillus subtilis',
       type: 'bacteria',
       environment: 'soil',
-      image: "https://images.unsplash.com/photo-1707386821773-22f80ad5a5ad",
+      image: "https://images.unsplash.com/photo-1707079918208-d4b0c55eded6",
       imageAlt: 'Microscopic view of rod-shaped Bacillus subtilis bacteria in green and blue coloration',
       description: 'A beneficial soil bacterium that helps plants grow by protecting their roots from harmful microorganisms.',
       facts: [
@@ -35,7 +35,7 @@ const DiscoveryPanel = ({
       name: 'Mycorrhizal fungi',
       type: 'fungi',
       environment: 'soil',
-      image: "https://images.unsplash.com/photo-1650694558186-ec904d29ec2d",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_11751376f-1772085789123.png",
       imageAlt: 'Network of white fungal threads connecting to plant roots in dark soil',
       description: 'Friendly fungi that form partnerships with plant roots, helping them find water and nutrients.',
       facts: [
@@ -52,7 +52,7 @@ const DiscoveryPanel = ({
       name: 'Soil amoeba',
       type: 'protozoa',
       environment: 'soil',
-      image: "https://images.unsplash.com/photo-1706201320711-3d85bf15bac4",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1ae01eb1a-1765075929022.png",
       imageAlt: 'Single-celled amoeba with flowing pseudopods extending in multiple directions',
       description: 'A tiny single-celled organism that moves by stretching its body and helps keep soil healthy.',
       facts: [
@@ -69,7 +69,7 @@ const DiscoveryPanel = ({
       name: 'E. coli',
       type: 'bacteria',
       environment: 'water',
-      image: "https://images.unsplash.com/photo-1574341792525-683b103fffe8",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1afb618e1-1772720842276.png",
       imageAlt: 'Rod-shaped E. coli bacteria with flagella visible under microscope in blue-green staining',
       description: 'A common bacterium that lives in our intestines and helps us digest food properly.',
       facts: [
@@ -86,7 +86,7 @@ const DiscoveryPanel = ({
       name: 'Paramecium',
       type: 'protozoa',
       environment: 'water',
-      image: "https://images.unsplash.com/photo-1707861107096-4c3b8a3ff175",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1b2181c42-1775916852330.png",
       imageAlt: 'Slipper-shaped Paramecium with visible cilia around its edge and internal structures',
       description: 'A slipper-shaped microorganism that swims around in pond water using tiny hairs called cilia.',
       facts: [
@@ -103,7 +103,7 @@ const DiscoveryPanel = ({
       name: 'Chlorella',
       type: 'algae',
       environment: 'water',
-      image: "https://images.unsplash.com/photo-1574483078807-f1c78259e290",
+      image: "https://images.unsplash.com/photo-1706204077076-f3108ff282bb",
       imageAlt: 'Spherical green Chlorella algae cells clustered together showing bright green chloroplasts',
       description: 'A tiny green algae that makes its own food using sunlight, just like plants do.',
       facts: [
@@ -120,7 +120,7 @@ const DiscoveryPanel = ({
       name: 'Lactobacillus',
       type: 'bacteria',
       environment: 'body',
-      image: "https://images.unsplash.com/photo-1727814415354-025b7c3fcf58",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1f29ced2a-1765657306805.png",
       imageAlt: 'Chain of rod-shaped Lactobacillus bacteria in purple staining under microscope',
       description: 'Helpful bacteria that live in our digestive system and help keep us healthy by fighting bad germs.',
       facts: [
@@ -137,7 +137,7 @@ const DiscoveryPanel = ({
       name: 'Common cold virus',
       type: 'virus',
       environment: 'body',
-      image: "https://images.unsplash.com/photo-1707863081051-44f6540b0119",
+      image: "https://images.unsplash.com/photo-1706201320711-3d85bf15bac4",
       imageAlt: 'Spherical virus particles with spike proteins on surface in orange and red coloration',
       description: 'A tiny virus that sometimes makes us sneeze and cough, but our body learns to fight it off.',
       facts: [
@@ -154,7 +154,7 @@ const DiscoveryPanel = ({
       name: 'Gut bacteria',
       type: 'bacteria',
       environment: 'body',
-      image: "https://images.unsplash.com/photo-1706204786979-e2076316143f",
+      image: "https://img.rocket.new/generatedImages/rocket_gen_img_11241a13d-1775916870689.png",
       imageAlt: 'Diverse collection of different shaped bacteria in the intestinal environment',
       description: 'A community of friendly bacteria living in our intestines that help us digest food and stay healthy.',
       facts: [
@@ -246,7 +246,7 @@ const DiscoveryPanel = ({
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <div className="flex items-center space-x-1 text-accent">
               <Icon name="Star" size={14} strokeWidth={2} />
@@ -318,7 +318,7 @@ const DiscoveryPanel = ({
                           <span className="font-mono text-xs text-accent">{microbe?.points}</span>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-1">
                           <Icon name={getTypeIcon(microbe?.type)} size={10} className="text-primary" />
@@ -326,7 +326,7 @@ const DiscoveryPanel = ({
                             {microbe?.type}
                           </span>
                         </div>
-                        
+
                         <div className={`
                           px-2 py-0.5 rounded-full border text-xs font-caption font-medium
                           ${getRarityColor(microbe?.rarity)}

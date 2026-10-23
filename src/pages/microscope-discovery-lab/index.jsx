@@ -11,6 +11,7 @@ import MicroscopeViewport from './components/MicroscopeViewport';
 import SpecimenSelector from './components/SpecimenSelector';
 import EducationalPanel from './components/EducationalPanel';
 import LabEnvironment from './components/LabEnvironment';
+import { saveGameScore } from '../../services/gameProgressService';
 
 const MicroscopeDiscoveryLab = () => {
   const [selectedSpecimen, setSelectedSpecimen] = useState(null);
@@ -47,13 +48,13 @@ const MicroscopeDiscoveryLab = () => {
   const handleSpecimenSelect = (specimen) => {
     setIsLoading(true);
     setActiveHotspot(null);
-    
+
     setTimeout(() => {
       setSelectedSpecimen(specimen);
       setZoomLevel(1);
       setFocusLevel(50);
       setIsLoading(false);
-      
+
       // Update progress
       if (!discoveredFeatures?.has(specimen?.id)) {
         setLabProgress(prev => ({
@@ -66,7 +67,7 @@ const MicroscopeDiscoveryLab = () => {
 
   const handleHotspotClick = (hotspot) => {
     setActiveHotspot(hotspot);
-    
+
     // Mark feature as discovered
     const featureKey = `${selectedSpecimen?.id}-${hotspot?.id}`;
     if (!discoveredFeatures?.has(featureKey)) {
@@ -82,11 +83,27 @@ const MicroscopeDiscoveryLab = () => {
     const factKey = `facts-${specimen?.id}`;
     if (!completedFacts?.has(factKey)) {
       setCompletedFacts(prev => new Set([...prev, factKey]));
-      setLabProgress(prev => ({
-        ...prev,
-        factsLearned: prev?.factsLearned + 1
-      }));
-      
+      setLabProgress(prev => {
+        const newFacts = prev?.factsLearned + 1;
+        const newProgress = { ...prev, factsLearned: newFacts };
+        // Persist score to Supabase when facts are learned
+        saveGameScore({
+          gameMode: 'microscope-lab',
+          score: newProgress?.specimensExamined * 50 + newProgress?.featuresDiscovered * 30 + newFacts * 20,
+          correctAnswers: newFacts,
+          totalQuestions: newProgress?.specimensExamined || 1,
+          timeElapsed: 0,
+          difficulty: 'easy',
+          metadata: {
+            specimensExamined: newProgress?.specimensExamined,
+            featuresDiscovered: newProgress?.featuresDiscovered,
+            factsLearned: newFacts,
+            specimenName: specimen?.name,
+          },
+        })?.catch((err) => console.error('Failed to save lab score:', err));
+        return newProgress;
+      });
+
       setGuideMessage("Fantastic! You've learned all the facts about this microorganism. You're well on your way to becoming a microbe expert!");
     }
   };
@@ -105,14 +122,14 @@ const MicroscopeDiscoveryLab = () => {
 
   const achievements = [
     "First Discovery",
-    "Zoom Master", 
+    "Zoom Master",
     "Feature Hunter"
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background game-screen">
       <Header />
-      <main className="pt-16">
+      <main className="pt-20 pb-8 px-4 lg:px-6">
         {/* Hero Section */}
         <section className="bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 py-8 lg:py-12">
           <div className="container mx-auto px-4 lg:px-6">
@@ -125,9 +142,9 @@ const MicroscopeDiscoveryLab = () => {
                   Microscope Discovery Lab
                 </h1>
               </div>
-              
+
               <p className="text-lg font-body text-muted-foreground max-w-2xl mx-auto">
-                Explore the invisible world of microorganisms through our interactive virtual microscope. 
+                Explore the invisible world of microorganisms through our interactive virtual microscope.
                 Discover bacteria, viruses, fungi, and more with scientifically accurate detail!
               </p>
             </div>
@@ -141,7 +158,7 @@ const MicroscopeDiscoveryLab = () => {
                 <p className="font-mono text-lg font-semibold text-foreground">{labProgress?.specimensExamined}</p>
                 <p className="font-caption text-xs text-muted-foreground">Specimens Examined</p>
               </div>
-              
+
               <div className="bg-card border border-border rounded-lg p-4 text-center">
                 <div className="w-8 h-8 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-2">
                   <Icon name="Search" size={16} strokeWidth={2.5} />
@@ -149,7 +166,7 @@ const MicroscopeDiscoveryLab = () => {
                 <p className="font-mono text-lg font-semibold text-foreground">{labProgress?.featuresDiscovered}</p>
                 <p className="font-caption text-xs text-muted-foreground">Features Discovered</p>
               </div>
-              
+
               <div className="bg-card border border-border rounded-lg p-4 text-center">
                 <div className="w-8 h-8 bg-accent/10 text-accent rounded-full flex items-center justify-center mx-auto mb-2">
                   <Icon name="BookOpen" size={16} strokeWidth={2.5} />
@@ -187,7 +204,7 @@ const MicroscopeDiscoveryLab = () => {
                         <span className="font-caption text-sm text-muted-foreground">Equipment Online</span>
                       </div>
                     </div>
-                    
+
                     <div className="h-48 lg:h-64">
                       <LabEnvironment
                         isActive={true}
@@ -210,7 +227,7 @@ const MicroscopeDiscoveryLab = () => {
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="flex justify-center">
                       <MicroscopeViewport
                         selectedSpecimen={selectedSpecimen}

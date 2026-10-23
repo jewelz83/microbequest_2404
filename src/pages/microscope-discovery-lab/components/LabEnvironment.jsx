@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '../../../components/AppIcon';
 
-const LabEnvironment = ({ 
-  isActive = true, 
+const LabEnvironment = ({
+  isActive = true,
   onEquipmentInteract,
-  className = "" 
+  className = ""
 }) => {
   const [animatedElements, setAnimatedElements] = useState(new Set());
   const [bubbles, setBubbles] = useState([]);
@@ -21,7 +21,7 @@ const LabEnvironment = ({
           size: 2 + Math.random() * 4,
           duration: 3 + Math.random() * 2
         };
-        
+
         setBubbles(prev => [...prev?.slice(-12), newBubble]);
       }, 1200);
 
@@ -33,7 +33,7 @@ const LabEnvironment = ({
           y: 65,
           duration: 4 + Math.random() * 2
         };
-        
+
         setSteamParticles(prev => [...prev?.slice(-6), newSteam]);
       }, 2000);
 
@@ -47,10 +47,10 @@ const LabEnvironment = ({
   // Clean up old bubbles and steam
   useEffect(() => {
     const cleanup = setInterval(() => {
-      setBubbles(prev => prev?.filter(bubble => 
+      setBubbles(prev => prev?.filter(bubble =>
         Date.now() - bubble?.id < bubble?.duration * 1000
       ));
-      setSteamParticles(prev => prev?.filter(steam => 
+      setSteamParticles(prev => prev?.filter(steam =>
         Date.now() - steam?.id < steam?.duration * 1000
       ));
     }, 1000);
@@ -61,7 +61,7 @@ const LabEnvironment = ({
   const handleElementClick = (elementType, elementId) => {
     setAnimatedElements(prev => new Set([...prev, elementId]));
     onEquipmentInteract && onEquipmentInteract(elementType, elementId);
-    
+
     setTimeout(() => {
       setAnimatedElements(prev => {
         const newSet = new Set(prev);
@@ -155,7 +155,7 @@ const LabEnvironment = ({
           <div className="absolute bottom-2 left-4 w-16 h-1 bg-gray-400/60 rounded-full"></div>
           <div className="absolute bottom-4 right-8 w-12 h-0.5 bg-gray-400/60 rounded-full"></div>
         </div>
-        
+
         {/* Professional Laboratory Wall */}
         <div className="absolute top-0 left-0 right-0 h-2/3 bg-gradient-to-b from-slate-50 to-blue-50/80">
           {/* Clean room tiles pattern */}
@@ -176,7 +176,7 @@ const LabEnvironment = ({
               </div>
             ))}
           </div>
-          
+
           {/* Wall mounted equipment shadows */}
           <div className="absolute top-8 right-12 w-8 h-6 bg-slate-300/20 rounded-sm blur-sm"></div>
           <div className="absolute top-16 left-8 w-6 h-4 bg-slate-300/20 rounded-sm blur-sm"></div>
@@ -188,10 +188,10 @@ const LabEnvironment = ({
           <div className="absolute top-1 left-1/4 w-1 h-1 bg-blue-400 rounded-full animate-pulse-soft"></div>
           <div className="absolute top-1 right-1/4 w-1 h-1 bg-blue-400 rounded-full animate-pulse-soft delay-75"></div>
         </div>
-        
+
         {/* Professional light beam with realistic falloff */}
         <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-56 h-32 bg-gradient-to-b from-yellow-100/30 via-yellow-50/20 to-transparent rounded-b-3xl blur-sm"></div>
-        
+
         {/* Ambient room lighting */}
         <div className="absolute top-0 left-0 right-0 h-full bg-gradient-radial from-yellow-50/10 via-transparent to-slate-100/20 opacity-60"></div>
       </div>
@@ -220,14 +220,14 @@ const LabEnvironment = ({
                 <div className="absolute top-2 left-2 w-3 h-1 bg-blue-400 rounded-sm"></div>
                 <div className="absolute bottom-1 right-2 text-xs font-mono text-gray-400 opacity-60">ZEISS</div>
               </div>
-              
+
               {/* Microscope Arm with realistic joints */}
               <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-4 h-16 bg-gradient-to-t from-gray-700 via-gray-600 to-gray-550 rounded-t-lg shadow-moderate">
                 {/* Joint details */}
                 <div className="absolute top-4 left-0 right-0 h-1 bg-gray-800 rounded-full"></div>
                 <div className="absolute top-8 left-0 right-0 h-1 bg-gray-800 rounded-full"></div>
               </div>
-              
+
               {/* Professional Microscope Head */}
               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-12 h-8 bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 rounded-lg shadow-pronounced border border-gray-900">
                 {/* Eyepiece */}
@@ -238,7 +238,7 @@ const LabEnvironment = ({
                 <div className="absolute bottom-0 left-1/4 w-2 h-1 bg-gray-300 rounded-b-full"></div>
                 <div className="absolute bottom-0 right-1/4 w-2 h-1 bg-gray-300 rounded-b-full"></div>
               </div>
-              
+
               {/* Stage with sample holder */}
               <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 w-8 h-3 bg-gradient-to-r from-gray-500 to-gray-400 rounded-sm shadow-moderate">
                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-4 h-1 bg-gray-300 rounded-sm"></div>
@@ -254,7 +254,7 @@ const LabEnvironment = ({
                 <div className="absolute right-0 top-2 w-2 h-px bg-gray-600 opacity-60"></div>
                 <div className="absolute right-0 top-4 w-3 h-px bg-gray-600 opacity-60"></div>
                 <div className="absolute right-0 top-6 w-2 h-px bg-gray-600 opacity-60"></div>
-                
+
                 {/* Active Culture Liquid */}
                 <div className="absolute bottom-0 left-0 right-0 h-4/5 bg-gradient-to-t from-emerald-400/70 via-emerald-300/60 to-emerald-200/50 rounded-b-lg animate-pulse-soft">
                   {/* Liquid surface tension */}
@@ -264,10 +264,10 @@ const LabEnvironment = ({
                   <div className="absolute bottom-4 right-3 w-0.5 h-0.5 bg-emerald-100/80 rounded-full animate-bounce-gentle delay-100"></div>
                 </div>
               </div>
-              
+
               {/* Professional Spout */}
               <div className="absolute top-0 right-0 w-3 h-3 bg-gradient-to-br from-gray-300 to-gray-400 rounded-tr-lg border-r border-t border-gray-500"></div>
-              
+
               {/* Beaker Label */}
               <div className="absolute top-1 left-1 bg-white/90 border border-gray-300 rounded-sm px-1 py-0.5">
                 <span className="text-xs font-mono text-gray-700">500mL</span>
@@ -281,7 +281,7 @@ const LabEnvironment = ({
               <div className="w-full h-full bg-gradient-to-br from-gray-100 via-gray-50 to-gray-200 rounded-full border-2 border-gray-400 shadow-pronounced relative overflow-hidden">
                 {/* Agar medium */}
                 <div className="absolute inset-1 bg-gradient-to-br from-yellow-100/80 to-amber-50/90 rounded-full"></div>
-                
+
                 {/* Realistic Bacterial Colonies */}
                 <div className="absolute top-3 left-3 w-3 h-3 bg-gradient-radial from-yellow-400 to-orange-500 rounded-full opacity-85 shadow-moderate">
                   {/* Colony texture */}
@@ -295,7 +295,7 @@ const LabEnvironment = ({
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-gradient-radial from-purple-400 to-violet-600 rounded-full opacity-85 animate-pulse-soft shadow-moderate">
                   <div className="absolute inset-0.5 bg-purple-300/60 rounded-full"></div>
                 </div>
-                
+
                 {/* Dish lid reflection */}
                 <div className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-white/20 to-transparent rounded-t-full"></div>
               </div>
@@ -311,9 +311,9 @@ const LabEnvironment = ({
                     {/* Graduated markings */}
                     <div className="absolute right-0 top-2 w-1 h-px bg-gray-500 opacity-40"></div>
                     <div className="absolute right-0 top-6 w-1 h-px bg-gray-500 opacity-40"></div>
-                    
+
                     {/* Sample Liquid */}
-                    <div 
+                    <div
                       className={`absolute bottom-0 left-0 right-0 rounded-b-full transition-all duration-300 ${
                         i === 0 ? 'h-1/3 bg-gradient-to-t from-red-400/80 to-red-300/60' :
                         i === 1 ? 'h-1/2 bg-gradient-to-t from-blue-400/80 to-blue-300/60':
@@ -324,12 +324,12 @@ const LabEnvironment = ({
                       <div className="absolute top-0 left-0 right-0 h-px bg-current opacity-60 rounded-full"></div>
                     </div>
                   </div>
-                  
+
                   {/* Professional Cork/Cap */}
                   <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-4 h-3 bg-gradient-to-t from-amber-700 via-amber-600 to-amber-500 rounded-t-sm shadow-moderate border border-amber-800">
                     <div className="absolute top-0.5 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-amber-800 rounded-full"></div>
                   </div>
-                  
+
                   {/* Sample Label */}
                   <div className="absolute top-4 -left-2 bg-white/95 border border-gray-300 rounded-sm px-1 py-0.5 text-xs font-mono text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     S-{i+1}
@@ -357,7 +357,7 @@ const LabEnvironment = ({
                   )}
                 </div>
               </div>
-              
+
               {/* Lid */}
               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-4/5 h-1/3 bg-gradient-to-b from-gray-400 to-gray-500 rounded-t-lg border border-gray-600 shadow-moderate">
                 <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-2 h-1 bg-gray-600 rounded-full"></div>
@@ -376,14 +376,14 @@ const LabEnvironment = ({
                     {/* Interior lighting */}
                     <div className="absolute inset-1 bg-yellow-100/30 rounded-sm"></div>
                   </div>
-                  
+
                   {/* Digital display */}
                   <div className="absolute bottom-2 left-2 right-2 h-4 bg-black rounded-sm border border-gray-400">
                     <div className="absolute top-1 left-2 text-xs font-mono text-green-400 animate-pulse-soft">37.0°C</div>
                     <div className="absolute top-1 right-2 w-2 h-1 bg-red-400 rounded-full animate-pulse-soft"></div>
                   </div>
                 </div>
-                
+
                 {/* Handle */}
                 <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-1 h-6 bg-gradient-to-r from-gray-500 to-gray-600 rounded-r-full shadow-moderate"></div>
               </div>
@@ -453,21 +453,24 @@ const LabEnvironment = ({
       <div className="absolute top-4 right-4 space-y-3">
         <button
           onClick={() => handleElementClick('lighting', 'main-light')}
+          aria-label="Toggle lab lighting"
           className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-400 hover:from-yellow-300 hover:to-orange-300 rounded-full flex items-center justify-center shadow-pronounced transition-all duration-200 border border-yellow-500"
         >
           <Icon name="Lightbulb" size={18} color="white" strokeWidth={2.5} />
           <div className="absolute -inset-1 bg-yellow-400/20 rounded-full animate-ping"></div>
         </button>
-        
+
         <button
           onClick={() => handleElementClick('ventilation', 'fan')}
+          aria-label="Toggle ventilation fan"
           className="w-10 h-10 bg-gradient-to-br from-blue-400 to-cyan-400 hover:from-blue-300 hover:to-cyan-300 rounded-full flex items-center justify-center shadow-pronounced transition-all duration-200 border border-blue-500"
         >
           <Icon name="Wind" size={18} color="white" strokeWidth={2.5} />
         </button>
-        
+
         <button
           onClick={() => handleElementClick('safety', 'emergency')}
+          aria-label="Emergency safety alert"
           className="w-10 h-10 bg-gradient-to-br from-red-400 to-red-500 hover:from-red-300 hover:to-red-400 rounded-full flex items-center justify-center shadow-pronounced transition-all duration-200 border border-red-600"
         >
           <Icon name="AlertTriangle" size={18} color="white" strokeWidth={2.5} />
@@ -480,12 +483,12 @@ const LabEnvironment = ({
           <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse-soft shadow-glow"></div>
           <span className="font-caption text-sm font-medium text-gray-800">Lab Systems Online</span>
         </div>
-        
+
         <div className="flex items-center space-x-2 bg-white/90 backdrop-blur-sm border border-gray-300 rounded-lg px-4 py-2 shadow-moderate">
           <Icon name="Thermometer" size={16} className="text-blue-600" />
           <span className="font-mono text-sm font-medium text-gray-800">22.5°C</span>
         </div>
-        
+
         <div className="flex items-center space-x-2 bg-white/90 backdrop-blur-sm border border-gray-300 rounded-lg px-4 py-2 shadow-moderate">
           <Icon name="Droplets" size={16} className="text-cyan-600" />
           <span className="font-mono text-sm font-medium text-gray-800">45% RH</span>

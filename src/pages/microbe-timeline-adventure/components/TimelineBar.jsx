@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 import Icon from '../../../components/AppIcon';
 
-const TimelineBar = ({ 
-  eras = [], 
-  selectedEra, 
-  unlockedEras = [], 
+const TimelineBar = ({
+  eras = [],
+  selectedEra,
+  unlockedEras = [],
   onEraSelect,
-  className = "" 
+  className = ""
 }) => {
   const [hoveredEra, setHoveredEra] = useState(null);
 
   const getEraColor = (eraId) => {
     const colors = {
       discovery: 'amber',
-      germTheory: 'emerald', 
+      germTheory: 'emerald',
       modern: 'blue',
       dnaRevolution: 'purple',
       modernAge: 'cyan'
@@ -48,10 +48,10 @@ const TimelineBar = ({
           <div className="relative">
             {/* Timeline Line */}
             <div className="absolute top-8 left-0 right-0 h-1 bg-border rounded-full">
-              <div 
+              <div
                 className="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-moderate"
-                style={{ 
-                  width: `${(unlockedEras?.length / eras?.length) * 100}%` 
+                style={{
+                  width: `${(unlockedEras?.length / eras?.length) * 100}%`
                 }}
               />
             </div>
@@ -63,7 +63,7 @@ const TimelineBar = ({
                 const isSelected = selectedEra === era?.id;
                 const isCompleted = era?.completed;
                 const color = getEraColor(era?.id);
-                
+
                 return (
                   <div key={era?.id} className="flex flex-col items-center">
                     {/* Era Marker */}
@@ -76,12 +76,13 @@ const TimelineBar = ({
                       onMouseEnter={() => setHoveredEra(era?.id)}
                       onMouseLeave={() => setHoveredEra(null)}
                       disabled={!isUnlocked}
+                      aria-label={`${era?.name} era (${era?.period})${!isUnlocked ? ' - locked' : isCompleted ? ' - completed' : ''}`}
                       className={`
                         relative w-16 h-16 rounded-full flex items-center justify-center
                         transition-all duration-fast hover:scale-110 active:scale-95
                         ${isUnlocked ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}
-                        ${isSelected 
-                          ? `bg-${color}-500 text-white shadow-pronounced ring-4 ring-${color}-200` 
+                        ${isSelected
+                          ? `bg-${color}-500 text-white shadow-pronounced ring-4 ring-${color}-200`
                           : isCompleted
                           ? `bg-success text-white shadow-moderate`
                           : isUnlocked
@@ -93,18 +94,18 @@ const TimelineBar = ({
                       {isCompleted ? (
                         <Icon name="CheckCircle" size={24} strokeWidth={2.5} />
                       ) : (
-                        <Icon 
-                          name={getEraIcon(era?.id)} 
-                          size={24} 
-                          strokeWidth={2.5} 
+                        <Icon
+                          name={getEraIcon(era?.id)}
+                          size={24}
+                          strokeWidth={2.5}
                         />
                       )}
-                      
+
                       {/* Pulse animation for selected era */}
                       {isSelected && (
                         <div className={`absolute inset-0 rounded-full bg-${color}-400 animate-ping opacity-30`} />
                       )}
-                      
+
                       {/* Unlock indicator */}
                       {!isUnlocked && (
                         <div className="absolute -top-1 -right-1 w-6 h-6 bg-muted border-2 border-card rounded-full flex items-center justify-center">
@@ -131,7 +132,7 @@ const TimelineBar = ({
                           <p className="font-body text-xs opacity-90 mt-1">
                             {era?.keyEvents?.length} discoveries to explore
                           </p>
-                          
+
                           {/* Tooltip Arrow */}
                           <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-l-4 border-r-4 border-t-4 border-transparent border-t-black" />
                         </div>
@@ -158,11 +159,11 @@ const TimelineBar = ({
             <div className="mt-4 p-3 bg-primary/10 border border-primary/20 rounded-lg">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <Icon 
-                    name={getEraIcon(selectedEra)} 
-                    size={20} 
-                    className="text-primary" 
-                    strokeWidth={2.5} 
+                  <Icon
+                    name={getEraIcon(selectedEra)}
+                    size={20}
+                    className="text-primary"
+                    strokeWidth={2.5}
                   />
                   <div>
                     <span className="font-heading text-sm text-foreground font-semibold">
@@ -173,7 +174,7 @@ const TimelineBar = ({
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="text-right">
                   <div className="flex items-center space-x-4 text-xs">
                     <div className="flex items-center space-x-1">
