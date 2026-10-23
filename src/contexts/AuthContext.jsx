@@ -91,15 +91,23 @@ export const AuthProvider = ({ children }) => {
       setUser(session?.user ?? null)
       setLoading(false)
 
-      if (session?.user) {
-        profileOperations?.load(session?.user?.id) // Fire-and-forget
-        subscriptionOperations?.load(session?.user?.id) // Fire-and-forget
-      } else {
+      if (!session?.user) {
         profileOperations?.clear()
         subscriptionOperations?.clear()
       }
     }
   }
+
+  // Start authenticated requests after the auth callback has released its lock.
+  useEffect(() => {
+    if (!user?.id) return
+    const timer = setTimeout(() => {
+      if (currentUserId.current !== user.id) return
+      profileOperations.load(user.id)
+      subscriptionOperations.load(user.id)
+    }, 0)
+    return () => clearTimeout(timer)
+  }, [user?.id])
 
   useEffect(() => {
     let active = true
