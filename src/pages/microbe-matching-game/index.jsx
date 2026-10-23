@@ -492,6 +492,8 @@ const MicrobeMatchingGame = () => {
             <div className="lg:col-span-3 space-y-4 sm:space-y-6">
               {/* Game Controls */}
               <GameControls
+                matchedPairs={matches}
+                totalPairs={cards.length / 2}
                 score={score}
                 timeElapsed={timeElapsed}
                 moves={moves}

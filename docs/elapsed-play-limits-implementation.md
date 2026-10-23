@@ -15,3 +15,9 @@ This is device-local parental restriction support, not tamper-proof or cross-dev
 - Local in-app browser, synthetic guest fixture: initial game rendered; five-second session cutoff unmounted Matching; reload and direct Quiz entry remained blocked; simulated elapsed 15-minute break restored Matching; five-second daily cutoff displayed next local midnight; raising both limits restored play.
 - Browser testing used synthetic guest configuration against the isolated test host, with no authenticated account or backend writes. The temporary fixture is not included in the branch.
 - Two-client serialization and identity changes are covered by deterministic service tests. Actual simultaneous visible browser windows, signed-in journeys and hosted-preview cutoff/recovery remain to verify; no claim of production readiness.
+
+## Guest concurrency follow-up
+
+Two separate visible game documents (Matching and Quiz, same-origin frames) used real browser Web Locks and shared localStorage. The fixture observed two concurrent leases. Both games blocked at a six-second session allowance, with 6,000 milliseconds recorded once; observed active wall span was 6,107 milliseconds including startup/heartbeat gaps. Both remaining lease sets were empty. This verifies concurrent documents, not separate native windows. Reproducible localhost-only fixture: tests/browser/guest-coordination.html. It resets synthetic guest controls and usage; never use it for real records.
+
+The browser connection kept documents marked visible when its panel was hidden or another connected tab was inspected. Consequently no actual visibilitychange-to-hidden was observed: hidden-page accounting and round preservation remain unverified in a native browser. Signed-in checks were deferred at the user's request. All 41 automated tests pass after the separate Matching metrics repair.

@@ -1,0 +1,28 @@
+<!doctype html><title>Guest coordination checks</title>
+<h1>Guest coordination checks</h1>
+<p>This resets guest settings and play-time data on localhost. Local synthetic fixture. Two separate visible game documents share browser storage and real Web Locks.</p>
+<button id="cutoff">Run two-game shared cutoff check</button>
+<button id="hidden">Prepare visibility and state check</button>
+<button id="read">Read evidence</button>
+<pre id="evidence"></pre><div id="games" style="display:flex"></div>
+<script type="module">
+import {defaultControls} from '/src/services/parentalControlsService.js';
+if (!['127.0.0.1','localhost'].includes(location.hostname)) throw new Error('Run this fixture on localhost only.');
+const key='microbequest_usage:v1:guest', log=[];
+let start=0, firstPlay=null, maxLeases=0, timer, hideStart=null, hideUsage=null;
+const record=()=>JSON.parse(localStorage.getItem(key)||'null');
+const show=()=>document.querySelector('#evidence').textContent=JSON.stringify({events:log,record:record(),frames:[...document.querySelectorAll('iframe')].map(f=>({visibility:f.contentDocument?.visibilityState,headings:[...f.contentDocument.querySelectorAll('h1')].map(h=>h.textContent)}))},null,2);
+async function setup(seconds){
+ document.querySelector('#games').replaceChildren();clearInterval(timer);
+ await new Promise(r=>setTimeout(r,2200));
+ localStorage.removeItem(key);
+ localStorage.setItem('microbequest_parental_controls',JSON.stringify({...defaultControls,allowedStartTime:'00:00',allowedEndTime:'23:59',dailyTimeLimitMinutes:60,sessionTimeLimitMinutes:seconds/60}));
+ log.length=0;firstPlay=null;maxLeases=0;start=Date.now();
+ for(const route of ['microbe-matching-game','quiz-challenge-system']){const f=document.createElement('iframe');f.src='/'+route;f.width='600';f.height='500';document.querySelector('#games').append(f);}
+ timer=setInterval(()=>{const r=record();const frames=[...document.querySelectorAll('iframe')];if(r){maxLeases=Math.max(maxLeases,Object.keys(r.leases).length);if(firstPlay===null && Object.keys(r.leases).length)firstPlay=r.cursor-r.daily;}if(r?.session>=seconds*1000 && frames.every(f=>[...f.contentDocument.querySelectorAll('h1')].some(h=>h.textContent==='Time for a play break'))){log.push({result:'both games blocked',wallElapsed:Date.now()-start,activeElapsed:r.lastPlay-firstPlay,maxConcurrentLeases:maxLeases,charged:r.session,leases:Object.keys(r.leases).length});clearInterval(timer);}show();},100);
+}
+document.querySelector('#cutoff').onclick=()=>setup(6);
+document.querySelector('#hidden').onclick=()=>setup(120);
+document.querySelector('#read').onclick=show;
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){hideStart=Date.now();hideUsage=record()?.daily;}else if(hideStart){log.push({result:'visibility recovery',hiddenFor:Date.now()-hideStart,chargedWhileHidden:(record()?.daily||0)-hideUsage});hideStart=null;}show();});
+</script>

@@ -1,10 +1,13 @@
 import { allowedDifficulties } from '../../../services/gameAccessPolicy.mjs';
+import { matchingMetrics } from '../../../services/matchingMetrics.mjs';
 import React from 'react';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 
 const GameControls = ({
   score = 0,
+  matchedPairs = 0,
+  totalPairs = 0,
   timeElapsed = 0,
   moves = 0,
   hintsRemaining = 3,
@@ -17,6 +20,7 @@ const GameControls = ({
   onDifficultyChange,
   className = ""
 }) => {
+  const metrics = matchingMetrics({ matchedPairs, totalPairs, moves });
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -141,17 +145,17 @@ const GameControls = ({
       {/* Progress Bar */}
       <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-border">
         <div className="flex items-center justify-between mb-2">
-          <span className="font-caption text-sm text-muted-foreground">Game Progress</span>
-          <span className="font-mono text-sm text-primary">
-            {Math.round((moves > 0 ? (score / (moves * 10)) * 100 : 0))}% Efficiency
+          <span className="font-caption text-sm text-muted-foreground">{metrics.matchedPairs} of {metrics.totalPairs} pairs</span>
+          <span className="font-mono text-sm text-primary" title="Matched cards divided by card flips. Each flip counts as one move.">
+            {metrics.efficiencyPercent}% Efficiency
           </span>
         </div>
 
         <div className="relative">
-          <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+          <div role="progressbar" aria-label="Matched pairs" aria-valuemin={0} aria-valuemax={metrics.totalPairs} aria-valuenow={metrics.matchedPairs} aria-valuetext={`${metrics.matchedPairs} of ${metrics.totalPairs} pairs matched`} className="w-full bg-muted rounded-full h-2 overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-primary via-secondary to-accent rounded-full transition-all duration-normal animate-smooth"
-              style={{ width: `${Math.min(100, (score / 1000) * 100)}%` }}
+              style={{ width: `${metrics.progressPercent}%` }}
             ></div>
           </div>
         </div>
