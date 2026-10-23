@@ -34,3 +34,17 @@ Covered: guest/account isolation, account-to-account cache separation, missing r
 The deployed repair preview at https://deploy-preview-2--microbequest.netlify.app rendered the Timeline on direct entry. Through visible controls, completed the first focus activity and then fully reloaded the page. The next event stayed unlocked, the persisted points display remained 50, and the status explicitly read 'Progress saved on this device.' The known doubled Timeline award and stale 0/4 navigator count remain unresolved.
 
 The isolated backend currently lists billing-test@example.com as its sole user. Its password is not available to the agent. The repair preview's sign-in page is prepared for owner entry; a second disposable account is still needed for a real browser account-switching test. No credentials were created, changed or read during this pass, and no signed-in gameplay was counted as verified.
+
+## Signed-in follow-up, October 23
+
+The owner created audit-one@example.com and audit-two@example.com and privately signed into the first account. This supersedes the earlier sole-user observation. Only synthetic application profiles and a stored consent fixture for audit-one were added in MicrobeQuest Billing Test. No schema, policy or production changes were made. The stored grant simulates permission for testing; it is not verified parental consent.
+
+- Account Settings confirmed audit-one. Timeline started at zero without importing the guest's 50 points.
+- Without a consent record, a completed matching round left both score and progress row counts at zero.
+- After adding the synthetic stored grant, a matching round saved one 600-point score at 2026-10-23 13:29:44.343782+00.
+- The first Timeline activity saved 50 points and completed_events=["leeuwenhoek-discovery"]. A full reload preserved the result. The doubled award remains an open defect.
+- Parent Controls → Opt Out All recorded tracking=false and withdrawal at 2026-10-23 13:32:19.621+00.
+- Another completed matching round left the score count at one and its timestamp unchanged. Previously stored Timeline progress remained 50.
+- Sign Out left the first account active, including after reload. Account-to-account browser isolation remains unverified.
+
+A follow-up moves profile/subscription requests outside the authentication callback into a deferred effect, removing a possible authentication-lock stall. All 21 existing tests and compilation pass; these tests do not prove the logout fix. Preview logout and second-account checks must still be repeated.
