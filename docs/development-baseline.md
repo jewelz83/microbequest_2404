@@ -48,3 +48,15 @@ The audit documented confirmed failures of saved parent restrictions and trackin
 Netlify automatically created https://deploy-preview-1--microbequest.netlify.app for this draft. Initial artifact inspection showed no embedded Supabase host; the dashboard confirmed no project environment variables existed. The missing-settings startup error remained in the compiled entry.
 
 Added VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY with values only in the Deploy Previews context, pointing to the isolated Billing Test project and using its public publishable client key. Each variable has one value in one deploy context. Production, branch deploy, agent runner and local CLI contexts were left unset. No database privilege, policy, schema or account credential was changed. Analytics remains unconfigured. This follow-up commit requests a fresh preview build; runtime checks follow deployment.
+
+## Hosted preview verification
+
+Verified the rebuilt preview in the connected Chrome browser on October 23:
+
+- Home rendered and the intro could be skipped through its visible controls.
+- A complete guest matching round reached 6 matches, 600 points, 12 moves and Completed. The known 500% efficiency defect reproduced and remains unresolved. Hidden card contents are still exposed in the accessibility tree.
+- Initial direct entry to /microbe-matching-game returned Netlify's 404. Added an explicit non-forced SPA fallback to netlify.toml. After deployment b3aba6ac88d2b73789bb3324b7cc404b6a1980bd, both direct navigation and a full browser reload rendered the matching heading successfully.
+- Static inspection of the hosted entry bundle found only the isolated test Supabase host and no GA measurement identifier. No signed-in account was used for the guest test; account and cross-account persistence are not certified.
+- Copied current Rocket package.json and App.jsx through the visible editor. Package settings match the imported snapshot; App.jsx exactly matches the original exported entry before the branch's AuthProvider correction. Full archive and deployed-artifact reconciliation remains outstanding. A Rocket download monitor timed out; it did not establish a fresh archive comparison.
+
+The preview is available at https://deploy-preview-1--microbequest.netlify.app. It retains known audit defects and is for test/review only. Production remains on its prior deployment. Next repair scope is consent-aware persistence, account-specific caching and enforced parental restrictions, with targeted regression tests and isolated account fixtures.
