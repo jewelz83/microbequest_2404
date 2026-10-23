@@ -196,7 +196,7 @@ const Header = () => {
       </div>
       {/* Mobile Navigation Menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden bg-card border-t border-border shadow-pronounced animate-slide-up">
+        <div className="lg:hidden max-h-[calc(100dvh-4rem)] overflow-y-auto bg-card border-t border-border shadow-pronounced animate-slide-up">
           <nav className="px-4 py-4 space-y-2">
             {navigationItems?.map((item) => (
               <Link
