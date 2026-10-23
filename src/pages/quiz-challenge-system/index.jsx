@@ -1,3 +1,5 @@
+import { useDifficultyCeiling } from '../../components/GameAccessGate';
+import { permitsDifficulty } from '../../services/gameAccessPolicy.mjs';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
@@ -24,8 +26,9 @@ const QuizChallengeSystem = () => {
   const [hostEmotion, setHostEmotion] = useState('happy');
   const [hostMessage, setHostMessage] = useState('');
 
+  const maxDifficulty = useDifficultyCeiling();
   // Mock quiz data
-  const quizQuestions = [
+  const questionBank = [
   {
     id: 1,
     title: "Bacterial Structure",
@@ -517,6 +520,7 @@ const QuizChallengeSystem = () => {
   }];
 
 
+  const quizQuestions = questionBank.filter(question => permitsDifficulty(question.difficulty, maxDifficulty));
   const currentQuestion = quizQuestions?.[currentQuestionIndex];
   const totalQuestions = quizQuestions?.length;
 

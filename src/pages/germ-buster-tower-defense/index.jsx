@@ -1,3 +1,5 @@
+import { useDifficultyCeiling } from '../../components/GameAccessGate';
+import { permitsDifficulty } from '../../services/gameAccessPolicy.mjs';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
@@ -20,7 +22,9 @@ const GermBusterTowerDefense = () => {
   // Game state
   const [gameState, setGameState] = useState('location-select'); // location-select, playing, paused, game-over, victory
   const [selectedLocation, setSelectedLocation] = useState(null);
-  const [difficulty, setDifficulty] = useState('easy');
+  const maxDifficulty = useDifficultyCeiling();
+  const [difficulty, setDifficultyState] = useState('easy');
+  const setDifficulty = level => { if (permitsDifficulty(level, maxDifficulty)) setDifficultyState(level); };
   const [currentWave, setCurrentWave] = useState(1);
   const [totalWaves, setTotalWaves] = useState(3);
   const [immuneHealth, setImmuneHealth] = useState(100);
@@ -882,6 +886,7 @@ const GermBusterTowerDefense = () => {
                 locations={bodyLocations}
                 onSelectLocation={selectLocation}
                 difficulty={difficulty}
+                maxDifficulty={maxDifficulty}
                 setDifficulty={setDifficulty}
               />
               {!isPremium && (

@@ -1,3 +1,5 @@
+import { useDifficultyCeiling } from '../../components/GameAccessGate';
+import { permitsDifficulty } from '../../services/gameAccessPolicy.mjs';
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
@@ -15,7 +17,9 @@ import { trackGameModeStart, trackGameModeComplete } from '../../services/analyt
 const MicrobeMatchingGame = () => {
   // Game state
   const [gameState, setGameState] = useState('playing'); // 'playing', 'paused', 'completed'
-  const [difficulty, setDifficulty] = useState('easy');
+  const maxDifficulty = useDifficultyCeiling();
+  const [difficulty, setDifficultyState] = useState('easy');
+  const setDifficulty = level => { if (permitsDifficulty(level, maxDifficulty)) setDifficultyState(level); };
   const [cards, setCards] = useState([]);
   const [flippedCards, setFlippedCards] = useState([]);
   const [matchedCards, setMatchedCards] = useState([]);
@@ -497,6 +501,7 @@ const MicrobeMatchingGame = () => {
                 onHint={handleHint}
                 onPause={handlePause}
                 onRestart={handleRestart}
+                maxDifficulty={maxDifficulty}
                 onDifficultyChange={handleDifficultyChange} />
 
 

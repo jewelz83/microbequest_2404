@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { loadParentalControls } from '../services/parentalControlsService';
-import { canPlayMode } from '../services/gameAccessPolicy.mjs';
+import { canPlayMode, difficultyCeiling } from '../services/gameAccessPolicy.mjs';
 import Header from './ui/Header';
+
+const DifficultyContext = createContext('easy');
+export const useDifficultyCeiling = () => useContext(DifficultyContext);
 
 export default function GameAccessGate({ mode, children }) {
   const { user } = useAuth();
@@ -17,7 +20,7 @@ export default function GameAccessGate({ mode, children }) {
       const current = ++request;
       try {
         const controls = await loadParentalControls({ strict: true });
-        if (active && request === current) setResult({ owner, mode, allowed: canPlayMode(controls, mode) });
+        if (active && request === current) setResult({ owner, mode, allowed: canPlayMode(controls, mode), ceiling: difficultyCeiling(controls.maxDifficultyLevel) });
       } catch {
         if (active && request === current) setResult({ owner, mode, error: true });
       }
@@ -28,7 +31,7 @@ export default function GameAccessGate({ mode, children }) {
     return () => { active = false; clearInterval(timer); window.removeEventListener('focus', refresh); };
   }, [owner, mode, retry]);
   const current = result?.owner === owner && result?.mode === mode ? result : null;
-  if (current?.allowed) return children;
+  if (current?.allowed) return <DifficultyContext.Provider key={current.ceiling} value={current.ceiling}>{children}</DifficultyContext.Provider>;
   return <><Header /><main className="min-h-screen bg-background text-foreground pt-28 px-6">
     <div className="max-w-lg mx-auto space-y-4">
       <h1 className="text-2xl font-heading">{!current ? 'Checking game access…' : current.error ? 'Game settings unavailable' : 'This game is turned off'}</h1>

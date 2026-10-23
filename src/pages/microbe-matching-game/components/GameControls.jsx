@@ -1,3 +1,4 @@
+import { allowedDifficulties } from '../../../services/gameAccessPolicy.mjs';
 import React from 'react';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
@@ -9,6 +10,7 @@ const GameControls = ({
   hintsRemaining = 3,
   gameState = 'playing',
   difficulty = 'easy',
+  maxDifficulty = 'easy',
   onHint,
   onPause,
   onRestart,
@@ -82,7 +84,7 @@ const GameControls = ({
         <div className="flex items-center space-x-2">
           <span className="font-caption text-xs sm:text-sm text-muted-foreground hidden sm:inline">Level:</span>
           <div className="flex items-center space-x-1">
-            {['easy', 'medium', 'hard']?.map((level) => (
+            {allowedDifficulties(maxDifficulty).map((level) => (
               <button
                 key={level}
                 onClick={() => onDifficultyChange(level)}
