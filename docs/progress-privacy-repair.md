@@ -48,3 +48,9 @@ The owner created audit-one@example.com and audit-two@example.com and privately 
 - Sign Out left the first account active, including after reload. Account-to-account browser isolation remains unverified.
 
 A follow-up moves profile/subscription requests outside the authentication callback into a deferred effect, removing a possible authentication-lock stall. All 21 existing tests and compilation pass; these tests do not prove the logout fix. Preview logout and second-account checks must still be repeated.
+
+## Second-account browser verification, October 23
+
+The deployed deferred-effect change was confirmed present in the hosted source map, and Netlify reported preview success. Both open preview tabs were refreshed. Mouse clicks on the header Sign Out did not visibly end the session. Activating that same control with Enter did sign out; a full reload remained signed out. The cause of the mouse interaction failure remains unresolved, so the callback change is not certified as its fix.
+
+The owner privately signed in as audit-two@example.com. Account Settings showed that email and Synthetic Audit Two, with no prior account metadata. Timeline started at zero points with First bacteria observed still locked, despite the first account and earlier guest having completed the opening event. Completing the first focus activity showed 50 in-memory points; full reload returned to zero and relocked the second event. No tracking permission was granted to audit-two. This verifies the observed account-one → account-two Timeline journey and no-permission reload behavior, not all game modes or database access policies.
