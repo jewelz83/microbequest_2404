@@ -112,6 +112,7 @@ const GameControls = ({
           {/* Hint Button */}
           <button
             onClick={onHint}
+            aria-label={`Hint (${hintsRemaining} remaining)`}
             disabled={hintsRemaining === 0 || gameState !== 'playing'}
             style={{ touchAction: 'manipulation' }}
             className="relative flex items-center gap-1 px-2 sm:px-3 py-2 rounded-lg border border-border bg-card text-foreground text-xs sm:text-sm font-medium disabled:opacity-50 hover:bg-muted transition-colors min-h-[40px]"
@@ -124,6 +125,8 @@ const GameControls = ({
           {/* Pause/Resume Button */}
           <button
             onClick={onPause}
+            aria-label={gameState === 'paused' ? 'Resume game' : 'Pause game'}
+            disabled={gameState === 'completed'}
             style={{ touchAction: 'manipulation' }}
             className="flex items-center gap-1 px-2 sm:px-3 py-2 rounded-lg border border-border bg-card text-foreground text-xs sm:text-sm font-medium hover:bg-muted transition-colors min-h-[40px]"
           >
@@ -134,6 +137,7 @@ const GameControls = ({
           {/* Restart Button */}
           <button
             onClick={onRestart}
+            aria-label="Restart game"
             style={{ touchAction: 'manipulation' }}
             className="flex items-center gap-1 px-2 sm:px-3 py-2 rounded-lg border border-border bg-card text-foreground text-xs sm:text-sm font-medium hover:bg-muted transition-colors min-h-[40px]"
           >

@@ -25,6 +25,7 @@ const GameBoard = ({
 
   useEffect(() => {
     // Animate card flips
+    setAnimatingCards([]);
     if (flippedCards?.length > 0) {
       setAnimatingCards(flippedCards);
       const timer = setTimeout(() => {
@@ -36,6 +37,7 @@ const GameBoard = ({
 
   useEffect(() => {
     // Celebrate matched pairs
+    setCelebratingPairs([]);
     if (matchedCards?.length > 0) {
       const newMatches = matchedCards?.slice(-2);
       setCelebratingPairs(newMatches);
@@ -84,16 +86,17 @@ const GameBoard = ({
           gridTemplateColumns: `repeat(${currentConfig?.cols}, 1fr)`,
         }}
       >
-        {cards?.map((card) => (
-          <div
+        {cards?.map((card, index) => (
+          <button
+            type="button"
             key={card?.id}
             onClick={() => handleCardClick(card)}
             onTouchEnd={(e) => handleCardTouch(card, e)}
-            role="button"
-            aria-label={`Card: ${isCardFlipped(card?.id) ? card?.name : 'Hidden microbe'}`}
+            disabled={gameState !== 'playing' || isCardFlipped(card.id) || flippedCards.length >= 2}
+            aria-label={`Card ${index + 1}: ${isCardFlipped(card?.id) ? card?.name : 'Hidden microbe'}`}
             aria-pressed={isCardFlipped(card?.id)}
             className={`
-              relative aspect-square cursor-pointer group game-card
+              relative aspect-square cursor-pointer group game-card focus-visible:outline focus-visible:outline-4 focus-visible:outline-primary
               ${isCardFlipped(card?.id) ? 'pointer-events-none' : 'touch-no-hover hover:scale-105'}
               transition-all duration-300 animate-smooth
               ${isCardCelebrating(card?.id) ? 'animate-bounce-gentle' : ''}
@@ -101,7 +104,7 @@ const GameBoard = ({
             style={{ minHeight: difficulty === 'hard' ? '52px' : '64px' }}
           >
             {/* Card Container */}
-            <div className={`
+            <div aria-hidden="true" className={`
               relative w-full h-full rounded-xl overflow-hidden shadow-moderate
               transform-gpu transition-transform duration-600
               ${isCardAnimating(card?.id) ? 'animate-flip' : ''}
@@ -192,7 +195,7 @@ const GameBoard = ({
                 </div>
               </div>
             )}
-          </div>
+          </button>
         ))}
       </div>
       {/* Game State Overlay */}

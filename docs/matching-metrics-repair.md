@@ -6,4 +6,4 @@ Controls now receive matched-pair and total-pair counts from the actual board. C
 
 Validation: all 41 automated tests pass; Vite build passes. Targeted tests cover the reported 500% case, misses, all three board sizes, reset state, and invalid counters. A real local guest round showed 1 of 6 pairs and 100% efficiency after the first successful pair, then 6 of 6 pairs, 600 points, 12 moves, 100% efficiency and the completion message after the final pair. A screenshot is saved with the task outputs.
 
-This does not repair hidden-card accessibility leakage, delayed-match/restart behavior, fabricated dashboard achievements or other game audit findings. No production or backend changes.
+The subsequent guest gameplay follow-up repairs hidden-card accessibility leakage, delayed-match/restart behavior and fabricated Home progress; see guest-gameplay-checks.md. Other game audit findings remain open. No production or backend changes.

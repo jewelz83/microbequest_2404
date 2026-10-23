@@ -323,6 +323,9 @@ const MicrobeMatchingGame = () => {
     setHintsRemaining(3);
     setGameState('playing');
     setShowHint(false);
+    setHintMessage('');
+    setShowEducationalPanel(false);
+    setSelectedMicrobeInfo(null);
   }, [difficulty]);
 
   // Timer effect
@@ -344,6 +347,7 @@ const MicrobeMatchingGame = () => {
 
   // Handle card click
   const handleCardClick = (card) => {
+    if (gameState !== 'playing') return;
     if (flippedCards?.length >= 2) return;
     if (flippedCards?.includes(card?.id)) return;
     if (matchedCards?.includes(card?.id)) return;
@@ -352,35 +356,37 @@ const MicrobeMatchingGame = () => {
     setFlippedCards(newFlippedCards);
     setMoves((prev) => prev + 1);
 
-    if (newFlippedCards?.length === 2) {
-      const [firstCardId, secondCardId] = newFlippedCards;
-      const firstCard = cards?.find((c) => c?.id === firstCardId);
-      const secondCard = cards?.find((c) => c?.id === secondCardId);
-
-      if (firstCard?.pairId === secondCard?.pairId) {
-        // Match found
-        setTimeout(() => {
-          setMatchedCards((prev) => [...prev, firstCardId, secondCardId]);
-          setFlippedCards([]);
-          setScore((prev) => prev + 100);
-
-          // Show educational info for first match of each type
-          if (!matchedCards?.some((id) => {
-            const matchedCard = cards?.find((c) => c?.id === id);
-            return matchedCard && matchedCard?.pairId === firstCard?.pairId;
-          })) {
-            setSelectedMicrobeInfo(firstCard);
-            setShowEducationalPanel(true);
-          }
-        }, 1000);
-      } else {
-        // No match
-        setTimeout(() => {
-          setFlippedCards([]);
-        }, 1500);
-      }
-    }
   };
+
+  // A round owns its pending reveal. Restart, difficulty changes, pause and
+  // unmount cancel the callback; resuming resolves the still-visible pair.
+  useEffect(() => {
+    if (gameState !== 'playing' || flippedCards.length !== 2) return;
+    const [firstId, secondId] = flippedCards;
+    const first = cards.find(card => card.id === firstId);
+    const second = cards.find(card => card.id === secondId);
+    if (!first || !second) return;
+    const matched = first.pairId === second.pairId;
+    const timer = setTimeout(() => {
+      if (matched) {
+        setMatchedCards(previous => [...previous, firstId, secondId]);
+        setScore(previous => previous + 100);
+        setSelectedMicrobeInfo(first);
+        setShowEducationalPanel(true);
+      }
+      setFlippedCards([]);
+    }, matched ? 1000 : 1500);
+    return () => clearTimeout(timer);
+  }, [flippedCards, cards, gameState]);
+
+  useEffect(() => {
+    if (!showHint) return;
+    const timer = setTimeout(() => {
+      setShowHint(false);
+      setHintMessage('');
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [showHint, hintsRemaining]);
 
   // Check for game completion
   useEffect(() => {
@@ -418,10 +424,7 @@ const MicrobeMatchingGame = () => {
           setHintMessage(`Look for another ${randomCard?.name}! ${randomCard?.category === 'bacteria' ? 'Bacteria are single-celled organisms.' : randomCard?.category === 'virus' ? 'Viruses need host cells to reproduce.' : randomCard?.category === 'fungi' ? 'Fungi can be helpful or harmful.' : 'Protozoa are single-celled animals.'}`);
           setShowHint(true);
 
-          setTimeout(() => {
-            setShowHint(false);
-            setHintMessage('');
-          }, 5000);
+
         }
       }
     }
@@ -429,7 +432,7 @@ const MicrobeMatchingGame = () => {
 
   // Handle pause/resume
   const handlePause = () => {
-    setGameState(gameState === 'playing' ? 'paused' : 'playing');
+    setGameState(state => state === 'playing' ? 'paused' : state === 'paused' ? 'playing' : state);
   };
 
   // Handle restart
