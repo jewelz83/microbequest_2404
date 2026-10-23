@@ -715,6 +715,7 @@ const ParentControlsDashboard = () => {
                     />
                     <div className="border-t border-border/50 pt-3 mt-1">
                       <p className="font-body text-sm font-semibold text-foreground mb-2">Allowed Hours</p>
+                      <p className="text-sm text-muted-foreground mb-2">Uses this device’s local time. Overnight hours belong to the day they start. Equal start and end times allow no play.</p>
                       <div className="grid grid-cols-2 gap-3">
                         <TimeField label="Start" value={controls?.allowedStartTime} onChange={(v) => update('allowedStartTime', v)} />
                         <TimeField label="End" value={controls?.allowedEndTime} onChange={(v) => update('allowedEndTime', v)} />
