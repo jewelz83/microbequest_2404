@@ -28,3 +28,9 @@ Covered: guest/account isolation, account-to-account cache separation, missing r
 - Signed-in browser tests with two disposable accounts are still required. Mocked account-switching tests do not replace them.
 - Parent mode/difficulty/time restrictions remain unenforced; game scoring/content/accessibility findings are unchanged.
 - Complete Rocket and published-artifact reconciliation remains open. Do not merge this candidate directly into production.
+
+## Hosted guest check, October 23
+
+The deployed repair preview at https://deploy-preview-2--microbequest.netlify.app rendered the Timeline on direct entry. Through visible controls, completed the first focus activity and then fully reloaded the page. The next event stayed unlocked, the persisted points display remained 50, and the status explicitly read 'Progress saved on this device.' The known doubled Timeline award and stale 0/4 navigator count remain unresolved.
+
+The isolated backend currently lists billing-test@example.com as its sole user. Its password is not available to the agent. The repair preview's sign-in page is prepared for owner entry; a second disposable account is still needed for a real browser account-switching test. No credentials were created, changed or read during this pass, and no signed-in gameplay was counted as verified.
