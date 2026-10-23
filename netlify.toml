@@ -1,3 +1,9 @@
 [build]
   command = "npm run build"
   publish = "build"
+
+# Serve React routes on direct entry and refresh while preserving real assets.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
