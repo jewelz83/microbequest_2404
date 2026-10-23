@@ -1,3 +1,4 @@
+import { browserUsageStore } from './playUsage.mjs';
 import { supabase } from '../lib/supabase';
 
 const STORAGE_KEY = 'microbequest_parental_controls';
@@ -347,6 +348,8 @@ export const exportChildData = async () => {
   };
 
   try {
+    if (userId === undefined) throw new Error('Could not verify the account for export.');
+    exportPayload.devicePlayTime = await browserUsageStore().export(userId ? `user:${userId}` : 'guest');
     const localControls = loadLocalControls();
     exportPayload.parentalControls = localControls;
 
@@ -408,6 +411,10 @@ export const deleteAllChildData = async () => {
 
   const userId = await getCurrentUserId();
   if (userId === undefined) return { error: new Error('Could not verify the account for deletion.'), deletedAt };
+
+  try {
+    await browserUsageStore().clear(userId ? `user:${userId}` : 'guest');
+  } catch (error) { return { error, deletedAt }; }
 
   // Clear this account's new cache as well as legacy keys. Other accounts stay separate.
   try {

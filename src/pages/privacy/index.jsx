@@ -46,6 +46,7 @@ const PrivacyPolicy = () => {
             {[
               'Email address when you join our waitlist',
               'Game progress data stored locally on your device',
+              'Device-local daily and session play-time totals used for parent restrictions, kept separately for guests and each account. These totals are not analytics and are not sent to a server. Old totals reset when play-time settings are next checked; export or delete them through Parent Controls.',
               'Anonymous usage data through Google Analytics including pages visited, time spent, and game activities completed',
               'Payment information processed securely through Stripe — we never store your card details',
             ]?.map((item, i) => (

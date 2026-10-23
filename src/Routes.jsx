@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from "react";
 import { BrowserRouter, Routes as RouterRoutes, Route } from "react-router-dom";
 import ScrollToTop from "components/ScrollToTop";
 import ErrorBoundary from "components/ErrorBoundary";
+import { PlayUsageProvider } from './contexts/PlayUsageContext';
 import GameAccessGate from "./components/GameAccessGate";
 import { useGoogleAnalytics } from "./hooks/useGoogleAnalytics";
 // Eagerly load NotFound (tiny, no benefit from lazy loading)
@@ -42,6 +43,7 @@ const Routes = () => {
       <ErrorBoundary>
         <ScrollToTop />
         <GATracker />
+        <PlayUsageProvider>
         <Suspense fallback={<PageLoader />}>
           <RouterRoutes>
             <Route path="/" element={<GameHomeDashboard />} />
@@ -68,6 +70,7 @@ const Routes = () => {
             <Route path="*" element={<NotFound />} />
           </RouterRoutes>
         </Suspense>
+        </PlayUsageProvider>
       </ErrorBoundary>
     </BrowserRouter>
   );

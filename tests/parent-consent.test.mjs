@@ -22,7 +22,7 @@ async function fixture() {
   } });
   const source = await fs.readFile(new URL('../src/services/parentalControlsService.js', import.meta.url), 'utf8');
   const module = new vm.SourceTextModule(source, { context });
-  await module.link(() => new vm.SyntheticModule(['supabase'], function () { this.setExport('supabase', client); }, { context }));
+  await module.link(specifier => specifier.includes('playUsage') ? new vm.SyntheticModule(['browserUsageStore'], function () { this.setExport('browserUsageStore', () => ({ export: async () => ({}), clear: async () => {} })); }, { context }) : new vm.SyntheticModule(['supabase'], function () { this.setExport('supabase', client); }, { context }));
   await module.evaluate();
   module.namespace.setParentalControlsIdentity(state.id);
   return { api: module.namespace, state, values };

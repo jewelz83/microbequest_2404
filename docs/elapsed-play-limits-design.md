@@ -1,6 +1,6 @@
 # Elapsed play limits: proposed implementation
 
-October 23, 2026. Design and source review only. Daily/session duration enforcement is not implemented or verified. Production remains unchanged.
+October 23, 2026. Original design preserved below. Implementation has resumed; see [implementation and verification notes](elapsed-play-limits-implementation.md) for current evidence and remaining checks. Production remains unchanged.
 
 ## Confirmed source gap
 
@@ -39,6 +39,6 @@ Keep only the minimum timing data necessary for restrictions. Do not put scores,
 7. Storage denial, corrupt records, clock rollback and unsupported coordination produce explicit safe behavior.
 8. Run targeted automated tests, the existing suite, npm run build and diff checks. In the hosted test preview verify actual cutoff, reload/navigation persistence, recovery, and a two-tab journey. Preserve production and synthetic-only backend boundaries.
 
-## Current execution blocker
+## Earlier execution blocker (resolved locally)
 
 The coding execution environment failed to initialize and remained unavailable when work resumed. Source was reviewed through GitHub. No application code was changed, and no new build or automated test result is claimed by this design pass. Implement and execute the checks once the workspace is available.
