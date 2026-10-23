@@ -8,6 +8,6 @@ The gate reevaluates time each second and on visibility/focus events. An expired
 
 Validation: all 28 tests and production compilation pass. Tests cover opening/closing boundaries, disallowed days, overnight dates, week rollover, invalid values and disabled scheduling. In the signed-out preview, Friday was disabled through Parent Controls. Direct Matching entry showed the schedule block, including after reload.
 
-Browser access became unavailable before Friday could be restored and recovery tested. The guest preview fixture therefore still has Friday disabled. Restore Friday through Parent Controls and Save Settings before further normal guest play. This has no effect on production or signed-in backend settings. Recovery, actual live cutoff and signed-in browser checks remain unverified.
+Follow-up browser verification restored Friday through Parent Controls and Save Settings. Direct Timeline entry and a full reload both rendered the adventure with the existing guest 50 points and opening-event unlock preserved. The guest fixture now permits Friday again. This has no effect on production or signed-in backend settings. Actual live cutoff and signed-in browser checks remain unverified.
 
 Daily/session elapsed-use limits remain separate unfinished work. They require account-scoped usage state that survives routes and reloads, a defined session-break rule, midnight handling and multiple-tab coordination. A per-game timer would reset too easily and is not an adequate repair.
