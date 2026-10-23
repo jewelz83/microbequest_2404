@@ -17,7 +17,7 @@ This branch builds on the unmerged development baseline. No production deploymen
 
 ## Validation
 
-Run npm test and npm run build. Tests use injected/fake clients and synthetic account identifiers; no real child records or external authentication requests are used.
+Validation completed October 23, 2026: all 21 regression tests pass, production compilation passes, and git diff --check passes. Run npm test and npm run build. Tests use injected/fake clients and synthetic account identifiers; no real child records or external authentication requests are used.
 
 Covered: guest/account isolation, account-to-account cache separation, missing remote rows, opt-out, absent grants, invalid dates, unavailable consent, permitted saves, regrant, account changes during pending reads/saves, failed session verification, and failed parent consent updates. These tests establish client behavior, not production database security.
 
