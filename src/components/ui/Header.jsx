@@ -104,12 +104,12 @@ const Header = () => {
         <div className="hidden lg:block w-px h-8 bg-border mx-4 flex-shrink-0"></div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center space-x-1 flex-1">
+        <nav aria-label="Main navigation" className="hidden lg:flex items-center space-x-1 flex-1 min-w-0 overflow-x-auto">
           {navigationItems?.map((item) => (
             <Link
               key={item?.path}
               to={item?.path}
-              className={`group relative flex items-center space-x-2 px-4 py-2 rounded-button transition-all duration-fast ${
+              className={`group relative flex flex-shrink-0 items-center space-x-2 px-4 py-2 rounded-button transition-all duration-fast ${
                 isActivePath(item?.path)
                   ? 'bg-primary text-primary-foreground shadow-moderate'
                   : 'text-foreground hover:bg-muted hover:text-primary'
@@ -132,7 +132,7 @@ const Header = () => {
         </nav>
 
         {/* Progress Access Button - Desktop */}
-        <div className="hidden lg:flex items-center gap-2">
+        <div className="hidden lg:flex flex-shrink-0 items-center gap-2 pl-2">
           <Link to="/progress-achievement-hub">
             <Button
               variant={isActivePath('/progress-achievement-hub') ? 'default' : 'outline'}
@@ -189,6 +189,8 @@ const Header = () => {
           size="icon"
           onClick={toggleMobileMenu}
           className="lg:hidden"
+          aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-expanded={isMobileMenuOpen}
           iconName={isMobileMenuOpen ? 'X' : 'Menu'}
         />
       </div>
