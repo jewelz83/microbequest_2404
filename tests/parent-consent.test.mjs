@@ -60,3 +60,16 @@ test('unknown session cannot save private settings into the guest cache', async 
   assert.ok((await f.api.saveParentalControls(f.api.defaultControls)).error);
   assert.equal(f.state.writes.length, 0); assert.equal(f.values.size, 0);
 });
+test('game enforcement distinguishes unavailable settings from missing account settings', async () => {
+  const f = await fixture();
+  assert.ok((await f.api.loadParentalControls({ strict: true })).allowedGameModes.includes('matching'));
+  f.state.readError = true;
+  await assert.rejects(f.api.loadParentalControls({ strict: true }));
+  f.state.readError = false;
+  f.state.sessionError = true;
+  await assert.rejects(f.api.loadParentalControls({ strict: true }));
+});
+test('game enforcement preserves an explicitly empty allowed game list', async () => {
+  const f = await fixture(); f.state.row = { allowed_game_modes: [] };
+  assert.equal((await f.api.loadParentalControls({ strict: true })).allowedGameModes.length, 0);
+});

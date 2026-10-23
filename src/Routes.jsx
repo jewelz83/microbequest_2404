@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from "react";
 import { BrowserRouter, Routes as RouterRoutes, Route } from "react-router-dom";
 import ScrollToTop from "components/ScrollToTop";
 import ErrorBoundary from "components/ErrorBoundary";
+import GameAccessGate from "./components/GameAccessGate";
 import { useGoogleAnalytics } from "./hooks/useGoogleAnalytics";
 // Eagerly load NotFound (tiny, no benefit from lazy loading)
 import NotFound from "pages/NotFound";
@@ -44,15 +45,15 @@ const Routes = () => {
         <Suspense fallback={<PageLoader />}>
           <RouterRoutes>
             <Route path="/" element={<GameHomeDashboard />} />
-            <Route path="/microbe-matching-game" element={<MicrobeMatchingGame />} />
+            <Route path="/microbe-matching-game" element={<GameAccessGate mode="matching"><MicrobeMatchingGame /></GameAccessGate>} />
             <Route path="/progress-achievement-hub" element={<ProgressAchievementHub />} />
-            <Route path="/world-explorer-mode" element={<WorldExplorerMode />} />
-            <Route path="/quiz-challenge-system" element={<QuizChallengeSystem />} />
+            <Route path="/world-explorer-mode" element={<GameAccessGate mode="explorer"><WorldExplorerMode /></GameAccessGate>} />
+            <Route path="/quiz-challenge-system" element={<GameAccessGate mode="quiz"><QuizChallengeSystem /></GameAccessGate>} />
             <Route path="/game-home-dashboard" element={<GameHomeDashboard />} />
-            <Route path="/microscope-discovery-lab" element={<MicroscopeDiscoveryLab />} />
-            <Route path="/germ-buster-tower-defense" element={<GermBusterTowerDefense />} />
-            <Route path="/microbe-detective-mystery-outbreak" element={<MicrobeDetectiveMysteryOutbreak />} />
-            <Route path="/microbe-timeline-adventure" element={<MicrobeTimelineAdventure />} />
+            <Route path="/microscope-discovery-lab" element={<GameAccessGate mode="lab"><MicroscopeDiscoveryLab /></GameAccessGate>} />
+            <Route path="/germ-buster-tower-defense" element={<GameAccessGate mode="tower_defense"><GermBusterTowerDefense /></GameAccessGate>} />
+            <Route path="/microbe-detective-mystery-outbreak" element={<GameAccessGate mode="detective"><MicrobeDetectiveMysteryOutbreak /></GameAccessGate>} />
+            <Route path="/microbe-timeline-adventure" element={<GameAccessGate mode="timeline"><MicrobeTimelineAdventure /></GameAccessGate>} />
             <Route path="/parent-controls-dashboard" element={<ParentControlsDashboard />} />
             <Route path="/teacher-classroom-dashboard" element={<TeacherClassroomDashboard />} />
             <Route path="/parent-billing" element={<ParentBillingPage />} />

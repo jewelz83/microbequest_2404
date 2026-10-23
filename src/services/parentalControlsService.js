@@ -218,9 +218,13 @@ export const logConsentAction = async (action, details = {}) => {
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
-export const loadParentalControls = async () => {
+export const loadParentalControls = async ({ strict = false } = {}) => {
   const userId = await getCurrentUserId();
-  if (userId === undefined) return { ...defaultControls };
+  const epoch = accountEpoch;
+  if (userId === undefined) {
+    if (strict) throw new Error('Could not verify the current account.');
+    return { ...defaultControls };
+  }
   if (userId === null) return loadLocalControls();
 
   try {
@@ -230,7 +234,9 @@ export const loadParentalControls = async () => {
       ?.eq('user_id', userId)
       ?.maybeSingle();
 
+    if (strict && epoch !== accountEpoch) throw new Error('Account changed while loading settings.');
     if (error) {
+      if (strict) throw error;
       console.error('Error loading parental controls:', error?.message);
       return { ...defaultControls };
     }
@@ -243,6 +249,7 @@ export const loadParentalControls = async () => {
     const controls = dbToControls(data);
     return controls;
   } catch (err) {
+    if (strict) throw err;
     console.error('Unexpected error loading parental controls:', err);
     return { ...defaultControls };
   }
