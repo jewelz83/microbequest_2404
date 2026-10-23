@@ -9,6 +9,8 @@ import GameBoard from './components/GameBoard';
 import GameControls from './components/GameControls';
 import CharacterGuidePanel from './components/CharacterGuidePanel';
 import EducationalInfoPanel from './components/EducationalInfoPanel';
+import { saveGameScore } from '../../services/gameProgressService';
+import { trackGameModeStart, trackGameModeComplete } from '../../services/analyticsService';
 
 const MicrobeMatchingGame = () => {
   // Game state
@@ -120,7 +122,7 @@ const MicrobeMatchingGame = () => {
     id: 5,
     name: 'Penicillium',
     category: 'fungi',
-    image: "https://images.unsplash.com/photo-1703500584838-ba17cd6c1b5f",
+    image: "https://images.unsplash.com/photo-1703793029976-c6721ee35896",
     imageAlt: 'Green and blue Penicillium mold colonies growing in circular patterns on laboratory medium',
     pairId: 'penicillium',
     scientificName: 'Penicillium chrysogenum',
@@ -142,7 +144,7 @@ const MicrobeMatchingGame = () => {
     id: 6,
     name: 'Penicillium',
     category: 'fungi',
-    image: "https://images.unsplash.com/photo-1703500584838-ba17cd6c1b5f",
+    image: "https://images.unsplash.com/photo-1703793029976-c6721ee35896",
     imageAlt: 'Green and blue Penicillium mold colonies growing in circular patterns on laboratory medium',
     pairId: 'penicillium',
     scientificName: 'Penicillium chrysogenum',
@@ -164,7 +166,7 @@ const MicrobeMatchingGame = () => {
     id: 7,
     name: 'Paramecium',
     category: 'protozoa',
-    image: "https://images.unsplash.com/photo-1569333393870-182ed614e9b2",
+    image: "https://img.rocket.new/generatedImages/rocket_gen_img_170178e6f-1765095177740.png",
     imageAlt: 'Elongated single-celled Paramecium organism with visible internal structures and cilia',
     pairId: 'paramecium',
     scientificName: 'Paramecium caudatum',
@@ -186,7 +188,7 @@ const MicrobeMatchingGame = () => {
     id: 8,
     name: 'Paramecium',
     category: 'protozoa',
-    image: "https://images.unsplash.com/photo-1569333393870-182ed614e9b2",
+    image: "https://img.rocket.new/generatedImages/rocket_gen_img_170178e6f-1765095177740.png",
     imageAlt: 'Elongated single-celled Paramecium organism with visible internal structures and cilia',
     pairId: 'paramecium',
     scientificName: 'Paramecium caudatum',
@@ -208,7 +210,7 @@ const MicrobeMatchingGame = () => {
     id: 9,
     name: 'Streptococcus',
     category: 'bacteria',
-    image: "https://images.unsplash.com/photo-1575467252250-c0e889b69d2b",
+    image: "https://img.rocket.new/generatedImages/rocket_gen_img_1cab30092-1765657306639.png",
     imageAlt: 'Chain-like arrangement of spherical Streptococcus bacteria in pink and purple staining',
     pairId: 'streptococcus',
     scientificName: 'Streptococcus pyogenes',
@@ -230,7 +232,7 @@ const MicrobeMatchingGame = () => {
     id: 10,
     name: 'Streptococcus',
     category: 'bacteria',
-    image: "https://images.unsplash.com/photo-1575467252250-c0e889b69d2b",
+    image: "https://img.rocket.new/generatedImages/rocket_gen_img_1cab30092-1765657306639.png",
     imageAlt: 'Chain-like arrangement of spherical Streptococcus bacteria in pink and purple staining',
     pairId: 'streptococcus',
     scientificName: 'Streptococcus pyogenes',
@@ -252,7 +254,7 @@ const MicrobeMatchingGame = () => {
     id: 11,
     name: 'Rhinovirus',
     category: 'virus',
-    image: "https://images.unsplash.com/photo-1728919083930-fdeef71420cd",
+    image: "https://images.unsplash.com/photo-1707386820631-9e89816c1946",
     imageAlt: 'Microscopic view of small spherical rhinovirus particles with distinctive surface structure in red and pink colors, smaller and different from influenza virus',
     pairId: 'rhinovirus',
     scientificName: 'Human rhinovirus',
@@ -274,7 +276,7 @@ const MicrobeMatchingGame = () => {
     id: 12,
     name: 'Rhinovirus',
     category: 'virus',
-    image: "https://images.unsplash.com/photo-1728919083930-fdeef71420cd",
+    image: "https://images.unsplash.com/photo-1707386820631-9e89816c1946",
     imageAlt: 'Microscopic view of small spherical rhinovirus particles with distinctive surface structure in red and pink colors, smaller and different from influenza virus',
     pairId: 'rhinovirus',
     scientificName: 'Human rhinovirus',
@@ -333,6 +335,7 @@ const MicrobeMatchingGame = () => {
   // Initialize game on mount and difficulty change
   useEffect(() => {
     initializeGame();
+    trackGameModeStart('microbe-matching', { difficulty });
   }, [initializeGame]);
 
   // Handle card click
@@ -379,6 +382,18 @@ const MicrobeMatchingGame = () => {
   useEffect(() => {
     if (matchedCards?.length === cards?.length && cards?.length > 0) {
       setGameState('completed');
+      trackGameModeComplete('microbe-matching', { score, difficulty, timeElapsed, moves });
+      // Persist score to Supabase
+      saveGameScore({
+        gameMode: 'microbe-matching',
+        score,
+        difficulty,
+        timeElapsed,
+        metadata: {
+          moves,
+          matchedPairs: matchedCards?.length / 2,
+        },
+      })?.catch((err) => console.error('Failed to save matching game score:', err));
     }
   }, [matchedCards?.length, cards?.length]);
 
@@ -426,38 +441,39 @@ const MicrobeMatchingGame = () => {
   const matches = matchedCards?.length / 2;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/5">
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/5 game-screen">
       <Header />
       <main className="pt-20 pb-8 px-4 lg:px-6">
         <div className="max-w-7xl mx-auto">
           {/* Page Header */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-6 sm:mb-8">
             <div className="flex items-center justify-center space-x-3 mb-4">
               <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center shadow-moderate">
                 <Icon name="Puzzle" size={24} color="white" strokeWidth={2.5} />
               </div>
-              <h1 className="text-3xl lg:text-4xl font-heading text-foreground">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-heading text-foreground">
                 Microbe Matching Game
               </h1>
             </div>
-            <p className="text-lg font-body text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg font-body text-muted-foreground max-w-2xl mx-auto">
               Test your memory and learn about microorganisms! Match pairs of identical microbes to discover fascinating facts about the microscopic world.
             </p>
           </div>
 
           {/* Game Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Left Sidebar - Character Guide */}
-            <div className="lg:col-span-1 space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
+            {/* Left Sidebar - Character Guide — hidden on mobile, shown on lg+ */}
+            <div className="hidden lg:block lg:col-span-1 space-y-6">
               <CharacterGuidePanel
                 gameState={gameState}
                 score={score}
                 matches={matches}
                 moves={moves}
                 showHint={showHint}
-                hintMessage={hintMessage} />
+                hintMessage={hintMessage}
+                onClose={() => setShowHint(false)} />
 
-              
+
               {/* Progress Indicator */}
               <ProgressIndicator
                 completedActivities={matches}
@@ -469,7 +485,7 @@ const MicrobeMatchingGame = () => {
             </div>
 
             {/* Main Game Area */}
-            <div className="lg:col-span-3 space-y-6">
+            <div className="lg:col-span-3 space-y-4 sm:space-y-6">
               {/* Game Controls */}
               <GameControls
                 score={score}
@@ -497,7 +513,7 @@ const MicrobeMatchingGame = () => {
 
                 {/* Pause Overlay */}
                 {gameState === 'paused' &&
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-2xl">
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-2xl z-10">
                     <div className="bg-card p-8 rounded-2xl shadow-pronounced text-center animate-slide-up">
                       <Icon name="Pause" size={48} className="text-primary mx-auto mb-4" />
                       <h3 className="text-xl font-heading text-foreground mb-2">Game Paused</h3>
@@ -511,16 +527,16 @@ const MicrobeMatchingGame = () => {
               </div>
 
               {/* Navigation Links */}
-              <div className="bg-card rounded-xl p-6 shadow-moderate border border-border">
+              <div className="bg-card rounded-xl p-4 sm:p-6 shadow-moderate border border-border">
                 <h3 className="font-heading text-lg text-foreground mb-4 flex items-center space-x-2">
                   <Icon name="Compass" size={20} className="text-primary" />
                   <span>Continue Your Adventure</span>
                 </h3>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                   <Link
                     to="/world-explorer-mode"
-                    className="flex items-center space-x-3 p-4 bg-muted/50 hover:bg-primary/10 rounded-lg transition-colors duration-fast group">
+                    className="flex items-center space-x-3 p-4 bg-muted/50 hover:bg-primary/10 rounded-lg transition-colors duration-fast group min-h-[56px]">
 
                     <Icon name="Globe" size={20} className="text-primary group-hover:scale-110 transition-transform" />
                     <div>
@@ -528,10 +544,10 @@ const MicrobeMatchingGame = () => {
                       <p className="font-caption text-xs text-muted-foreground">Discover hidden microbes</p>
                     </div>
                   </Link>
-                  
+
                   <Link
                     to="/quiz-challenge-system"
-                    className="flex items-center space-x-3 p-4 bg-muted/50 hover:bg-secondary/10 rounded-lg transition-colors duration-fast group">
+                    className="flex items-center space-x-3 p-4 bg-muted/50 hover:bg-secondary/10 rounded-lg transition-colors duration-fast group min-h-[56px]">
 
                     <Icon name="Brain" size={20} className="text-secondary group-hover:scale-110 transition-transform" />
                     <div>
@@ -539,10 +555,10 @@ const MicrobeMatchingGame = () => {
                       <p className="font-caption text-xs text-muted-foreground">Test your knowledge</p>
                     </div>
                   </Link>
-                  
+
                   <Link
                     to="/microscope-discovery-lab"
-                    className="flex items-center space-x-3 p-4 bg-muted/50 hover:bg-accent/10 rounded-lg transition-colors duration-fast group">
+                    className="flex items-center space-x-3 p-4 bg-muted/50 hover:bg-accent/10 rounded-lg transition-colors duration-fast group min-h-[56px]">
 
                     <Icon name="Microscope" size={20} className="text-accent group-hover:scale-110 transition-transform" />
                     <div>

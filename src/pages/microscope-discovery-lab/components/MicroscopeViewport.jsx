@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 
-const MicroscopeViewport = ({ 
-  selectedSpecimen, 
-  zoomLevel = 1, 
-  onZoomChange, 
+const MicroscopeViewport = ({
+  selectedSpecimen,
+  zoomLevel = 1,
+  onZoomChange,
   focusLevel = 50,
   onFocusChange,
   onHotspotClick,
-  className = "" 
+  className = ""
 }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [activeHotspot, setActiveHotspot] = useState(null);
@@ -27,12 +27,12 @@ const MicroscopeViewport = ({
         delay: i * 0.1
       }));
       setParticles(newParticles);
-      
+
       const timer = setTimeout(() => {
         setParticles([]);
         setIsAnimating(false);
       }, 1000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [isAnimating]);
@@ -52,7 +52,7 @@ const MicroscopeViewport = ({
   };
 
   const handleFocusAdjust = (direction) => {
-    const newFocus = direction === 'up' 
+    const newFocus = direction === 'up'
       ? Math.min(focusLevel + 10, 100)
       : Math.max(focusLevel - 10, 0);
     onFocusChange(newFocus);
@@ -62,7 +62,7 @@ const MicroscopeViewport = ({
   // Dynamic hotspots based on specimen type and zoom level
   const getHotspotsForSpecimen = () => {
     if (!selectedSpecimen) return [];
-    
+
     // Show different hotspots based on zoom level
     const baseHotspots = {
       bacteria: [
@@ -86,13 +86,13 @@ const MicroscopeViewport = ({
         { id: 3, x: 48, y: 65, label: 'Nucleus', type: 'organelle', minZoom: 2.5, description: 'The control center containing genetic instructions.', fun: 'Some protozoa have TWO nuclei - one for daily tasks and one for reproduction!' }
       ]
     };
-    
-    const categoryHotspots = baseHotspots[selectedSpecimen.category] || baseHotspots.bacteria;
-    
+
+    const categoryHotspots = baseHotspots?.[selectedSpecimen?.category] || baseHotspots?.bacteria;
+
     // Only show hotspots that are visible at current zoom level
-    return categoryHotspots.filter(hotspot => zoomLevel >= hotspot.minZoom);
+    return categoryHotspots?.filter(hotspot => zoomLevel >= hotspot?.minZoom);
   };
-  
+
   const hotspots = getHotspotsForSpecimen();
 
   const getBlurLevel = () => {
@@ -110,11 +110,11 @@ const MicroscopeViewport = ({
           {/* Focus Rings */}
           <div className="absolute inset-2 rounded-full border-2 border-gray-600 opacity-60"></div>
           <div className="absolute inset-4 rounded-full border border-gray-500 opacity-40"></div>
-          
+
           {/* Viewport */}
           <div className="absolute inset-6 rounded-full overflow-hidden bg-black border-2 border-gray-600">
             {selectedSpecimen ? (
-              <div 
+              <div
                 className="relative w-full h-full transition-all duration-500"
                 style={{
                   transform: `scale(${zoomLevel})`,
@@ -127,7 +127,7 @@ const MicroscopeViewport = ({
                   alt={selectedSpecimen?.microscopeImageAlt}
                   className="w-full h-full object-cover"
                 />
-                
+
                 {/* Animated Microbe Overlay */}
                 <div className="absolute inset-0">
                   {selectedSpecimen?.category === 'bacteria' && (
@@ -141,7 +141,7 @@ const MicroscopeViewport = ({
                       </div>
                     </div>
                   )}
-                  
+
                   {selectedSpecimen?.category === 'virus' && (
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                       <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 transform rotate-45 animate-spin-slow opacity-80">
@@ -154,7 +154,7 @@ const MicroscopeViewport = ({
                       </div>
                     </div>
                   )}
-                  
+
                   {selectedSpecimen?.category === 'fungi' && (
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                       <div className="relative">
@@ -179,7 +179,7 @@ const MicroscopeViewport = ({
 
                 {/* Interactive Hotspots */}
                 {hotspots?.map((hotspot) => {
-                  const isDiscovered = discoveredHotspots.has(hotspot.id);
+                  const isDiscovered = discoveredHotspots?.has(hotspot?.id);
                   return (
                     <button
                       key={hotspot?.id}
@@ -188,18 +188,17 @@ const MicroscopeViewport = ({
                         if (!isDiscovered) {
                           setDiscoveredHotspots(prev => new Set([...prev, hotspot.id]));
                           // Show celebration effect
-                          setCelebrationEffect({ x: hotspot.x, y: hotspot.y });
+                          setCelebrationEffect({ x: hotspot?.x, y: hotspot?.y });
                           setTimeout(() => setCelebrationEffect(null), 1000);
                         }
                         onHotspotClick && onHotspotClick(hotspot);
                       }}
                       className={`absolute w-4 h-4 rounded-full border-2 border-white shadow-moderate transition-all duration-fast ${
-                        isDiscovered 
-                          ? 'bg-success animate-none scale-110' 
-                          : 'bg-accent animate-pulse-soft hover:scale-125'
+                        isDiscovered
+                          ? 'bg-success animate-none scale-110' :'bg-accent animate-pulse-soft hover:scale-125'
                       }`}
-                      style={{ 
-                        left: `${hotspot?.x}%`, 
+                      style={{
+                        left: `${hotspot?.x}%`,
                         top: `${hotspot?.y}%`,
                         transform: 'translate(-50%, -50%)'
                       }}
@@ -217,18 +216,18 @@ const MicroscopeViewport = ({
                     </button>
                   );
                 })}
-                
+
                 {/* Celebration Effect */}
                 {celebrationEffect && (
-                  <div 
+                  <div
                     className="absolute pointer-events-none"
-                    style={{ 
-                      left: `${celebrationEffect.x}%`, 
-                      top: `${celebrationEffect.y}%`,
+                    style={{
+                      left: `${celebrationEffect?.x}%`,
+                      top: `${celebrationEffect?.y}%`,
                       transform: 'translate(-50%, -50%)'
                     }}
                   >
-                    {[...Array(8)].map((_, i) => (
+                    {[...Array(8)]?.map((_, i) => (
                       <div
                         key={i}
                         className="absolute w-2 h-2 bg-yellow-400 rounded-full animate-ping"
@@ -271,11 +270,11 @@ const MicroscopeViewport = ({
           <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-card border border-border rounded-lg px-3 py-1 shadow-moderate">
             <span className="font-mono text-sm text-foreground">{zoomLevel?.toFixed(1)}x</span>
           </div>
-          
+
           {/* Zoom Hint - Show when there are hidden hotspots */}
-          {selectedSpecimen && getHotspotsForSpecimen().length < (
-            selectedSpecimen.category === 'bacteria' || selectedSpecimen.category === 'virus' || 
-            selectedSpecimen.category === 'fungi' || selectedSpecimen.category === 'protozoa' ? 3 : 0
+          {selectedSpecimen && getHotspotsForSpecimen()?.length < (
+            selectedSpecimen?.category === 'bacteria' || selectedSpecimen?.category === 'virus' ||
+            selectedSpecimen?.category === 'fungi' || selectedSpecimen?.category === 'protozoa' ? 3 : 0
           ) && (
             <div className="absolute -top-20 left-1/2 transform -translate-x-1/2 bg-yellow-100 border-2 border-yellow-400 rounded-lg px-4 py-2 shadow-moderate animate-bounce">
               <div className="flex items-center space-x-2">
@@ -302,14 +301,16 @@ const MicroscopeViewport = ({
           <button
             onClick={handleZoomIn}
             disabled={zoomLevel >= 5}
+            aria-label="Zoom in"
             className="w-12 h-12 bg-primary hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground text-primary-foreground rounded-full flex items-center justify-center shadow-moderate transition-colors duration-fast"
           >
             <Icon name="Plus" size={20} strokeWidth={2.5} />
           </button>
-          
+
           <button
             onClick={handleZoomOut}
             disabled={zoomLevel <= 0.5}
+            aria-label="Zoom out"
             className="w-12 h-12 bg-primary hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground text-primary-foreground rounded-full flex items-center justify-center shadow-moderate transition-colors duration-fast"
           >
             <Icon name="Minus" size={20} strokeWidth={2.5} />
@@ -321,14 +322,16 @@ const MicroscopeViewport = ({
           <button
             onClick={() => handleFocusAdjust('up')}
             disabled={focusLevel >= 100}
+            aria-label="Increase focus"
             className="w-12 h-12 bg-secondary hover:bg-secondary/80 disabled:bg-muted disabled:text-muted-foreground text-secondary-foreground rounded-full flex items-center justify-center shadow-moderate transition-colors duration-fast"
           >
             <Icon name="ChevronUp" size={20} strokeWidth={2.5} />
           </button>
-          
+
           <button
             onClick={() => handleFocusAdjust('down')}
             disabled={focusLevel <= 0}
+            aria-label="Decrease focus"
             className="w-12 h-12 bg-secondary hover:bg-secondary/80 disabled:bg-muted disabled:text-muted-foreground text-secondary-foreground rounded-full flex items-center justify-center shadow-moderate transition-colors duration-fast"
           >
             <Icon name="ChevronDown" size={20} strokeWidth={2.5} />
@@ -353,25 +356,25 @@ const MicroscopeViewport = ({
               <Icon name="X" size={16} className="text-muted-foreground" />
             </button>
           </div>
-          
+
           <div className="space-y-3">
             {/* Type Badge */}
             <div className="flex items-center space-x-2">
-              <Icon 
-                name={activeHotspot?.type === 'structure' ? 'Box' : activeHotspot?.type === 'organelle' ? 'Circle' : 'Zap'} 
-                size={14} 
-                className="text-muted-foreground" 
+              <Icon
+                name={activeHotspot?.type === 'structure' ? 'Box' : activeHotspot?.type === 'organelle' ? 'Circle' : 'Zap'}
+                size={14}
+                className="text-muted-foreground"
               />
               <span className="font-caption text-xs text-muted-foreground capitalize bg-muted px-2 py-1 rounded-full">
                 {activeHotspot?.type}
               </span>
             </div>
-            
+
             {/* Description */}
             <p className="font-body text-sm text-foreground leading-relaxed">
               {activeHotspot?.description}
             </p>
-            
+
             {/* Fun Fact */}
             {activeHotspot?.fun && (
               <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded-r">
@@ -384,9 +387,9 @@ const MicroscopeViewport = ({
                 </div>
               </div>
             )}
-            
+
             {/* Discovery Badge */}
-            {discoveredHotspots.has(activeHotspot.id) && (
+            {discoveredHotspots?.has(activeHotspot?.id) && (
               <div className="flex items-center justify-center space-x-2 bg-success/10 text-success px-3 py-2 rounded-lg">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />

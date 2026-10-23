@@ -11,8 +11,13 @@ import EraBackground from './components/EraBackground';
 import MiniGame from './components/MiniGame';
 import ToolEvolution from './components/ToolEvolution';
 import Button from '../../components/ui/Button';
-
-const SAVE_KEY = 'microbequest_progress';
+import {
+  loadProgress,
+  saveProgress,
+  resetProgress as resetProgressService,
+} from '../../services/gameProgressService';
+import { useAuth } from '../../contexts/AuthContext';
+import { trackTimelineEventComplete, trackEraComplete, trackEraUnlock } from '../../services/analyticsService';
 
 const defaultProgress = {
   unlockedEras: ['discovery'],
@@ -23,52 +28,55 @@ const defaultProgress = {
   achievements: [],
 };
 
-const loadProgress = () => {
-  try {
-    const saved = localStorage.getItem(SAVE_KEY);
-    if (saved) return { ...defaultProgress, ...JSON.parse(saved) };
-  } catch (e) {}
-  return defaultProgress;
-};
-
-const saveProgress = (progress) => {
-  try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify(progress));
-  } catch (e) {}
-};
-
 const MicrobeTimelineAdventure = () => {
-  const saved = loadProgress();
-
   const [selectedEra, setSelectedEra] = useState('discovery');
   const { shouldShowGuide, hideGuide } = useGuideVisibility('microbe-timeline-adventure');
+  const { isPremium } = useAuth();
   const [showFunFact, setShowFunFact] = useState(false);
   const [currentFunFact, setCurrentFunFact] = useState(null);
-  const [unlockedEras, setUnlockedEras] = useState(saved.unlockedEras);
-  const [collectedCards, setCollectedCards] = useState(saved.collectedCards);
-  const [achievements, setAchievements] = useState(saved.achievements);
-  const [totalPoints, setTotalPoints] = useState(saved.totalPoints);
+  const [unlockedEras, setUnlockedEras] = useState(defaultProgress?.unlockedEras);
+  const [collectedCards, setCollectedCards] = useState(defaultProgress?.collectedCards);
+  const [achievements, setAchievements] = useState(defaultProgress?.achievements);
+  const [totalPoints, setTotalPoints] = useState(defaultProgress?.totalPoints);
   const [activeMinigame, setActiveMinigame] = useState(null);
   const [showToolEvolution, setShowToolEvolution] = useState(false);
   const [showTimeline, setShowTimeline] = useState(true);
-  const [completedEvents, setCompletedEvents] = useState(saved.completedEvents);
-  const [unlockedEvents, setUnlockedEvents] = useState(saved.unlockedEvents);
+  const [completedEvents, setCompletedEvents] = useState(defaultProgress?.completedEvents);
+  const [unlockedEvents, setUnlockedEvents] = useState(defaultProgress?.unlockedEvents);
   const [showSaveNotice, setShowSaveNotice] = useState(false);
+  const [progressLoaded, setProgressLoaded] = useState(false);
 
-  // Auto-save whenever progress state changes
+  // Load progress from Supabase (with localStorage fallback) on mount
   useEffect(() => {
-    saveProgress({ unlockedEras, unlockedEvents, completedEvents, totalPoints, collectedCards, achievements });
-  }, [unlockedEras, unlockedEvents, completedEvents, totalPoints, collectedCards, achievements]);
+    let cancelled = false;
+    loadProgress()?.then((saved) => {
+      if (cancelled) return;
+      setUnlockedEras(saved?.unlockedEras ?? defaultProgress?.unlockedEras);
+      setUnlockedEvents(saved?.unlockedEvents ?? defaultProgress?.unlockedEvents);
+      setCompletedEvents(saved?.completedEvents ?? defaultProgress?.completedEvents);
+      setTotalPoints(saved?.totalPoints ?? 0);
+      setCollectedCards(saved?.collectedCards ?? []);
+      setAchievements(saved?.achievements ?? []);
+      setProgressLoaded(true);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
-  const handleResetProgress = () => {
+  // Auto-save whenever progress state changes (after initial load)
+  useEffect(() => {
+    if (!progressLoaded) return;
+    saveProgress({ unlockedEras, unlockedEvents, completedEvents, totalPoints, collectedCards, achievements });
+  }, [unlockedEras, unlockedEvents, completedEvents, totalPoints, collectedCards, achievements, progressLoaded]);
+
+  const handleResetProgress = async () => {
     if (window.confirm('Reset all progress? This cannot be undone.')) {
-      localStorage.removeItem(SAVE_KEY);
-      setUnlockedEras(defaultProgress.unlockedEras);
-      setUnlockedEvents(defaultProgress.unlockedEvents);
-      setCompletedEvents(defaultProgress.completedEvents);
-      setTotalPoints(defaultProgress.totalPoints);
-      setCollectedCards(defaultProgress.collectedCards);
-      setAchievements(defaultProgress.achievements);
+      await resetProgressService();
+      setUnlockedEras(defaultProgress?.unlockedEras);
+      setUnlockedEvents(defaultProgress?.unlockedEvents);
+      setCompletedEvents(defaultProgress?.completedEvents);
+      setTotalPoints(defaultProgress?.totalPoints);
+      setCollectedCards(defaultProgress?.collectedCards);
+      setAchievements(defaultProgress?.achievements);
     }
   };
 
@@ -87,7 +95,7 @@ const MicrobeTimelineAdventure = () => {
         { id: 'leeuwenhoek-discovery', year: 1676, scientist: 'Antonie van Leeuwenhoek', title: 'Discovers "animalcules"', description: 'First observations of living microorganisms using homemade microscopes', minigame: 'microscope-focus', fact: 'Leeuwenhoek made over 500 microscopes in his lifetime!', points: 25, unlocked: true },
         { id: 'first-bacteria', year: 1683, scientist: 'Antonie van Leeuwenhoek', title: 'First bacteria observed', description: 'Drew detailed sketches of bacterial shapes - rods, spheres, and spirals', minigame: 'bacteria-drawing', fact: 'His drawings from 340 years ago are still accurate today!', points: 30, unlocked: false },
         { id: 'jenner-vaccination', year: 1796, scientist: 'Edward Jenner', title: 'Invents vaccination', description: 'Creates first vaccine using cowpox to prevent smallpox', minigame: 'vaccination-timeline', fact: 'The word "vaccine" comes from "vacca" meaning cow in Latin!', points: 40, unlocked: false },
-        { id: 'pasteur-generation', year: 1850, scientist: 'Louis Pasteur', title: 'Disproves spontaneous generation', description: 'Swan neck flask experiment proves microbes come from other microbes', minigame: 'swan-flask-experiment', fact: "Some of Pasteur's original flasks are still sterile today!", points: 35, unlocked: false }
+        { id: 'pasteur-generation', year: 1850, scientist: 'Louis Pasteur', title: 'Disproves spontaneous generation', description: 'Swan neck flask experiment proves microbes come from other microbes', minigame: 'swan-flask-experiment', fact: "Some of Pasteur\'s original flasks are still sterile today!", points: 35, unlocked: false }
       ]
     },
     germTheory: {
@@ -103,9 +111,9 @@ const MicrobeTimelineAdventure = () => {
       keyEvents: [
         { id: 'snow-cholera', year: 1854, scientist: 'John Snow', title: 'Traces cholera to contaminated water', description: 'Maps disease outbreak to identify water pump as source', minigame: 'outbreak-mapping', fact: 'John Snow is considered the father of modern epidemiology!', points: 45, unlocked: false },
         { id: 'lister-antiseptic', year: 1865, scientist: 'Joseph Lister', title: 'Introduces antiseptic surgery', description: 'Uses carbolic acid to prevent surgical infections', minigame: 'operating-room-cleaning', fact: 'Before Lister, 50% of surgical patients died from infection!', points: 40, unlocked: false },
-        { id: 'koch-tuberculosis', year: 1882, scientist: 'Robert Koch', title: 'Discovers TB bacterium', description: "Establishes Koch's postulates for proving disease causation", minigame: 'kochs-postulates', fact: "Koch's postulates are still used by scientists today!", points: 50, unlocked: false },
+        { id: 'koch-tuberculosis', year: 1882, scientist: 'Robert Koch', title: 'Discovers TB bacterium', description: "Establishes Koch\'s postulates for proving disease causation", minigame: 'kochs-postulates', fact: "Koch\'s postulates are still used by scientists today!", points: 50, unlocked: false },
         { id: 'pasteur-rabies', year: 1885, scientist: 'Louis Pasteur', title: 'Creates rabies vaccine', description: 'Saves Joseph Meister, first person to receive rabies vaccine', minigame: 'pasteur-laboratory', fact: 'Pasteur had never gone to medical school, he was a chemist!', points: 55, unlocked: false },
-        { id: 'fleming-penicillin', year: 1928, scientist: 'Alexander Fleming', title: 'Discovers penicillin', description: 'Accidentally notices mold killing bacteria in petri dish', minigame: 'petri-dish-detective', fact: "Fleming's lucky accident has saved millions of lives!", points: 60, unlocked: false }
+        { id: 'fleming-penicillin', year: 1928, scientist: 'Alexander Fleming', title: 'Discovers penicillin', description: 'Accidentally notices mold killing bacteria in petri dish', minigame: 'petri-dish-detective', fact: "Fleming\'s lucky accident has saved millions of lives!", points: 60, unlocked: false }
       ]
     },
     modern: {
@@ -121,7 +129,7 @@ const MicrobeTimelineAdventure = () => {
       keyEvents: [
         { id: 'electron-microscope', year: 1933, scientist: 'Ernst Ruska', title: 'Electron microscope invented', description: 'New technology allows 1000x better magnification than light microscopes', minigame: 'microscope-comparison', fact: 'Electron microscopes can magnify up to 2 million times!', points: 45, unlocked: false },
         { id: 'antibiotics-production', year: 1940, scientist: 'Multiple Scientists', title: 'Antibiotics mass-produced', description: 'Penicillin manufactured to treat wounded WWII soldiers', minigame: 'antibiotic-assembly', fact: 'Mass production of penicillin saved thousands of soldiers in WWII!', points: 50, unlocked: false },
-        { id: 'dna-structure-study', year: 1952, scientist: 'Rosalind Franklin', title: 'DNA structure being studied', description: 'X-ray crystallography reveals clues about DNA structure', minigame: 'dna-building', fact: "Franklin's Photo 51 was crucial for discovering DNA structure!", points: 55, unlocked: false }
+        { id: 'dna-structure-study', year: 1952, scientist: 'Rosalind Franklin', title: 'DNA structure being studied', description: 'X-ray crystallography reveals clues about DNA structure', minigame: 'dna-building', fact: "Franklin\'s Photo 51 was crucial for discovering DNA structure!", points: 55, unlocked: false }
       ]
     },
     dnaRevolution: {
@@ -164,7 +172,7 @@ const MicrobeTimelineAdventure = () => {
     'leeuwenhoek': { name: 'Antonie van Leeuwenhoek', dates: '1632-1723', title: 'Father of Microbiology', discovery: 'First to observe living microorganisms', portrait: '/assets/images/scientists/leeuwenhoek.png', funFacts: ['Made over 500 microscopes by hand','Was originally a cloth merchant','Never shared his lens-making secrets'], rarity: 'legendary', points: 100 },
     'jenner': { name: 'Edward Jenner', dates: '1749-1823', title: 'Vaccination Pioneer', discovery: 'Created first vaccine', portrait: '/assets/images/scientists/jenner.png', funFacts: ['Used cowpox to prevent smallpox','Saved millions of lives','Word "vaccine" comes from Latin for cow'], rarity: 'rare', points: 85 },
     'pasteur': { name: 'Louis Pasteur', dates: '1822-1895', title: 'Germ Theory Pioneer', discovery: 'Proved germs cause disease', portrait: '/assets/images/scientists/pasteur.png', funFacts: ['Invented pasteurization process','Created rabies vaccine','Never went to medical school'], rarity: 'legendary', points: 100 },
-    'koch': { name: 'Robert Koch', dates: '1843-1910', title: 'Disease Detective', discovery: 'Identified TB and cholera bacteria', portrait: '/assets/images/scientists/koch.png', funFacts: ["Established Koch's postulates",'Won Nobel Prize in 1905','Founded modern bacteriology'], rarity: 'rare', points: 85 },
+    'koch': { name: 'Robert Koch', dates: '1843-1910', title: 'Disease Detective', discovery: 'Identified TB and cholera bacteria', portrait: '/assets/images/scientists/koch.png', funFacts: ["Established Koch\'s postulates",'Won Nobel Prize in 1905','Founded modern bacteriology'], rarity: 'rare', points: 85 },
     'lister': { name: 'Joseph Lister', dates: '1827-1912', title: 'Antiseptic Surgery Pioneer', discovery: 'Introduced surgical antiseptics', portrait: '/assets/images/scientists/lister.png', funFacts: ['Reduced surgical deaths by 80%','Used carbolic acid as antiseptic','Listerine mouthwash named after him'], rarity: 'uncommon', points: 70 },
     'fleming': { name: 'Alexander Fleming', dates: '1881-1955', title: 'Penicillin Discoverer', discovery: 'Discovered penicillin antibiotic', portrait: '/assets/images/scientists/fleming.png', funFacts: ['Discovery was accidental','Saved millions during WWII','Won Nobel Prize in 1945'], rarity: 'legendary', points: 100 },
   };
@@ -174,10 +182,10 @@ const MicrobeTimelineAdventure = () => {
   const getCharacterMessage = (eraId) => {
     const messages = {
       discovery: "Welcome to the Discovery Era! Click on the first event to begin your journey!",
-      germTheory: "Now we're in the Victorian era — microbes cause disease! Exciting times ahead!",
-      modern: "The 20th century brought incredible new tools! Let's explore!",
+      germTheory: "Now we\'re in the Victorian era — microbes cause disease! Exciting times ahead!",
+      modern: "The 20th century brought incredible new tools! Let\'s explore!",
       dnaRevolution: "We're entering the age of genetics! Scientists are reading the very code of life!",
-      modernAge: "Welcome to today's world of biotechnology!"
+      modernAge: "Welcome to today\'s world of biotechnology!"
     };
     return messages?.[eraId] || "Let's explore this fascinating era together!";
   };
@@ -201,6 +209,7 @@ const MicrobeTimelineAdventure = () => {
       setCompletedEvents(prev => [...prev, eventId]);
     }
     setTotalPoints(prev => prev + points);
+    trackTimelineEventComplete(eventId, selectedEra, points);
 
     const currentEraData = timelineEras?.[selectedEra];
     const eventIndex = currentEraData?.keyEvents?.findIndex(e => e?.id === eventId);
@@ -220,10 +229,12 @@ const MicrobeTimelineAdventure = () => {
     if (allEventsCompleted) {
       const eraOrder = ['discovery', 'germTheory', 'modern', 'dnaRevolution', 'modernAge'];
       const currentIndex = eraOrder?.indexOf(selectedEra);
+      trackEraComplete(selectedEra, currentEraData?.name);
       if (currentIndex < eraOrder?.length - 1) {
         const nextEra = eraOrder?.[currentIndex + 1];
         if (!unlockedEras?.includes(nextEra)) {
           setUnlockedEras(prev => [...prev, nextEra]);
+          trackEraUnlock(nextEra);
           const nextEraData = timelineEras?.[nextEra];
           if (nextEraData?.keyEvents?.[0]) {
             setUnlockedEvents(prev => [...prev, nextEraData?.keyEvents?.[0]?.id]);
@@ -282,9 +293,9 @@ const MicrobeTimelineAdventure = () => {
     const eraTotalPoints = currentEra?.keyEvents?.reduce((sum, e) => sum + (e?.points || 0), 0);
 
     return (
-      <div className="min-h-screen bg-background overflow-hidden">
+      <div className="min-h-screen bg-background overflow-hidden game-screen">
         <Header />
-        <main className="pt-20 pb-32 relative">
+        <main className="pt-20 pb-32 safe-bottom relative">
           <EraBackground era={currentEra} />
           <div className="container mx-auto px-4 lg:px-6 relative z-10">
 
@@ -320,6 +331,19 @@ const MicrobeTimelineAdventure = () => {
 
             <section className="mb-10">
               <h3 className="font-heading text-xl text-foreground mb-4">Discoveries in this Era</h3>
+              {selectedEra !== 'discovery' && !isPremium ? (
+                <div className="rounded-xl p-8 text-center shadow-moderate" style={{ background: 'linear-gradient(135deg, #1a1030 0%, #2d1b69 50%, #1a1030 100%)', border: '1px solid rgba(139,92,246,0.4)' }}>
+                  <div className="text-6xl mb-4">🔒</div>
+                  <h3 className="font-heading text-xl text-white mb-3">This Era is Part of MicrobeQuest Premium</h3>
+                  <p className="font-body text-purple-200 mb-6">Unlock 14 more discoveries, all 6 game modules, and 350+ years of microbiology history.</p>
+                  <Link to="/premium">
+                    <button className="px-6 py-3 rounded-xl font-heading font-bold text-gray-900 transition-all duration-fast hover:opacity-90 hover:scale-105" style={{ backgroundColor: '#FFC107' }}>
+                      Unlock the Full Adventure 🌻
+                    </button>
+                  </Link>
+                  <p className="font-caption text-sm text-purple-300 mt-4">From $1.99/month • Free for Title I schools</p>
+                </div>
+              ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {currentEra?.keyEvents?.map((event, index) => {
                   const isUnlocked = unlockedEvents?.includes(event?.id);
@@ -373,6 +397,7 @@ const MicrobeTimelineAdventure = () => {
                   );
                 })}
               </div>
+              )}
             </section>
 
             {eraCompletedCount === currentEra?.keyEvents?.length && currentEra?.keyEvents?.length > 0 && (
@@ -401,11 +426,12 @@ const MicrobeTimelineAdventure = () => {
         <ToolEvolution isOpen={showToolEvolution} onClose={() => setShowToolEvolution(false)} currentEra={selectedEra} />
         <SaveNotice />
 
-        <div className="fixed top-24 right-4 z-30">
-          <div className="bg-card border border-border rounded-lg p-3 shadow-moderate">
+        {/* Score widget — repositioned to avoid overlap on small screens */}
+        <div className="fixed top-20 right-2 sm:top-24 sm:right-4 z-30">
+          <div className="bg-card border border-border rounded-lg p-2 sm:p-3 shadow-moderate">
             <div className="flex items-center space-x-2 mb-2"><Icon name="Star" size={16} className="text-primary" /><span className="font-mono text-sm font-semibold text-foreground">{totalPoints}</span></div>
             <div className="flex items-center space-x-2"><Icon name="Collection" size={16} className="text-secondary" /><span className="font-mono text-sm text-foreground">{collectedCards?.length}/10</span></div>
-            <button onClick={handleResetProgress} className="mt-2 text-xs text-muted-foreground hover:text-destructive transition-colors w-full text-center">Reset Progress</button>
+            <button onClick={handleResetProgress} className="mt-2 text-xs text-muted-foreground hover:text-destructive transition-colors w-full text-center">Reset</button>
           </div>
         </div>
       </div>
@@ -414,9 +440,9 @@ const MicrobeTimelineAdventure = () => {
 
   // TIMELINE VIEW
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
+    <div className="min-h-screen bg-background overflow-hidden game-screen">
       <Header />
-      <main className="pt-20 pb-8 relative">
+      <main className="pt-20 pb-8 safe-bottom relative">
         <EraBackground era={currentEra} />
         <div className="container mx-auto px-4 lg:px-6 relative z-10">
 
@@ -498,11 +524,12 @@ const MicrobeTimelineAdventure = () => {
       <ToolEvolution isOpen={showToolEvolution} onClose={() => setShowToolEvolution(false)} currentEra={selectedEra} />
       <SaveNotice />
 
-      <div className="fixed top-24 right-4 z-30">
-        <div className="bg-card border border-border rounded-lg p-3 shadow-moderate">
+      {/* Score widget — repositioned to avoid overlap on small screens */}
+      <div className="fixed top-20 right-2 sm:top-24 sm:right-4 z-30">
+        <div className="bg-card border border-border rounded-lg p-2 sm:p-3 shadow-moderate">
           <div className="flex items-center space-x-2 mb-2"><Icon name="Star" size={16} className="text-primary" /><span className="font-mono text-sm font-semibold text-foreground">{totalPoints}</span></div>
           <div className="flex items-center space-x-2"><Icon name="Collection" size={16} className="text-secondary" /><span className="font-mono text-sm text-foreground">{collectedCards?.length}/10</span></div>
-          <button onClick={handleResetProgress} className="mt-2 text-xs text-muted-foreground hover:text-destructive transition-colors w-full text-center">Reset Progress</button>
+          <button onClick={handleResetProgress} className="mt-2 text-xs text-muted-foreground hover:text-destructive transition-colors w-full text-center">Reset</button>
         </div>
       </div>
     </div>

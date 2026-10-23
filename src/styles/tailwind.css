@@ -56,10 +56,10 @@
     
     /* Muted Colors */
     --color-muted: #F3F4F6; /* Light gray muted areas */
-    --color-muted-foreground: #6B7280; /* Medium gray text */
+    --color-muted-foreground: #4B5563; /* Darkened gray for WCAG AA contrast */
     
     /* Primary Colors - Bright Blue */
-    --color-primary: #3B82F6; /* Bright blue primary */
+    --color-primary: #1558C0; /* Darkened blue for WCAG AA contrast */
     --color-primary-foreground: #FFFFFF; /* White text on primary */
     
     /* Secondary Colors - Light Gray */
@@ -67,14 +67,14 @@
     --color-secondary-foreground: #1F2937; /* Dark gray text on secondary */
     
     /* Accent Colors - Purple */
-    --color-accent: #8B5CF6; /* Purple accents */
+    --color-accent: #6D28D9; /* Darkened purple for WCAG AA contrast */
     --color-accent-foreground: #FFFFFF; /* White text on accents */
     
     /* State Colors */
     --color-success: #10B981; /* Green for success */
     --color-success-foreground: #FFFFFF; /* White text on success */
     
-    --color-warning: #F59E0B; /* Orange for warnings */
+    --color-warning: #B45309; /* Darkened amber for WCAG AA contrast */
     --color-warning-foreground: #FFFFFF; /* White text on warnings */
     
     --color-error: #EF4444; /* Red for errors */
@@ -135,6 +135,110 @@
     transition-timing-function: var(--animation-timing);
     transition-duration: var(--animation-duration-fast);
   }
+
+  /* ============================================
+     MOBILE TOUCH & PERFORMANCE OPTIMIZATIONS
+     Applied globally to all 7 game screens
+     ============================================ */
+
+  /* Eliminate 300ms tap delay on all interactive elements */
+  button,
+  a,
+  [role="button"],
+  input,
+  select,
+  textarea,
+  label {
+    touch-action: manipulation;
+  }
+
+  /* Minimum 44×44px touch targets (WCAG 2.5.5) */
+  button,
+  a,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* GPU-accelerated layers for animated game elements */
+  .game-card,
+  .game-projectile,
+  .game-bacteria,
+  .game-player {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /* iOS safe area padding for fixed/sticky elements */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  /* Prevent text selection during game interactions */
+  .game-board,
+  .game-interactive {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Smooth scrolling for game content areas */
+  .game-scroll {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+  }
+
+  /* Prevent pull-to-refresh on game screens */
+  .game-screen {
+    overscroll-behavior: none;
+  }
+
+  /* Touch-friendly card flip — disable hover scale on touch devices */
+  @media (hover: none) and (pointer: coarse) {
+    .touch-no-hover:hover {
+      transform: none !important;
+    }
+
+    /* Larger card tap areas on mobile */
+    .game-card-touch {
+      min-height: 60px;
+      min-width: 60px;
+    }
+
+    /* Increase gap between interactive elements on mobile */
+    .mobile-gap > * + * {
+      margin-top: 8px;
+    }
+  }
+
+  /* Reduce animation complexity on low-end devices */
+  @media (prefers-reduced-motion: reduce) {
+    .game-card,
+    .game-projectile,
+    .game-bacteria {
+      will-change: auto;
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+
+  /* iOS viewport fix — prevent zoom on input focus */
+  @media screen and (max-width: 768px) {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    select,
+    textarea {
+      font-size: 16px;
+    }
+  }
   
   /* Reduced Motion Support */
   @media (prefers-reduced-motion: reduce) {
@@ -147,4 +251,41 @@
       scroll-behavior: auto !important;
     }
   }
+}
+
+/* ── Mobile Touch Optimizations ── */
+
+/* Prevent double-tap zoom on interactive elements */
+button, a, [role="button"] {
+  touch-action: manipulation;
+}
+
+/* Smooth scrolling for tab bars */
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent text selection on tap for game elements */
+.game-card, .game-button {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Bottom nav safe area for notched phones */
+.safe-area-pb {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 0px);
+}
+
+/* Ensure tap highlight is subtle */
+* {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Scrollbar hide utility */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

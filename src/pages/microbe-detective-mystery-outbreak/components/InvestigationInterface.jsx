@@ -92,7 +92,6 @@ const InvestigationInterface = ({ selectedCase, onComplete, onBack, playerStats 
   return (
     <motion.div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex flex-col"
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }}>
-
       {/* Header */}
       <div className="bg-gradient-to-r from-slate-800 to-purple-800 py-3 border-b border-white/10 flex-shrink-0">
         <div className="container mx-auto px-4">
@@ -119,7 +118,6 @@ const InvestigationInterface = ({ selectedCase, onComplete, onBack, playerStats 
           </div>
         </div>
       </div>
-
       {/* Desktop: sidebar + content | Mobile: content + bottom tabs */}
       <div className="flex flex-1 overflow-hidden">
 
@@ -127,16 +125,16 @@ const InvestigationInterface = ({ selectedCase, onComplete, onBack, playerStats 
         <div className="hidden md:flex w-56 bg-slate-800/50 backdrop-blur-sm border-r border-white/10 p-4 flex-col flex-shrink-0">
           <h3 className="text-sm font-bold text-white mb-4">Investigation Tools</h3>
           <div className="space-y-1 flex-1">
-            {tools.map((tool) => {
-              const ToolIcon = tool.icon;
-              const active = currentTool === tool.id;
-              const done = isCompleted(tool.id);
+            {tools?.map((tool) => {
+              const ToolIcon = tool?.icon;
+              const active = currentTool === tool?.id;
+              const done = isCompleted(tool?.id);
               return (
-                <button key={tool.id} onClick={() => setCurrentTool(tool.id)}
+                <button key={tool?.id} onClick={() => setCurrentTool(tool?.id)}
                   className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all text-sm ${
-                    active ? 'bg-gradient-to-r ' + getToolColor(tool.color) + ' text-white shadow-lg' : 'text-white/70 hover:text-white hover:bg-white/10'}`}>
+                    active ? 'bg-gradient-to-r ' + getToolColor(tool?.color) + ' text-white shadow-lg' : 'text-white/70 hover:text-white hover:bg-white/10'}`}>
                   <ToolIcon size={18} />
-                  <span className="flex-1 text-left">{tool.name}</span>
+                  <span className="flex-1 text-left">{tool?.name}</span>
                   {done && <CheckCircle size={14} className="text-green-400" />}
                 </button>
               );
@@ -174,16 +172,15 @@ const InvestigationInterface = ({ selectedCase, onComplete, onBack, playerStats 
           </AnimatePresence>
         </div>
       </div>
-
       {/* Bottom tab bar — mobile only */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-sm border-t border-white/10 z-50">
         <div className="flex items-stretch">
-          {tools.map((tool) => {
-            const ToolIcon = tool.icon;
-            const active = currentTool === tool.id;
-            const done = isCompleted(tool.id);
+          {tools?.map((tool) => {
+            const ToolIcon = tool?.icon;
+            const active = currentTool === tool?.id;
+            const done = isCompleted(tool?.id);
             return (
-              <button key={tool.id} onClick={() => setCurrentTool(tool.id)}
+              <button key={tool?.id} onClick={() => setCurrentTool(tool?.id)}
                 className={`flex-1 flex flex-col items-center gap-1 py-3 px-1 transition-all relative ${
                   active ? 'text-white' : 'text-white/40 hover:text-white/70'}`}>
                 {active && <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-400 to-blue-400" />}
@@ -191,7 +188,7 @@ const InvestigationInterface = ({ selectedCase, onComplete, onBack, playerStats 
                   <ToolIcon size={18} />
                   {done && <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full" />}
                 </div>
-                <span className="text-xs font-medium leading-tight">{tool.name}</span>
+                <span className="text-xs font-medium leading-tight">{tool?.name}</span>
               </button>
             );
           })}

@@ -12,25 +12,10 @@ import ProgressMap from './components/ProgressMap';
 import GameModeStats from './components/GameModeStats';
 import MicrobeGallery from './components/MicrobeGallery';
 import ParentReports from './components/ParentReports';
+import ShareBadgeModal from './components/ShareBadgeModal';
+import { loadProgress, loadGameScores } from '../../services/gameProgressService';
+import { trackAchievementUnlock, trackAchievementView, trackProgressHubView } from '../../services/analyticsService';
 
-const SAVE_KEY = 'microbequest_progress';
-
-const loadProgress = () => {
-  try {
-    const saved = localStorage.getItem(SAVE_KEY);
-    if (saved) return JSON.parse(saved);
-  } catch (e) {}
-  return {
-    unlockedEras: ['discovery'],
-    unlockedEvents: ['leeuwenhoek-discovery'],
-    completedEvents: [],
-    totalPoints: 0,
-    collectedCards: [],
-    achievements: [],
-  };
-};
-
-// All 18 timeline events for progress calculation
 const ALL_EVENTS = [
   'leeuwenhoek-discovery','first-bacteria','jenner-vaccination','pasteur-generation',
   'snow-cholera','lister-antiseptic','koch-tuberculosis','pasteur-rabies','fleming-penicillin',
@@ -55,7 +40,6 @@ const ERA_EVENTS = {
   modernAge: ['human-genome','crispr-discovery','covid-pandemic','microbiome-research'],
 };
 
-// Achievement definitions based on real progress
 const getAchievements = (progress) => {
   const completed = progress?.completedEvents || [];
   const points = progress?.totalPoints || 0;
@@ -145,21 +129,73 @@ const getAchievements = (progress) => {
   ];
 };
 
+const defaultProgress = {
+  unlockedEras: ['discovery'],
+  unlockedEvents: ['leeuwenhoek-discovery'],
+  completedEvents: [],
+  totalPoints: 0,
+  collectedCards: [],
+  achievements: [],
+};
+
 const ProgressAchievementHub = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const { shouldShowGuide, hideGuide } = useGuideVisibility('progress-achievement-hub');
   const [selectedAchievement, setSelectedAchievement] = useState(null);
-  const [progress, setProgress] = useState(loadProgress());
+  const [shareAchievement, setShareAchievement] = useState(null);
+  const [progress, setProgress] = useState(defaultProgress);
+  const [gameScores, setGameScores] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Reload progress when tab becomes active
+  // Track hub view on mount
   useEffect(() => {
-    setProgress(loadProgress());
+    trackProgressHubView('overview');
+  }, []);
+
+  // Track tab changes
+  useEffect(() => {
+    if (activeTab !== 'overview') {
+      trackProgressHubView(activeTab);
+    }
+  }, [activeTab]);
+
+  // Load progress and scores from Supabase (with localStorage fallback)
+  useEffect(() => {
+    let cancelled = false;
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [progressData, scoresData] = await Promise.all([
+          loadProgress(),
+          loadGameScores(),
+        ]);
+        if (!cancelled) {
+          setProgress(progressData ?? defaultProgress);
+          setGameScores(scoresData ?? []);
+        }
+      } catch (err) {
+        console.error('Error loading progress hub data:', err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    fetchData();
+    return () => { cancelled = true; };
   }, [activeTab]);
 
   const achievements = getAchievements(progress);
   const completedCount = progress?.completedEvents?.length || 0;
   const unlockedAchievements = achievements?.filter(a => a?.isUnlocked);
   const achievementPoints = unlockedAchievements?.reduce((sum, a) => sum + a?.points, 0);
+
+  // Track newly unlocked achievements
+  useEffect(() => {
+    if (!loading) {
+      unlockedAchievements?.forEach(a => {
+        trackAchievementUnlock(a?.id, a?.name, { rarity: a?.rarity, points: a?.points });
+      });
+    }
+  }, [loading]);
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: 'BarChart3' },
@@ -262,6 +298,32 @@ const ProgressAchievementHub = () => {
         </div>
       </div>
 
+      {/* Recent Game Scores */}
+      {gameScores?.length > 0 && (
+        <div className="bg-card rounded-2xl p-6 border border-border shadow-moderate">
+          <h3 className="text-xl font-heading text-foreground mb-4">Recent Game Sessions</h3>
+          <div className="space-y-3">
+            {gameScores?.slice(0, 5)?.map((session) => (
+              <div key={session?.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <Icon name="Gamepad2" size={18} className="text-primary" />
+                  <div>
+                    <p className="font-body text-sm font-medium text-foreground capitalize">{session?.gameMode?.replace(/-/g, ' ')}</p>
+                    <p className="font-caption text-xs text-muted-foreground">{new Date(session?.playedAt)?.toLocaleDateString()}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-mono text-sm font-bold text-foreground">{session?.score} pts</p>
+                  {session?.correctAnswers > 0 && (
+                    <p className="font-caption text-xs text-muted-foreground">{session?.correctAnswers}/{session?.totalQuestions} correct</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Recent Achievements */}
       {unlockedAchievements?.length > 0 && (
         <div className="bg-card rounded-2xl p-6 border border-border shadow-moderate">
@@ -272,7 +334,7 @@ const ProgressAchievementHub = () => {
           <div className="flex space-x-4 overflow-x-auto pb-2">
             {unlockedAchievements?.slice(0, 4)?.map((achievement) => (
               <div key={achievement?.id} className="flex-shrink-0">
-                <AchievementBadge achievement={achievement} isUnlocked={true} showDetails={true} onClick={() => setSelectedAchievement(achievement)} />
+                <AchievementBadge achievement={achievement} isUnlocked={true} showDetails={true} onClick={() => setSelectedAchievement(achievement)} onShare={setShareAchievement} />
               </div>
             ))}
           </div>
@@ -340,7 +402,7 @@ const ProgressAchievementHub = () => {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
         {achievements?.map((achievement) => (
-          <AchievementBadge key={achievement?.id} achievement={achievement} isUnlocked={achievement?.isUnlocked} showDetails={true} onClick={() => setSelectedAchievement(achievement)} />
+          <AchievementBadge key={achievement?.id} achievement={achievement} isUnlocked={achievement?.isUnlocked} showDetails={true} onClick={() => { setSelectedAchievement(achievement); trackAchievementView(achievement?.id, achievement?.name); }} onShare={achievement?.isUnlocked ? setShareAchievement : undefined} />
         ))}
       </div>
 
@@ -371,55 +433,92 @@ const ProgressAchievementHub = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="pt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between mb-8">
+      <main className="pt-16 pb-24 lg:pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-4">
             <div>
-              <h1 className="text-3xl font-heading text-foreground mb-2">Progress & Achievements</h1>
-              <p className="font-body text-muted-foreground">Track your learning journey and celebrate your discoveries!</p>
+              <h1 className="text-2xl sm:text-3xl font-heading text-foreground mb-1 sm:mb-2">Progress & Achievements</h1>
+              <p className="font-body text-muted-foreground text-sm sm:text-base">Track your learning journey and celebrate your discoveries!</p>
             </div>
-            <Link to="/game-home-dashboard">
-              <Button variant="outline" iconName="ArrowLeft" iconPosition="left">Back to Dashboard</Button>
+            <Link to="/game-home-dashboard" className="self-start sm:self-auto">
+              <Button variant="outline" iconName="ArrowLeft" iconPosition="left" className="min-h-[44px]">Back to Dashboard</Button>
             </Link>
           </div>
 
-          {/* Tabs */}
-          <div className="flex flex-wrap gap-2 mb-8 p-1 bg-muted rounded-lg">
-            {tabs?.map((tab) => (
-              <button key={tab?.id} onClick={() => setActiveTab(tab?.id)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-button transition-all duration-fast
-                  ${activeTab === tab?.id ? 'bg-primary text-primary-foreground shadow-moderate' : 'text-muted-foreground hover:text-foreground hover:bg-background'}`}>
-                <Icon name={tab?.icon} size={18} strokeWidth={2} />
-                <span className="font-body font-medium">{tab?.label}</span>
-              </button>
-            ))}
-          </div>
+          {/* Loading state */}
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <div className="flex items-center space-x-3 text-muted-foreground">
+                <Icon name="Loader2" size={24} className="animate-spin" />
+                <span className="font-body">Loading your progress...</span>
+              </div>
+            </div>
+          )}
 
-          <div className="space-y-8">
-            {activeTab === 'overview' && renderOverview()}
-            {activeTab === 'achievements' && renderAchievements()}
-            {activeTab === 'progress' && <ProgressMap onNodeClick={(node) => {}} />}
-            {activeTab === 'collection' && <MicrobeGallery />}
-            {activeTab === 'reports' && <ParentReports />}
-            {activeTab === 'overview' && <GameModeStats />}
-          </div>
+          {!loading && (
+            <>
+              {/* Tabs — horizontally scrollable on mobile */}
+              <div className="mb-6 sm:mb-8">
+                <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 p-1 bg-muted rounded-xl scrollbar-hide -mx-1 px-1">
+                  {tabs?.map((tab) => (
+                    <button
+                      key={tab?.id}
+                      onClick={() => setActiveTab(tab?.id)}
+                      className={`flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2.5 rounded-lg transition-all duration-fast whitespace-nowrap flex-shrink-0 min-h-[44px] active:scale-[0.97]
+                        ${activeTab === tab?.id
+                          ? 'bg-primary text-primary-foreground shadow-moderate'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-background'
+                        }`}
+                    >
+                      <Icon name={tab?.icon} size={16} sm:size={18} strokeWidth={2} />
+                      <span className="font-body font-medium text-sm">{tab?.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-6 sm:space-y-8">
+                {activeTab === 'overview' && renderOverview()}
+                {activeTab === 'achievements' && renderAchievements()}
+                {activeTab === 'progress' && <ProgressMap onNodeClick={(node) => {}} />}
+                {activeTab === 'collection' && <MicrobeGallery />}
+                {activeTab === 'reports' && <ParentReports />}
+                {activeTab === 'overview' && <GameModeStats />}
+              </div>
+            </>
+          )}
         </div>
       </main>
-      <CharacterGuide character="charlie-zebra" message={
-        completedCount === 0
-          ? "Welcome! Complete events in the Timeline Adventure to start building your progress here!"
-          : `Wow! You've completed ${completedCount} discoveries and earned ${unlockedAchievements?.length} achievements. Keep going!`
-      } emotion="celebrating" position="bottom-right" isVisible={shouldShowGuide} onClose={hideGuide} showHint={true} hintText="Click on any achievement to see how to unlock it!" />
+      <CharacterGuide
+        character="charlie-zebra"
+        message={
+          completedCount === 0
+            ? "Welcome! Complete events in the Timeline Adventure to start building your progress here!"
+            : `Wow! You've completed ${completedCount} discoveries and earned ${unlockedAchievements?.length} achievements. Keep going!`
+        }
+        emotion="celebrating"
+        position="bottom-right"
+        isVisible={shouldShowGuide}
+        onClose={hideGuide}
+        showHint={true}
+        hintText="Click on any achievement to see how to unlock it!"
+      />
       {selectedAchievement && (
         <div className="fixed inset-0 pointer-events-none z-30">
           {[...Array(12)]?.map((_, i) => (
-            <div key={i}
+            <div
+              key={i}
               className={`absolute w-3 h-3 rounded-full animate-bounce-gentle ${i % 4 === 0 ? 'bg-accent' : i % 4 === 1 ? 'bg-primary' : i % 4 === 2 ? 'bg-secondary' : 'bg-success'}`}
               style={{ left: `${10 + (i * 8)}%`, top: `${10 + (i * 7)}%`, animationDelay: `${i * 0.1}s`, animationDuration: '2s' }}
             />
           ))}
         </div>
       )}
+      <ShareBadgeModal
+        achievement={shareAchievement}
+        isOpen={!!shareAchievement}
+        onClose={() => setShareAchievement(null)}
+      />
     </div>
   );
 };

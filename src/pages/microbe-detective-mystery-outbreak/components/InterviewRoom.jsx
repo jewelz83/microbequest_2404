@@ -25,7 +25,7 @@ const InterviewRoom = ({ selectedCase, onClueFound, collectedClues }) => {
             },
             {
               q: "Did all students eat the same lunch?",
-              a: "Most got the chicken salad special. Some students who brought lunch from home or bought pizza weren't affected.",
+              a: "Most got the chicken salad special. Some students who brought lunch from home or bought pizza weren\'t affected.",
               clue: {
                 id: 'interview-cafeteria-1',
                 type: 'witness',
@@ -121,12 +121,12 @@ const InterviewRoom = ({ selectedCase, onClueFound, collectedClues }) => {
             },
             {
               q: "What did the water taste like?",
-              a: "Kids said it was 'earthy' or 'muddy.' I didn't drink it myself - I always use bottled water. Maybe that's why I didn't get sick!",
+              a: "Kids said it was \'earthy\' or \'muddy.\' I didn\'t drink it myself - I always use bottled water. Maybe that\'s why I didn\'t get sick!",
               clue: null
             },
             {
               q: "Is there any farming nearby?",
-              a: "Oh yes! There's a dairy farm just uphill. They use a lot of fertilizer on their fields. The rain probably caused runoff into our well area.",
+              a: "Oh yes! There\'s a dairy farm just uphill. They use a lot of fertilizer on their fields. The rain probably caused runoff into our well area.",
               clue: {
                 id: 'interview-well-2',
                 type: 'witness',
@@ -274,7 +274,7 @@ const InterviewRoom = ({ selectedCase, onClueFound, collectedClues }) => {
             },
             {
               q: "Have you noticed anything else unusual?",
-              a: "There's a musty smell in those rooms. And I see dark spots behind the new tiles when I checked. I reported it but no one followed up.",
+              a: "There\'s a musty smell in those rooms. And I see dark spots behind the new tiles when I checked. I reported it but no one followed up.",
               clue: {
                 id: 'interview-mold-3',
                 type: 'witness',
@@ -294,7 +294,7 @@ const InterviewRoom = ({ selectedCase, onClueFound, collectedClues }) => {
           questions: [
             {
               q: "What have you observed in your classroom?",
-              a: "The AC vent blows musty air. I've seen students near the vent cough more. I even developed a stuffy nose that won't go away.",
+              a: "The AC vent blows musty air. I\'ve seen students near the vent cough more. I even developed a stuffy nose that won\'t go away.",
               clue: {
                 id: 'interview-mold-4',
                 type: 'witness',
@@ -399,7 +399,7 @@ const InterviewRoom = ({ selectedCase, onClueFound, collectedClues }) => {
           avatar: '👨‍⚕️',
           questions: [
             {
-              q: "Tell me about this patient's case.",
+              q: "Tell me about this patient\'s case.",
               a: "He's been hospitalized three times this year for different infections. Each time he got antibiotics, but he admits he stops taking them when he feels better.",
               clue: {
                 id: 'interview-resistance-1',
@@ -412,7 +412,7 @@ const InterviewRoom = ({ selectedCase, onClueFound, collectedClues }) => {
             },
             {
               q: "Why is this case so serious?",
-              a: "The bacteria is MRSA - resistant to multiple antibiotics. It's spreading in the ICU. We've had to isolate the patient and implement strict precautions for staff.",
+              a: "The bacteria is MRSA - resistant to multiple antibiotics. It\'s spreading in the ICU. We\'ve had to isolate the patient and implement strict precautions for staff.",
               clue: {
                 id: 'interview-resistance-2',
                 type: 'witness',
@@ -431,7 +431,7 @@ const InterviewRoom = ({ selectedCase, onClueFound, collectedClues }) => {
           avatar: '👩‍⚕️',
           questions: [
             {
-              q: "Review the patient's medication history.",
+              q: "Review the patient\'s medication history.",
               a: "Multiple antibiotic prescriptions over the past year. The pattern shows he picks up the prescription but never completes the full course.",
               clue: null
             },
@@ -472,7 +472,7 @@ const InterviewRoom = ({ selectedCase, onClueFound, collectedClues }) => {
       ]
     };
 
-    return witnessesByCase?.[selectedCase?.id] || witnessesByCase[1];
+    return witnessesByCase?.[selectedCase?.id] || witnessesByCase?.[1];
   };
 
   // Witness portrait images by role type
@@ -503,10 +503,10 @@ const InterviewRoom = ({ selectedCase, onClueFound, collectedClues }) => {
   };
 
   const getWitnessPortrait = (witnessId) =>
-    witnessPortraits[witnessId] || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80';
+    witnessPortraits?.[witnessId] || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80';
 
   const getCaseBackground = () =>
-    caseBackgrounds[selectedCase?.id] || caseBackgrounds[1];
+    caseBackgrounds?.[selectedCase?.id] || caseBackgrounds?.[1];
 
   const witnesses = getWitnessesForCase();
   const currentWitnessData = witnesses?.find(w => w?.id === currentWitness);
@@ -536,9 +536,9 @@ const InterviewRoom = ({ selectedCase, onClueFound, collectedClues }) => {
   return (
     <div className="h-full bg-gradient-to-br from-slate-900/50 to-orange-900/50 p-6 overflow-auto">
       <div className="max-w-6xl mx-auto">
-        
+
         {/* Header */}
-        <motion.div 
+        <motion.div
           className="mb-8 text-center"
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -554,19 +554,18 @@ const InterviewRoom = ({ selectedCase, onClueFound, collectedClues }) => {
 
         {!currentWitness ? (
           /* Witness Selection */
-          <div>
+          (<div>
             <h3 className="text-xl font-bold text-white mb-6 text-center">Select a Witness to Interview</h3>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {witnesses?.map((witness, index) => {
                 const interviewed = isWitnessInterviewed(witness?.id);
-                
+
                 return (
                   <motion.button
                     key={witness?.id}
                     className={`relative rounded-xl border-2 text-left overflow-hidden transition-all ${
                       interviewed
-                        ? 'bg-green-500/20 border-green-400/50'
-                        : 'bg-white/10 border-white/20 hover:border-white/40 hover:bg-white/15'
+                        ? 'bg-green-500/20 border-green-400/50' :'bg-white/10 border-white/20 hover:border-white/40 hover:bg-white/15'
                     }`}
                     onClick={() => !interviewed && setCurrentWitness(witness?.id)}
                     initial={{ opacity: 0, y: 20 }}
@@ -604,7 +603,6 @@ const InterviewRoom = ({ selectedCase, onClueFound, collectedClues }) => {
                         </div>
                       )}
                     </div>
-
                     {/* Info */}
                     <div className="p-4">
                       <h4 className="font-bold text-white text-lg mb-1">{witness?.name}</h4>
@@ -626,7 +624,6 @@ const InterviewRoom = ({ selectedCase, onClueFound, collectedClues }) => {
                 );
               })}
             </div>
-
             {interviewComplete?.length > 0 && (
               <motion.div
                 className="mt-8 bg-gradient-to-r from-green-500/20 to-blue-500/20 border border-green-400/30 rounded-xl p-6 text-center"
@@ -636,7 +633,7 @@ const InterviewRoom = ({ selectedCase, onClueFound, collectedClues }) => {
                 <Lightbulb className="w-8 h-8 text-yellow-300 mx-auto mb-3" />
                 <h4 className="text-xl font-bold text-white mb-2">Great Detective Work!</h4>
                 <p className="text-white/80">
-                  You've interviewed {interviewComplete?.length} / {witnesses?.length} witnesses. 
+                  You've interviewed {interviewComplete?.length} / {witnesses?.length} witnesses.
                   {interviewComplete?.length === witnesses?.length
                     ? " All interviews complete! Use your evidence in other tools."
                     : " Continue interviewing to gather more clues."
@@ -644,10 +641,10 @@ const InterviewRoom = ({ selectedCase, onClueFound, collectedClues }) => {
                 </p>
               </motion.div>
             )}
-          </div>
+          </div>)
         ) : (
           /* Active Interview */
-          <AnimatePresence mode="wait">
+          (<AnimatePresence mode="wait">
             <motion.div
               key={currentWitness}
               className="bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl overflow-hidden"
@@ -789,7 +786,7 @@ const InterviewRoom = ({ selectedCase, onClueFound, collectedClues }) => {
               </div>
               </div>
             </motion.div>
-          </AnimatePresence>
+          </AnimatePresence>)
         )}
       </div>
     </div>

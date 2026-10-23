@@ -1,6 +1,134 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, Star, ArrowRight, Lightbulb, GripVertical, MapPin } from 'lucide-react';
+import { useChat } from '../../../hooks/useChat';
+
+// ─────────────────────────────────────────────
+// AUNT JUJU TUTOR COMPONENT
+// ─────────────────────────────────────────────
+const AuntJujuTutor = ({ eventData, isVisible, onClose }) => {
+  const [question, setQuestion] = useState('');
+  const [asked, setAsked] = useState(false);
+
+  const { response, isLoading, error, sendMessage } = useChat(
+    'ANTHROPIC',
+    'claude-sonnet-4-5-20250929',
+    false
+  );
+
+  const suggestedQuestions = [
+    `Why was ${eventData?.scientist}'s discovery so important?`,
+    `How does this affect us today?`,
+    `What happened before this discovery?`,
+    `Can you tell me more about ${eventData?.title}?`
+  ];
+
+  const askAuntJuju = (q) => {
+    const questionToAsk = q || question;
+    if (!questionToAsk?.trim()) return;
+    setAsked(true);
+    setQuestion(questionToAsk);
+    sendMessage([
+      {
+        role: 'system',
+        content: `You are Aunt Juju, a warm, encouraging, and brilliant science guide for children ages 7-13. You just helped a child complete a learning activity about ${eventData?.title} from ${eventData?.year} by ${eventData?.scientist}. Explain science concepts in simple, fun, age-appropriate language using analogies kids understand. Use encouraging phrases like "Great question!" and "You're thinking like a real scientist!". Always end with one curiosity-sparking follow-up question to keep them exploring. Keep responses under 150 words. Never use scary or overly complex language.`
+      },
+      { role: 'user', content: questionToAsk }
+    ], { max_tokens: 300 });
+  };
+
+  if (!isVisible) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mt-6 bg-gradient-to-br from-amber-900/40 to-yellow-900/40 border-2 border-yellow-400/30 rounded-2xl p-6"
+    >
+      <div className="flex items-center gap-3 mb-4">
+        <div className="text-3xl">🌻</div>
+        <div>
+          <h3 className="text-white font-bold text-lg">Ask Aunt Juju!</h3>
+          <p className="text-yellow-200 text-sm">Curious about what you just learned?</p>
+        </div>
+        <button
+          onClick={onClose}
+          className="ml-auto text-white/40 hover:text-white transition-colors"
+        >
+          ✕
+        </button>
+      </div>
+      {!asked ? (
+        <div className="space-y-3">
+          <p className="text-white/70 text-sm">Try one of these questions or ask your own:</p>
+          <div className="grid grid-cols-1 gap-2">
+            {suggestedQuestions?.map((q, i) => (
+              <button
+                key={i}
+                onClick={() => askAuntJuju(q)}
+                className="text-left px-4 py-2 bg-white/10 hover:bg-yellow-500/20 border border-white/20 hover:border-yellow-400/50 rounded-xl text-white/80 text-sm transition-all"
+              >
+                💭 {q}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2 mt-3">
+            <input
+              type="text"
+              value={question}
+              onChange={(e) => setQuestion(e?.target?.value)}
+              onKeyPress={(e) => e?.key === 'Enter' && askAuntJuju()}
+              placeholder="Or type your own question..."
+              className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-white/40 text-sm focus:outline-none focus:border-yellow-400/50"
+            />
+            <button
+              onClick={() => askAuntJuju()}
+              disabled={!question?.trim()}
+              className="bg-yellow-500 hover:bg-yellow-400 disabled:opacity-40 text-black font-bold px-4 py-2 rounded-xl transition-all text-sm"
+            >
+              Ask!
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="bg-white/10 rounded-xl p-3">
+            <p className="text-yellow-200 text-xs mb-1">You asked:</p>
+            <p className="text-white text-sm">{question}</p>
+          </div>
+
+          {isLoading ? (
+            <div className="flex items-center gap-3 text-yellow-200">
+              <div className="animate-spin text-xl">🌻</div>
+              <p className="text-sm">Aunt Juju is thinking...</p>
+            </div>
+          ) : (
+            <div className="bg-gradient-to-br from-yellow-500/20 to-amber-500/20 border border-yellow-400/30 rounded-xl p-4">
+              <div className="flex items-start gap-2">
+                <span className="text-2xl">🌻</span>
+                <p className="text-white text-sm leading-relaxed">
+                  {response || (error ? "Hmm, my thinking cap needs a moment! Try asking me again." : "That's a great question! Keep exploring!")}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {!isLoading && (
+            <button
+              onClick={() => {
+                setAsked(false);
+                setQuestion('');
+              }}
+              className="text-yellow-300 text-sm hover:text-yellow-200 transition-colors"
+            >
+              ← Ask another question
+            </button>
+          )}
+        </div>
+      )}
+    </motion.div>
+  );
+};
 
 // ─────────────────────────────────────────────
 // ─────────────────────────────────────────────
@@ -613,8 +741,8 @@ const CrisprSnipGame = ({ gameData, eventData, onComplete }) => {
           {dnaSequence?.map((base, index) => (
             <motion.button key={index} onClick={() => toggleBase(index)} whileHover={phase === 'find' ? {scale:1.15} : {}} whileTap={phase === 'find' ? {scale:0.9} : {}}
               className={`w-10 h-10 rounded-lg font-bold text-white text-sm transition-all ${selectedBases?.includes(index) ? `${baseColors?.[base]} ring-2 ring-white shadow-lg scale-110` : `${baseColors?.[base]} opacity-80 ${phase === 'find' ? 'cursor-pointer hover:opacity-100' : 'cursor-default opacity-60'}`}`}>
-              {base}
-            </motion.button>
+                {base}
+              </motion.button>
           ))}
         </div>
         <div className="flex justify-center gap-3 mt-4">
@@ -660,7 +788,7 @@ const MicroscopeFocusGame = ({ gameData, eventData, onComplete, focusLevel, targ
     const shapes = {
       rod: <svg className="w-12 h-12" viewBox="0 0 100 100"><rect x="30" y="20" width="40" height="60" rx="20" fill="#10b981" stroke="#059669" strokeWidth="3"/></svg>,
       sphere: <svg className="w-12 h-12" viewBox="0 0 100 100"><circle cx="50" cy="50" r="35" fill="#3b82f6" stroke="#2563eb" strokeWidth="3"/></svg>,
-      spiral: <svg className="w-12 h-12" viewBox="0 0 100 100"><path d="M 30 50 Q 40 30, 50 50 T 70 50" stroke="#a855f7" strokeWidth="8" fill="none" strokeLinecap="round"/><path d="M 30 50 Q 40 70, 50 50 T 70 50" stroke="#9333ea" strokeWidth="8" fill="none" strokeLinecap="round"/></svg>,
+      spiral: <svg className="w-12 h-12" viewBox="0 0 100 100"><path d="M 30 50 Q 40 80, 50 50 T 70 50" stroke="#a855f7" strokeWidth="8" fill="none" strokeLinecap="round"/><path d="M 30 50 Q 40 70, 50 50 T 70 50" stroke="#9333ea" strokeWidth="8" fill="none" strokeLinecap="round"/></svg>,
     };
     return shapes?.[type] || shapes?.sphere;
   };
@@ -743,6 +871,7 @@ const MiniGame = ({ id, eventData, onComplete, onClose }) => {
   const [focusLevel, setFocusLevel] = useState(0);
   const [targetFocus] = useState(45 + Math.floor(Math.random() * 10));
   const [selectedShapes, setSelectedShapes] = useState([]);
+  const [showTutor, setShowTutor] = useState(false);
   const requiredShapes = ['rod','sphere','spiral'];
 
   useEffect(() => { initializeGame(id); }, [id]);
@@ -871,6 +1000,22 @@ const MiniGame = ({ id, eventData, onComplete, onClose }) => {
                   <p className="text-white/90 mb-4">You've completed {eventData?.title}!</p>
                   <div className="bg-white/10 rounded-lg p-4 inline-block mb-4"><div className="flex items-center gap-3 text-yellow-300"><Star className="w-8 h-8"/><span className="text-3xl font-bold">+{eventData?.points}</span><span className="text-xl">points</span></div></div>
                   <div className="bg-blue-500/20 border border-blue-400/30 rounded-lg p-4"><p className="text-blue-200 text-sm"><strong>Fun Fact:</strong> {eventData?.fact}</p></div>
+                  <div className="mt-4">
+                    {!showTutor ? (
+                      <button
+                        onClick={() => setShowTutor(true)}
+                        className="w-full bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2"
+                      >
+                        🌻 Ask Aunt Juju a Question!
+                      </button>
+                    ) : (
+                      <AuntJujuTutor
+                        eventData={eventData}
+                        isVisible={showTutor}
+                        onClose={() => setShowTutor(false)}
+                      />
+                    )}
+                  </div>
                 </div>
               </motion.div>
             )}

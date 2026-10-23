@@ -25,7 +25,7 @@ const MicroscopeInterface = ({ className = "" }) => {
     id: 2,
     name: 'Influenza Virus',
     type: 'Virus',
-    image: "https://images.unsplash.com/photo-1706201320711-3d85bf15bac4",
+    image: "https://images.unsplash.com/flagged/photo-1584036561584-b03c19da874c",
     alt: 'Spherical influenza virus particles with surface proteins visible, displayed in blue and purple electron microscopy coloring',
     description: 'Respiratory virus causing seasonal flu',
     magnification: '50000x',
@@ -37,7 +37,7 @@ const MicroscopeInterface = ({ className = "" }) => {
     id: 3,
     name: 'Penicillium',
     type: 'Fungi',
-    image: "https://images.unsplash.com/photo-1707386820796-a80ca3dd8f87",
+    image: "https://images.unsplash.com/photo-1611737608004-839c47c36c82",
     alt: 'Branching Penicillium fungus with characteristic brush-like spore structures in microscopic detail showing green-blue coloration',
     description: 'Antibiotic-producing mold fungus',
     magnification: '400x',
@@ -90,7 +90,7 @@ const MicroscopeInterface = ({ className = "" }) => {
             </p>
           </div>
         </div>
-        
+
         <Link to="/microscope-discovery-lab">
           <button className="flex items-center space-x-2 px-3 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-button transition-colors duration-fast">
             <Icon name="Zap" size={16} strokeWidth={2} />
@@ -112,7 +112,7 @@ const MicroscopeInterface = ({ className = "" }) => {
                 alt={currentMicrobe?.alt}
                 className="w-full h-full object-cover" />
 
-              
+
               {/* Focus Overlay */}
               <div
                 className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-black/20"
@@ -125,7 +125,7 @@ const MicroscopeInterface = ({ className = "" }) => {
             {/* Focus Rings */}
             <div className="absolute inset-4 border-2 border-primary/30 rounded-full animate-pulse-soft" />
             <div className="absolute inset-8 border border-secondary/20 rounded-full" />
-            
+
             {/* Crosshairs */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="relative">
@@ -182,11 +182,11 @@ const MicroscopeInterface = ({ className = "" }) => {
                 {currentMicrobe?.rarity}
               </div>
             </div>
-            
+
             <p className="font-body text-sm text-foreground mb-3">
               {currentMicrobe?.description}
             </p>
-            
+
             <div className="flex items-center justify-between text-xs">
               <span className="font-caption text-muted-foreground">
                 Discovered: {new Date(currentMicrobe.discoveredDate)?.toLocaleDateString()}
@@ -219,14 +219,14 @@ const MicroscopeInterface = ({ className = "" }) => {
                   alt={microbe?.alt}
                   className="w-full h-full object-cover" />
 
-                  
+
                   {/* Selection Indicator */}
                   {selectedMicrobe === index &&
                 <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
                       <Icon name="Eye" size={16} color="white" strokeWidth={2.5} />
                     </div>
                 }
-                  
+
                   {/* Microbe Type Icon */}
                   <div className="absolute bottom-1 right-1 w-5 h-5 bg-card/90 rounded-full flex items-center justify-center">
                     <Icon
