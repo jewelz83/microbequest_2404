@@ -42,3 +42,9 @@ Prepared October 23, 2026. This branch is a development recovery candidate, not 
 ## Original audit status to preserve
 
 The audit documented confirmed failures of saved parent restrictions and tracking opt-out; incomplete Germ Buster wave/end-state wiring; incorrect scoring and fabricated milestones; unscoped browser progress caching; incomplete exports; and keyboard/mobile/content defects. Matching persistence and early Timeline progression passed in the isolated environment. Full later-game, classroom cross-user, payment recovery, deletion and device coverage remains outstanding. Importing source and passing a build do not resolve these findings.
+
+## Hosted preview setup follow-up, October 23
+
+Netlify automatically created https://deploy-preview-1--microbequest.netlify.app for this draft. Initial artifact inspection showed no embedded Supabase host; the dashboard confirmed no project environment variables existed. The missing-settings startup error remained in the compiled entry.
+
+Added VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY with values only in the Deploy Previews context, pointing to the isolated Billing Test project and using its public publishable client key. Each variable has one value in one deploy context. Production, branch deploy, agent runner and local CLI contexts were left unset. No database privilege, policy, schema or account credential was changed. Analytics remains unconfigured. This follow-up commit requests a fresh preview build; runtime checks follow deployment.
