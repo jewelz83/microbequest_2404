@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Target, CheckCircle, XCircle, Lightbulb, AlertTriangle, TrendingUp, Shield, Users } from 'lucide-react';
 
 const AnalysisCenter = ({ selectedCase, collectedClues, identifiedMicrobe, onSolutionSubmit, solutionSubmitted }) => {
   const [selectedSolutions, setSelectedSolutions] = useState([]);
   const [showResults, setShowResults] = useState(false);
+  const completionTimer = useRef(null);
+  const submitted = useRef(false);
+  useEffect(() => () => clearTimeout(completionTimer.current), []);
 
   // Solution options for each case
   const getSolutionOptions = () => {
@@ -283,7 +286,7 @@ const AnalysisCenter = ({ selectedCase, collectedClues, identifiedMicrobe, onSol
   };
 
   const solutions = getSolutionOptions();
-  const allSolutions = [...solutions?.correctSolutions, ...solutions?.wrongSolutions]?.sort(() => Math.random() - 0.5);
+  const allSolutions = [...solutions?.correctSolutions, ...solutions?.wrongSolutions];
 
   const handleSolutionToggle = (solutionId) => {
     if (showResults) return;
@@ -296,10 +299,11 @@ const AnalysisCenter = ({ selectedCase, collectedClues, identifiedMicrobe, onSol
   };
 
   const handleSubmit = () => {
-    if (selectedSolutions?.length === 0) {
+    if (submitted.current || selectedSolutions?.length === 0) {
       return;
     }
 
+    submitted.current = true;
     setShowResults(true);
 
     // Calculate score
@@ -310,7 +314,7 @@ const AnalysisCenter = ({ selectedCase, collectedClues, identifiedMicrobe, onSol
     const score = (selectedCorrect?.length * 10) - (selectedWrong?.length * 5);
     const isPerfect = selectedCorrect?.length === correctIds?.length && selectedWrong?.length === 0;
 
-    setTimeout(() => {
+    if (isPerfect) completionTimer.current = setTimeout(() => {
       onSolutionSubmit({ score, isPerfect });
     }, 3000);
   };
@@ -549,13 +553,14 @@ const AnalysisCenter = ({ selectedCase, collectedClues, identifiedMicrobe, onSol
               transition={{ delay: 0.5 }}
             >
               <div className="text-6xl mb-4">🎉</div>
-              <h3 className="text-3xl font-bold text-white mb-3">Case Complete!</h3>
+              <h3 className="text-3xl font-bold text-white mb-3">Review Your Recommendations</h3>
               <p className="text-white/90 text-lg mb-4">
-                Excellent work, Detective! You've successfully investigated the outbreak and recommended solutions.
+                Compare your selections with the evidence. Select every correct solution and avoid incorrect options to complete the case.
               </p>
               <p className="text-green-300">
-                Your recommendations will help prevent future outbreaks and protect the community!
+                Correct recommendations will help protect the community.
               </p>
+              <button className="mt-4 px-6 py-3 rounded-lg bg-blue-600 text-white" onClick={() => {clearTimeout(completionTimer.current); submitted.current = false; setShowResults(false);}}>Review selections</button>
             </motion.div>
           </motion.div>)
         )}

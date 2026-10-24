@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Microscope, Search, FileText, Users, Award, ChevronLeft, Play } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { Link } from 'react-router-dom';
 import CaseSelectionBoard from './components/CaseSelectionBoard';
 import InvestigationInterface from './components/InvestigationInterface';
 
 import CareerConnectionPanel from './components/CareerConnectionPanel';
 import CharacterSpriteSystem from '../../components/ui/CharacterSpriteSystem';
+import { saveGameScore, unlockAchievement } from '../../services/gameProgressService';
 
 const MicrobeDetectiveMysteryOutbreak = () => {
+  const completedCaseIds = useRef(new Set());
   const [currentView, setCurrentView] = useState('home'); // home, case-selection, investigation, career
   const [selectedCase, setSelectedCase] = useState(null);
   const [unlockedCases, setUnlockedCases] = useState([1, 2]); // Start with first 2 cases unlocked
@@ -20,15 +24,16 @@ const MicrobeDetectiveMysteryOutbreak = () => {
     perfectScores: 0
   });
   const navigate = useNavigate();
+  const { isPremium } = useAuth();
 
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { 
+    visible: {
       opacity: 1,
-      transition: { 
+      transition: {
         duration: 0.8,
-        staggerChildren: 0.1 
+        staggerChildren: 0.1
       }
     }
   };
@@ -39,20 +44,49 @@ const MicrobeDetectiveMysteryOutbreak = () => {
   };
 
   const handleCaseComplete = (caseId, score, perfect) => {
-    setCompletedCases(prev => [...new Set([...prev, caseId])]);
-    setPlayerStats(prev => ({
-      ...prev,
-      totalPoints: prev?.totalPoints + score,
-      casesCompleted: prev?.casesCompleted + 1,
-      perfectScores: perfect ? prev?.perfectScores + 1 : prev?.perfectScores,
-      badgesEarned: [
-        ...prev?.badgesEarned,
-        ...(prev?.casesCompleted === 0 ? ['Junior Detective'] : []),
-        ...(prev?.casesCompleted === 2 ? ['Epidemiologist'] : []),
-        ...(prev?.casesCompleted === 5 ? ['Master Investigator'] : []),
-        ...(perfect ? ['Perfect Detective'] : [])
-      ]
-    }));
+    setCurrentView('case-selection');
+    if (completedCaseIds.current.has(caseId)) return;
+    completedCaseIds.current.add(caseId);
+    setCompletedCases([...completedCaseIds.current]);
+    const prev = playerStats;
+    const newStats = {
+        ...prev,
+        totalPoints: prev?.totalPoints + score,
+        casesCompleted: prev?.casesCompleted + 1,
+        perfectScores: perfect ? prev?.perfectScores + 1 : prev?.perfectScores,
+        badgesEarned: [
+          ...prev?.badgesEarned,
+          ...(prev?.casesCompleted === 0 ? ['Junior Detective'] : []),
+          ...(prev?.casesCompleted === 2 ? ['Epidemiologist'] : []),
+          ...(prev?.casesCompleted === 5 ? ['Master Investigator'] : []),
+          ...(perfect ? ['Perfect Detective'] : [])
+        ]
+      };
+
+      // Persist score to Supabase
+      saveGameScore({
+        gameMode: 'microbe-detective',
+        score,
+        correctAnswers: perfect ? 1 : 0,
+        totalQuestions: 1,
+        timeElapsed: 0,
+        difficulty: 'medium',
+        metadata: { caseId, perfect, casesCompleted: newStats?.casesCompleted },
+      })?.catch((err) => console.error('Failed to save detective score:', err));
+
+      // Unlock achievements
+      if (newStats?.casesCompleted === 1) {
+        unlockAchievement('junior-detective', 'Junior Detective');
+      }
+      if (newStats?.casesCompleted === 3) {
+        unlockAchievement('epidemiologist', 'Epidemiologist');
+      }
+      if (perfect) {
+        unlockAchievement('perfect-detective', 'Perfect Detective');
+      }
+
+      newStats.badgesEarned = [...new Set(newStats.badgesEarned)];
+      setPlayerStats(newStats);
 
     // Unlock next cases based on progress
     if (caseId === 2 && !unlockedCases?.includes(3)) {
@@ -65,67 +99,67 @@ const MicrobeDetectiveMysteryOutbreak = () => {
 
   const renderHomeScreen = () => (
     <motion.div
-      className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex flex-col"
+      className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex flex-col game-screen"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
       {/* Header */}
-      <motion.div 
-        className="relative overflow-hidden bg-gradient-to-r from-purple-800 to-blue-800 py-8"
+      <motion.div
+        className="relative overflow-hidden bg-gradient-to-r from-purple-800 to-blue-800 py-4 sm:py-8"
         variants={itemVariants}
       >
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%220%200%2040%2040%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22white%22%20opacity%3D%220.3%22%3E%3Cpath%20d%3D%22M20%2020c0-5.5-4.5-10-10-10s-10%204.5-10%2010%204.5%2010%2010%2010%2010-4.5%2010-10zm10%200c0-5.5-4.5-10-10-10s-10%204.5-10%2010%204.5%2010%2010%2010%2010-4.5%2010-10z%22/%3E%3C/g%3E%3C/svg%3E')]"></div>
         </div>
-        <div className="container mx-auto px-6 relative">
+        <div className="container mx-auto px-4 sm:px-6 relative">
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate('/')}
-              className="flex items-center gap-3 text-white/80 hover:text-white transition-colors"
+              style={{ touchAction: 'manipulation' }}
+              className="flex items-center gap-2 text-white/80 hover:text-white transition-colors min-h-[44px] min-w-[44px] py-2 pr-3"
             >
               <ChevronLeft size={24} />
-              <span className="text-lg">Back to Games</span>
+              <span className="text-base sm:text-lg">Back</span>
             </button>
-            <div className="flex items-center gap-4">
-              <div className="bg-white/20 rounded-lg px-4 py-2">
-                <span className="text-white font-semibold">Points: {playerStats?.totalPoints}</span>
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="bg-white/20 rounded-lg px-3 py-2">
+                <span className="text-white font-semibold text-sm sm:text-base">Pts: {playerStats?.totalPoints}</span>
               </div>
-              <div className="bg-white/20 rounded-lg px-4 py-2">
-                <span className="text-white font-semibold">Badges: {playerStats?.badgesEarned?.length}</span>
+              <div className="bg-white/20 rounded-lg px-3 py-2">
+                <span className="text-white font-semibold text-sm sm:text-base">🏅 {playerStats?.badgesEarned?.length}</span>
               </div>
             </div>
           </div>
-          <div className="text-center mt-8">
-            <motion.h1 
-              className="text-6xl font-bold text-white mb-4"
+          <div className="text-center mt-6 sm:mt-8">
+            <motion.h1
+              className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4"
               variants={itemVariants}
             >
               🔬 Microbe Detective
             </motion.h1>
-            <motion.h2 
-              className="text-3xl text-purple-200 font-semibold mb-6"
+            <motion.h2
+              className="text-xl sm:text-2xl lg:text-3xl text-purple-200 font-semibold mb-4 sm:mb-6"
               variants={itemVariants}
             >
               Mystery Outbreak Investigation
             </motion.h2>
-            <motion.p 
-              className="text-xl text-white/90 max-w-4xl mx-auto leading-relaxed"
+            <motion.p
+              className="text-base sm:text-xl text-white/90 max-w-4xl mx-auto leading-relaxed"
               variants={itemVariants}
             >
-              Join Aunt Juju and Charlie as a Junior Microbiologist! Investigate real-world disease outbreaks, 
-              gather clues, identify culprit microbes, and save communities. Use everything you've learned 
-              from other games in this ultimate scientific challenge!
+              Join Aunt Juju and Charlie as a Junior Microbiologist! Investigate real-world disease outbreaks,
+              gather clues, identify culprit microbes, and save communities.
             </motion.p>
           </div>
         </div>
       </motion.div>
 
       {/* Main Content */}
-      <div className="flex-1 container mx-auto px-6 py-12">
+      <div className="flex-1 container mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="grid lg:grid-cols-2 gap-12 max-w-7xl mx-auto">
           {/* Investigation Headquarters */}
-          <motion.div 
+          <motion.div
             className="space-y-6"
             variants={itemVariants}
           >
@@ -139,7 +173,7 @@ const MicrobeDetectiveMysteryOutbreak = () => {
                   <p className="text-purple-200">Your scientific command center</p>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="bg-blue-500/20 rounded-lg p-4 text-center">
                   <FileText size={24} className="text-blue-200 mx-auto mb-2" />
@@ -160,6 +194,18 @@ const MicrobeDetectiveMysteryOutbreak = () => {
                 <Play size={24} />
                 Start Investigation
               </button>
+
+              {!isPremium && (
+                <div className="mt-4 rounded-xl p-4 text-center" style={{ background: 'linear-gradient(135deg, #1a1030 0%, #2d1b69 50%, #1a1030 100%)', border: '1px solid rgba(139,92,246,0.4)' }}>
+                  <div className="text-3xl mb-2">🔒</div>
+                  <p className="text-purple-200 text-sm mb-3">Advanced cases require Premium. Cases 1–2 are free to explore!</p>
+                  <Link to="/premium">
+                    <button className="px-5 py-2 rounded-xl font-bold text-gray-900 text-sm transition-all hover:opacity-90 hover:scale-105" style={{ backgroundColor: '#FFC107' }}>
+                      Unlock All Cases 🌻
+                    </button>
+                  </Link>
+                </div>
+              )}
             </div>
 
             {/* Recent Badges */}
@@ -181,7 +227,7 @@ const MicrobeDetectiveMysteryOutbreak = () => {
           </motion.div>
 
           {/* Character Introduction */}
-          <motion.div 
+          <motion.div
             className="space-y-6"
             variants={itemVariants}
           >

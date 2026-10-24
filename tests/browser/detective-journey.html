@@ -1,0 +1,38 @@
+<!doctype html><meta charset="utf-8"><title>Guest detective journey</title><style>body{font:16px system-ui;margin:24px}iframe{width:390px;max-width:100%;height:850px}pre{white-space:pre-wrap}</style><h1>Guest detective journey</h1><button id="run">Run checks</button><pre id="results">Ready</pre><iframe></iframe><script type="module">
+import {defaultControls} from '/src/services/parentalControlsService.js';
+if(!['localhost','127.0.0.1'].includes(location.hostname))throw Error('Localhost only');
+const wait=ms=>new Promise(r=>setTimeout(r,ms)),frame=document.querySelector('iframe'),out=document.querySelector('pre'),rows=[];
+const doc=()=>frame.contentDocument,buttons=()=>[...doc().querySelectorAll('button')],btn=t=>buttons().find(b=>b.textContent.trim()===t),body=()=>doc().body.textContent;
+async function until(fn,label){for(let i=0;i<900;i++){if(fn())return;await wait(100)}throw Error('Timeout '+label)}
+function pass(ok,label){if(!ok)throw Error(label);rows.push('PASS '+label);out.textContent=rows.join('\n')}
+async function click(el){if(!el)throw Error('Missing control');el.click();await wait(100)}
+async function open(route,ready){frame.src='/'+route;await until(()=>frame.contentWindow.location.pathname==='/'+route&&body().includes(ready),'open '+route);await wait(500)}
+const stat=t=>[...doc().querySelectorAll('p')].find(p=>p.textContent===t)?.parentElement.textContent;
+document.querySelector('#run').onclick=async()=>{try{
+localStorage.removeItem('microbequest_usage:v1:guest');localStorage.setItem('microbequest_parental_controls',JSON.stringify({...defaultControls,screenTimeEnabled:false,allowedStartTime:'00:00',allowedEndTime:'23:59'}));
+await open('microbe-detective-mystery-outbreak','Start Investigation');await click(btn('Start Investigation'));await until(()=>body().includes('Case Selection Board'),'cases');await click(btn('Start Investigation'));await until(()=>btn('Evidence'),'case');pass(btn('Analysis').disabled,'analysis requires investigation');await click(btn('Evidence'));await until(()=>body().includes('Evidence Board'),'evidence');
+for(const name of ['Cafeteria Kitchen','Illness Timeline','Cafeteria Worker Interview','Student Symptoms','Food Sample Results']){await click([...doc().querySelectorAll('h3')].find(h=>h.textContent===name));await wait(2200)}
+await click(btn('Analyze Evidence in Lab'));await until(()=>body().includes('Available Laboratory Tests'),'lab');
+for(const name of ['Microscopy','Gram Stain']){await click(buttons().find(b=>b.textContent.startsWith(name)));await wait(3200)}
+await click(buttons().find(b=>b.textContent.startsWith('E. coli')));await until(()=>btn('Try identification again'),'wrong answer retry');pass(true,'wrong microbe identification can be retried');await click(btn('Try identification again'));await click(buttons().find(b=>b.textContent.startsWith('Salmonella enterica')));await wait(1800);await click(btn('Analysis'));await until(()=>btn('Submit Solutions'),'analysis');
+await click(buttons().find(b=>b.textContent.startsWith('Close the Entire School')));await click(btn('Submit Solutions'));await wait(5500);pass(Boolean(btn('Review selections'))&&body().includes('Solution✗'),'wrong solution does not complete case');await click(btn('Review selections'));
+for(const name of ['Close the Entire School','Implement Temperature Control','Separate Cutting Boards','Food Safety Training'])await click(buttons().find(b=>b.textContent.startsWith(name)));
+await click(btn('Submit Solutions'));await until(()=>body().includes('Case Selection Board')&&body().includes('1/6 Cases Solved'),'correct case completion');pass(true,'correct evidence, microbe and solutions complete case');
+await click(buttons().filter(b=>b.textContent.trim()==='Start Investigation').at(-1));await until(()=>btn('Evidence'),'second case');await click(btn('Evidence'));await until(()=>body().includes('Well Inspection'),'well evidence');
+for(const name of ['Well Inspection','Illness Pattern','Camp Director Report','Camper Symptoms','Water Test Results','Additional Finding']){await click([...doc().querySelectorAll('h3')].find(h=>h.textContent===name));await wait(2200)}
+await click(btn('Analyze Evidence in Lab'));await until(()=>body().includes('Available Laboratory Tests'),'well lab');
+for(const name of ['Microscopy','Gram Stain']){await click(buttons().find(b=>b.textContent.startsWith(name)));await wait(3200)}
+await click(buttons().find(b=>b.textContent.startsWith('Giardia lamblia')));await wait(1800);await click(btn('Analysis'));await until(()=>btn('Submit Solutions'),'well analysis');
+for(const name of ['Immediate Boil Water Order','Repair Well Cap','Protect Water Source'])await click(buttons().find(b=>b.textContent.startsWith(name)));
+await click(btn('Submit Solutions'));await until(()=>body().includes('2/6 Cases Solved'),'second case completion');pass(true,'water well case completes with six clues and correct solutions');
+pass(doc().documentElement.scrollWidth <= doc().documentElement.clientWidth + 1,'390px case board has no horizontal overflow');
+for(const [title,microbe,solutions,count] of [
+['Hospital Hand Sanitizer Failure','MRSA (Methicillin-resistant',['Switch to Effective Sanitizer','Strict Isolation Procedures','Enhanced Environmental Cleaning','Staff Hand Hygiene Training'],3],
+['The Moldy Building Mystery','Stachybotrys chartarum',['Evacuate Affected Classrooms','Professional Mold Remediation','Fix Moisture Source','Clean HVAC System'],4]]){
+const heading=[...doc().querySelectorAll('h3')].find(h=>h.textContent===title);let card=heading;while(card&&!card.querySelector('button'))card=card.parentElement;await click(card.querySelector('button'));await until(()=>btn('Evidence'),'later case');await click(btn('Evidence'));await until(()=>body().includes('Evidence Board'),'later evidence');
+for(const heading of [...doc().querySelectorAll('h3')].filter(h=>h.closest('[class*="cursor-pointer"]'))){await click(heading);await wait(2200)}
+await click(btn('Analyze Evidence in Lab'));await until(()=>body().includes('Available Laboratory Tests'),'later lab');for(const name of ['Microscopy','Gram Stain']){await click(buttons().find(b=>b.textContent.startsWith(name)));await wait(3200)}
+await click(buttons().find(b=>b.textContent.startsWith(microbe)));await wait(1800);await click(btn('Analysis'));await until(()=>btn('Submit Solutions'),'later analysis');for(const name of solutions)await click(buttons().find(b=>b.textContent.startsWith(name)));await click(btn('Submit Solutions'));await until(()=>body().includes(count+'/6 Cases Solved'),'later completion');pass(true,title+' completes at 390px');}
+rows.push('DONE');out.textContent=rows.join('\n');
+}catch(e){rows.push('FAIL '+e.message);out.textContent=rows.join('\n')}};
+</script>

@@ -1,22 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Icon from '../../../components/AppIcon';
 
-const GameBoard = ({ 
-  location, 
-  bacteria, 
-  setBacteria, 
-  defenseTowers, 
-  selectedTool, 
-  onUseTool, 
+const GameBoard = ({
+  location,
+  bacteria,
+  defenseTowers,
+  selectedTool,
+  onUseTool,
   onShoot,
   onMouseMove,
   onMouseClick,
+  onTouchMove,
+  onTouchEnd,
   projectiles,
   playerShip,
   gameState,
   hitIndicators,
   rapidFire
 }) => {
+  const boardContainer = useRef(null);
+  const [boardScale, setBoardScale] = useState(1);
+  useEffect(() => {
+    const observer = new ResizeObserver(([entry]) => setBoardScale(Math.min(1, entry.contentRect.width / 800)));
+    observer.observe(boardContainer.current);
+    return () => observer.disconnect();
+  }, []);
   const [animatingBacteria, setAnimatingBacteria] = useState([]);
   const [selectedBacterium, setSelectedBacterium] = useState(null);
   const [explosions, setExplosions] = useState([]);
@@ -38,7 +46,7 @@ const GameBoard = ({
           color: projectile?.color,
           maxLength: 8 // Number of trail points
         };
-        
+
         setShotTrails(prev => [...prev, newTrail]);
       }
     });
@@ -52,7 +60,7 @@ const GameBoard = ({
           y: matchingProjectile?.y,
           timestamp: Date.now()
         };
-        
+
         // Add new point and limit trail length
         const updatedPoints = [...trail?.points, newPoint]?.slice(-trail?.maxLength);
         return { ...trail, points: updatedPoints };
@@ -62,45 +70,10 @@ const GameBoard = ({
 
     // Remove trails for projectiles that no longer exist
     const activeProjectileIds = projectiles?.map(p => p?.id);
-    setShotTrails(prev => prev?.filter(trail => 
+    setShotTrails(prev => prev?.filter(trail =>
       activeProjectileIds?.includes(trail?.projectileId)
     ));
   }, [projectiles]);
-
-  // Animate bacteria movement
-  useEffect(() => {
-    if (gameState !== 'playing') return;
-
-    const interval = setInterval(() => {
-      setBacteria(prev => prev?.map(bacterium => {
-        if (!bacterium?.isAlive || bacterium?.spawnDelay > 0) {
-          return { 
-            ...bacterium, 
-            spawnDelay: Math.max(0, bacterium?.spawnDelay - 100) 
-          };
-        }
-
-        const newX = bacterium?.x + (bacterium?.speed === 'fast' ? 2 : bacterium?.speed === 'medium' ? 1.5 : 1);
-        
-        // Check if bacterium reached the end
-        if (newX > 800) {
-          // Bacterium reached the body - cause damage
-          return { ...bacterium, isAlive: false, reachedEnd: true };
-        }
-
-        return { ...bacterium, x: newX };
-      }));
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [gameState, setBacteria]);
-
-  // Remove dead bacteria
-  useEffect(() => {
-    setBacteria(prev => prev?.filter(bacterium => 
-      bacterium?.currentHealth > 0 && bacterium?.isAlive
-    ));
-  }, [bacteria, setBacteria]);
 
   // NEW: Clean up old hit effects
   useEffect(() => {
@@ -120,10 +93,10 @@ const GameBoard = ({
   const handleBoardClick = (event) => {
     if (gameState !== 'playing') return;
     event?.preventDefault();
-    
+
     if (selectedTool?.isShootable) {
       onShoot?.(playerShip?.x, playerShip?.y);
-      
+
       // Enhanced muzzle flash effect with color based on weapon
       setMuzzleFlash({
         id: Date.now(),
@@ -132,14 +105,14 @@ const GameBoard = ({
         color: selectedTool?.projectileColor || '#ffffff',
         size: selectedTool?.projectileSize || 8
       });
-      
+
       setTimeout(() => setMuzzleFlash(null), 200);
     } else if (selectedTool?.id === 'rest') {
       // Non-shootable tools can still be used by clicking
       const rect = event?.currentTarget?.getBoundingClientRect();
       const x = event?.clientX - rect?.left;
       const y = event?.clientY - rect?.top;
-      
+
       setExplosions(prev => [...prev, {
         id: Date.now(),
         x: x,
@@ -154,7 +127,7 @@ const GameBoard = ({
   // Updated bacterium click - for info display only
   const handleBacteriumClick = (bacterium) => {
     setSelectedBacterium(bacterium);
-    
+
     // NEW: Create hit effect when clicking on bacterium (for visual feedback)
     setHitEffects(prev => [...prev, {
       id: Date.now() + Math.random(),
@@ -240,22 +213,22 @@ const GameBoard = ({
                 {/* Villi structures */}
                 {Array.from({ length: 15 }, (_, i) => (
                   <g key={i}>
-                    <line 
-                      x1={50 + i * 50} 
-                      y1="320" 
-                      x2={50 + i * 50} 
-                      y2="290" 
-                      stroke="#f59e0b" 
-                      strokeWidth="4" 
+                    <line
+                      x1={50 + i * 50}
+                      y1="320"
+                      x2={50 + i * 50}
+                      y2="290"
+                      stroke="#f59e0b"
+                      strokeWidth="4"
                       opacity="0.5"
                     />
-                    <line 
-                      x1={50 + i * 50} 
-                      y1="80" 
-                      x2={50 + i * 50} 
-                      y2="110" 
-                      stroke="#f59e0b" 
-                      strokeWidth="4" 
+                    <line
+                      x1={50 + i * 50}
+                      y1="80"
+                      x2={50 + i * 50}
+                      y2="110"
+                      stroke="#f59e0b"
+                      strokeWidth="4"
                       opacity="0.5"
                     />
                   </g>
@@ -328,12 +301,19 @@ const GameBoard = ({
   };
 
   return (
-    <div className="relative">
+    <div ref={boardContainer} className="relative w-full min-w-0" style={{ height: 400 * boardScale }}>
       {/* Enhanced Game Board - Biological Environment Style */}
-      <div 
-        className="relative w-full h-96 border-2 border-border rounded-xl overflow-hidden bg-white cursor-crosshair"
+      <div
+        className="relative w-full h-96 border-2 border-border rounded-xl overflow-hidden bg-white cursor-crosshair game-board game-interactive"
+        style={{ touchAction: 'none', width: 800, height: 400, transform: `scale(${boardScale})`, transformOrigin: 'top left' }}
+        tabIndex={0}
+        role="region"
+        aria-label="Immune defense playfield"
         onClick={handleBoardClick}
         onMouseMove={onMouseMove}
+        onTouchStart={onTouchMove}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
       >
         {/* Realistic Biological Environment Background */}
         <div className="absolute inset-0">
@@ -344,7 +324,7 @@ const GameBoard = ({
         {/* NEW: Enhanced Shot Trails - Much More Visible */}
         {shotTrails?.map((trail) => {
           if (!trail?.points || trail?.points?.length < 2) return null;
-          
+
           return (
             <svg
               key={trail?.id}
@@ -363,7 +343,7 @@ const GameBoard = ({
                   filter: `drop-shadow(0 0 6px ${trail?.color})`,
                 }}
               />
-              
+
               {/* Glowing Trail Effect */}
               <path
                 d={`M ${trail?.points?.map(point => `${point?.x},${point?.y}`)?.join(' L ')}`}
@@ -376,13 +356,13 @@ const GameBoard = ({
                   filter: `blur(2px)`,
                 }}
               />
-              
+
               {/* Individual Trail Particles */}
               {trail?.points?.map((point, index) => {
                 const age = (Date.now() - point?.timestamp) / 1000;
                 const opacity = Math.max(0, 1 - age);
                 const size = 3 + (1 - age) * 2;
-                
+
                 return (
                   <circle
                     key={`${trail?.id}-${index}`}
@@ -403,6 +383,7 @@ const GameBoard = ({
 
         {/* NEW: Immune Defender Ship (instead of space ship) */}
         <div
+          data-testid="player-ship"
           className="absolute transition-all duration-75 ease-out z-20"
           style={{
             left: `${playerShip?.x - playerShip?.width / 2}px`,
@@ -428,17 +409,17 @@ const GameBoard = ({
               <path d="M 5 15 Q 10 10 15 15 Q 10 20 5 15" fill="#3b82f6" opacity="0.3" />
               <path d="M 35 15 Q 30 10 25 15 Q 30 20 35 15" fill="#3b82f6" opacity="0.3" />
             </svg>
-            
+
             {/* Weapon Mount Indicator */}
             {selectedTool?.isShootable && (
               <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                <div 
+                <div
                   className="w-2 h-3 rounded-t-full animate-pulse"
                   style={{ backgroundColor: selectedTool?.projectileColor }}
                 />
               </div>
             )}
-            
+
             {/* Rapid Fire Indicator */}
             {rapidFire && (
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -463,7 +444,7 @@ const GameBoard = ({
             }}
           >
             {/* Outer Glow Ring */}
-            <div 
+            <div
               className="absolute rounded-full animate-ping"
               style={{
                 width: `${projectile?.size * 3}px`,
@@ -475,9 +456,9 @@ const GameBoard = ({
                 filter: `blur(4px)`,
               }}
             />
-            
+
             {/* Main Projectile Body - Much Brighter */}
-            <div 
+            <div
               className="absolute rounded-full border-2 border-white animate-pulse"
               style={{
                 width: `${projectile?.size * 2}px`,
@@ -491,9 +472,9 @@ const GameBoard = ({
                 filter: 'brightness(1.3)',
               }}
             />
-            
+
             {/* Core Bright Center */}
-            <div 
+            <div
               className="absolute rounded-full"
               style={{
                 width: `${projectile?.size}px`,
@@ -505,9 +486,9 @@ const GameBoard = ({
                 boxShadow: `0 0 ${projectile?.size * 2}px #ffffff`,
               }}
             />
-            
+
             {/* Directional Motion Blur */}
-            <div 
+            <div
               className="absolute rounded-full opacity-40"
               style={{
                 width: `${projectile?.size * 0.8}px`,
@@ -518,7 +499,7 @@ const GameBoard = ({
                 filter: 'blur(1px)',
               }}
             />
-            
+
             {/* Special Effects for Different Weapon Types */}
             {projectile?.isHoming && (
               <>
@@ -526,14 +507,14 @@ const GameBoard = ({
                 <div className="absolute -inset-1 border border-blue-300 rounded-full animate-pulse opacity-50"></div>
               </>
             )}
-            
+
             {projectile?.isSpreadShot && (
               <>
                 <div className="absolute -inset-2 border-2 border-yellow-400 rounded-full animate-ping opacity-60"></div>
                 <div className="absolute -inset-3 border border-orange-400 rounded-full animate-pulse opacity-40"></div>
               </>
             )}
-            
+
             {/* Weapon Type Particles */}
             {projectile?.toolId === 'antibiotic' && (
               <div className="absolute inset-0">
@@ -541,7 +522,7 @@ const GameBoard = ({
                 <div className="w-1 h-1 bg-purple-300 rounded-full absolute animate-ping" style={{ right: '-2px', top: '50%', animationDelay: '0.1s' }} />
               </div>
             )}
-            
+
             {projectile?.toolId === 'probiotic' && (
               <div className="absolute inset-0">
                 <div className="w-1 h-1 bg-green-300 rounded-full absolute animate-bounce" style={{ left: '25%', top: '-2px' }} />
@@ -556,7 +537,7 @@ const GameBoard = ({
           const age = (Date.now() - effect?.timestamp) / 1000;
           const scale = 1 + age * 2;
           const opacity = Math.max(0, 1 - age);
-          
+
           return (
             <div
               key={effect?.id}
@@ -569,7 +550,7 @@ const GameBoard = ({
               }}
             >
               {/* Main Explosion Ring */}
-              <div 
+              <div
                 className="w-8 h-8 rounded-full border-4 animate-ping"
                 style={{
                   borderColor: effect?.color,
@@ -577,16 +558,16 @@ const GameBoard = ({
                   boxShadow: `0 0 20px ${effect?.color}`,
                 }}
               />
-              
+
               {/* Inner Flash */}
-              <div 
+              <div
                 className="absolute inset-2 rounded-full animate-pulse"
                 style={{
                   backgroundColor: '#ffffff',
                   boxShadow: `0 0 12px ${effect?.color}`,
                 }}
               />
-              
+
               {/* Sparkle Effects */}
               <div className="absolute inset-0">
                 <div className="w-1 h-1 bg-white rounded-full absolute animate-ping" style={{ left: '0px', top: '50%' }} />
@@ -601,7 +582,7 @@ const GameBoard = ({
         {/* Enhanced Bacteria with Better Visibility */}
         {bacteria?.map((bacterium) => {
           if (bacterium?.spawnDelay > 0 || !bacterium?.isAlive) return null;
-          
+
           return (
             <div
               key={bacterium?.id}
@@ -626,27 +607,27 @@ const GameBoard = ({
               }}
             >
               {/* Bacterium Icon */}
-              <Icon 
-                name={getBacteriumIcon(bacterium)} 
-                size={bacterium?.size === 'large' ? 20 : bacterium?.size === 'small' ? 12 : 16} 
-                color="white" 
+              <Icon
+                name={getBacteriumIcon(bacterium)}
+                size={bacterium?.size === 'large' ? 20 : bacterium?.size === 'small' ? 12 : 16}
+                color="white"
                 strokeWidth={2}
               />
-              
+
               {/* Health Bar */}
               {bacterium?.currentHealth < bacterium?.health && (
                 <div className="absolute -top-3 left-0 w-full">
                   <div className="w-full h-1 bg-gray-800 rounded">
-                    <div 
+                    <div
                       className="h-full bg-red-500 rounded transition-all duration-300"
-                      style={{ 
-                        width: `${(bacterium?.currentHealth / bacterium?.health) * 100}%` 
+                      style={{
+                        width: `${(bacterium?.currentHealth / bacterium?.health) * 100}%`
                       }}
                     />
                   </div>
                 </div>
               )}
-              
+
               {/* Bacterium Type Indicator */}
               <div className="absolute -top-1 -right-1">
                 {bacterium?.type === 'good' ? (
@@ -669,7 +650,7 @@ const GameBoard = ({
             }}
           >
             {/* Outer Flash Ring */}
-            <div 
+            <div
               className="absolute w-16 h-16 rounded-full animate-ping opacity-60"
               style={{
                 backgroundColor: muzzleFlash?.color,
@@ -678,9 +659,9 @@ const GameBoard = ({
                 top: '-20px',
               }}
             />
-            
+
             {/* Main Muzzle Flash */}
-            <div 
+            <div
               className="w-6 h-12 rounded-full animate-pulse"
               style={{
                 background: `linear-gradient(to top, transparent, ${muzzleFlash?.color}, #ffffff)`,
@@ -688,10 +669,10 @@ const GameBoard = ({
                 filter: 'brightness(1.5)',
               }}
             />
-            
+
             {/* Bright Core */}
             <div className="absolute inset-0 w-3 h-8 bg-white rounded-full animate-pulse ml-1.5 mt-2 opacity-90"></div>
-            
+
             {/* Side Flashes */}
             <div className="absolute top-2 -left-1 w-2 h-2 bg-white rounded-full animate-ping opacity-80"></div>
             <div className="absolute top-2 -right-1 w-2 h-2 bg-white rounded-full animate-ping opacity-80"></div>
@@ -700,18 +681,6 @@ const GameBoard = ({
 
         {/* Enhanced Damage Number Indicators */}
         {hitIndicators?.map((indicator) => {
-          // NEW: Create hit effect when damage indicator appears
-          React.useEffect(() => {
-            setHitEffects(prev => [...prev, {
-              id: Date.now() + Math.random(),
-              x: indicator?.x,
-              y: indicator?.y,
-              type: 'damage',
-              color: indicator?.type === 'good' ? '#ef4444' : '#22c55e',
-              timestamp: Date.now()
-            }]);
-          }, []);
-
           return (
             <div
               key={indicator?.id}
@@ -748,7 +717,7 @@ const GameBoard = ({
               top: `${explosion?.y - 32}px`,
             }}
           >
-            <div 
+            <div
               className="w-full h-full rounded-full opacity-75"
               style={{ backgroundColor: explosion?.color?.replace('bg-', '')?.replace('-500', '') }}
             />
@@ -807,17 +776,17 @@ const GameBoard = ({
         <div className="absolute top-full mt-4 left-0 right-0 bg-card border border-border rounded-lg p-4 z-40">
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-3">
-              <div 
+              <div
                 className="w-12 h-12 rounded-full flex items-center justify-center border-2"
-                style={{ 
+                style={{
                   backgroundColor: selectedBacterium?.color,
                   borderColor: selectedBacterium?.type === 'good' ? '#22c55e' : '#ef4444'
                 }}
               >
-                <Icon 
-                  name={getBacteriumIcon(selectedBacterium)} 
-                  size={24} 
-                  color="white" 
+                <Icon
+                  name={getBacteriumIcon(selectedBacterium)}
+                  size={24}
+                  color="white"
                   strokeWidth={2}
                 />
               </div>
@@ -844,7 +813,7 @@ const GameBoard = ({
                 </div>
               </div>
             </div>
-            
+
             <button
               onClick={() => setSelectedBacterium(null)}
               className="p-1 hover:bg-muted rounded"
@@ -852,14 +821,14 @@ const GameBoard = ({
               <Icon name="X" size={16} className="text-muted-foreground" />
             </button>
           </div>
-          
+
           {/* Educational Information - Updated */}
           <div className="mt-4 p-3 bg-muted rounded-lg">
             <div className="flex items-start space-x-2">
               <Icon name="Info" size={16} className="text-primary mt-0.5" />
               <div>
                 <p className="text-sm text-foreground">
-                  {selectedBacterium?.type === 'good' 
+                  {selectedBacterium?.type === 'good'
                     ? "This is a beneficial bacterium! Position your immune defender and use Probiotic Beams to boost its health!" :"This is a harmful bacterium! Move your immune defender into position and shoot it before it reaches the body!"
                   }
                 </p>
@@ -892,7 +861,7 @@ style.textContent = `
       opacity: 0;
     }
   }
-  
+
   @keyframes bounce-gentle {
     0%, 20%, 50%, 80%, 100% {
       transform: translateY(0);
@@ -904,11 +873,11 @@ style.textContent = `
       transform: translateY(-1px);
     }
   }
-  
+
   .animate-bounce-gentle {
     animation: bounce-gentle 2s infinite;
   }
-  
+
   @keyframes shot-trail {
     0% {
       opacity: 1;

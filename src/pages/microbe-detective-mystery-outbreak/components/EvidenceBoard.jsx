@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Search, MapPin, Clock, Users, AlertCircle, CheckCircle, Sparkles, Eye } from 'lucide-react';
 
@@ -70,7 +70,7 @@ const EvidenceBoard = ({ selectedCase, collectedClues, onClueFound, onSwitchTool
     'antibiotic-9': 'https://images.unsplash.com/photo-1607631568010-a87245c0daf8?w=400&q=80',
   };
 
-  const getClueImage = (clue) => caseImages[clue?.id] || clueImages[clue?.type] || clueImages.evidence;
+  const getClueImage = (clue) => caseImages?.[clue?.id] || clueImages?.[clue?.type] || clueImages?.evidence;
 
   // Generate clues based on case
   const getCaseClues = () => {
@@ -494,17 +494,22 @@ const EvidenceBoard = ({ selectedCase, collectedClues, onClueFound, onSwitchTool
       ]
     };
 
-    return cluesByCase?.[selectedCase?.id] || cluesByCase[1];
+    return cluesByCase?.[selectedCase?.id] || cluesByCase?.[1];
   };
 
   const allClues = getCaseClues();
   const isClueCollected = (clueId) => collectedClues?.some(c => c?.id === clueId);
 
+  const revealTimer = useRef(null);
+  const revealing = useRef(false);
+  useEffect(() => () => clearTimeout(revealTimer.current), []);
   const handleClueClick = (clue) => {
-    if (isClueCollected(clue?.id)) return;
-    
+    if (revealing.current || isClueCollected(clue?.id)) return;
+    revealing.current = true;
+
     setRevealingClue(clue);
-    setTimeout(() => {
+    revealTimer.current = setTimeout(() => {
+      revealing.current = false;
       onClueFound(clue);
       setRevealingClue(null);
     }, 2000);
@@ -535,9 +540,9 @@ const EvidenceBoard = ({ selectedCase, collectedClues, onClueFound, onSwitchTool
   return (
     <div className="h-full bg-gradient-to-br from-slate-900/50 to-blue-900/50 p-6 overflow-auto">
       <div className="max-w-7xl mx-auto">
-        
+
         {/* Header */}
-        <motion.div 
+        <motion.div
           className="mb-8 text-center"
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -565,7 +570,7 @@ const EvidenceBoard = ({ selectedCase, collectedClues, onClueFound, onSwitchTool
               <motion.div
                 key={clue?.id}
                 className={`relative rounded-xl border-2 overflow-hidden cursor-pointer transition-all duration-300 ${
-                  collected 
+                  collected
                     ? getColorClasses(clue?.color) + ' ' + getGlowColor(clue?.color) + ' shadow-lg'
                     : 'bg-slate-800/50 border-slate-600/50 hover:border-white/30 hover:bg-slate-700/50'
                 }`}
@@ -642,7 +647,6 @@ const EvidenceBoard = ({ selectedCase, collectedClues, onClueFound, onSwitchTool
                     </motion.div>
                   )}
                 </div>
-
                 {/* Card Content */}
                 <div className="p-4">
                   <h3 className="font-bold text-white text-base mb-2">{clue?.title}</h3>
@@ -696,13 +700,13 @@ const EvidenceBoard = ({ selectedCase, collectedClues, onClueFound, onSwitchTool
               Investigation Progress
             </h3>
             <p className="text-white/80 mb-4">
-              Great work, Detective! You've collected {collectedClues?.length} clues. 
-              {collectedClues?.length >= 3 
+              Great work, Detective! You've collected {collectedClues?.length} clues.
+              {collectedClues?.length >= 3
                 ? " You have enough evidence to analyze in the Digital Lab!"
                 : ` Find ${Math.min(3 - collectedClues?.length, allClues?.length - collectedClues?.length)} more clues to proceed.`
               }
             </p>
-            
+
             {collectedClues?.length >= 3 && (
               <button
                 onClick={() => onSwitchTool('lab')}

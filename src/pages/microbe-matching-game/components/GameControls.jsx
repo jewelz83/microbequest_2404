@@ -1,20 +1,26 @@
+import { allowedDifficulties } from '../../../services/gameAccessPolicy.mjs';
+import { matchingMetrics } from '../../../services/matchingMetrics.mjs';
 import React from 'react';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 
 const GameControls = ({
   score = 0,
+  matchedPairs = 0,
+  totalPairs = 0,
   timeElapsed = 0,
   moves = 0,
   hintsRemaining = 3,
   gameState = 'playing',
   difficulty = 'easy',
+  maxDifficulty = 'easy',
   onHint,
   onPause,
   onRestart,
   onDifficultyChange,
   className = ""
 }) => {
+  const metrics = matchingMetrics({ matchedPairs, totalPairs, moves });
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -31,33 +37,33 @@ const GameControls = ({
   };
 
   return (
-    <div className={`bg-card rounded-xl p-4 shadow-moderate border border-border ${className}`}>
+    <div className={`bg-card rounded-xl p-3 sm:p-4 shadow-moderate border border-border ${className}`}>
       {/* Top Row - Score and Timer */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-6">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <div className="flex items-center space-x-3 sm:space-x-6">
           {/* Score */}
           <div className="text-center">
-            <div className="flex items-center space-x-2 mb-1">
-              <Icon name="Star" size={18} className="text-accent" strokeWidth={2} />
-              <span className="font-heading text-lg text-foreground">{score}</span>
+            <div className="flex items-center space-x-1 sm:space-x-2 mb-1">
+              <Icon name="Star" size={16} className="text-accent" strokeWidth={2} />
+              <span className="font-heading text-base sm:text-lg text-foreground">{score}</span>
             </div>
             <p className="font-caption text-xs text-muted-foreground">Score</p>
           </div>
 
           {/* Timer */}
           <div className="text-center">
-            <div className="flex items-center space-x-2 mb-1">
-              <Icon name="Clock" size={18} className="text-primary" strokeWidth={2} />
-              <span className="font-mono text-lg text-foreground">{formatTime(timeElapsed)}</span>
+            <div className="flex items-center space-x-1 sm:space-x-2 mb-1">
+              <Icon name="Clock" size={16} className="text-primary" strokeWidth={2} />
+              <span className="font-mono text-base sm:text-lg text-foreground">{formatTime(timeElapsed)}</span>
             </div>
             <p className="font-caption text-xs text-muted-foreground">Time</p>
           </div>
 
           {/* Moves */}
           <div className="text-center">
-            <div className="flex items-center space-x-2 mb-1">
-              <Icon name="MousePointer" size={18} className="text-secondary" strokeWidth={2} />
-              <span className="font-heading text-lg text-foreground">{moves}</span>
+            <div className="flex items-center space-x-1 sm:space-x-2 mb-1">
+              <Icon name="MousePointer" size={16} className="text-secondary" strokeWidth={2} />
+              <span className="font-heading text-base sm:text-lg text-foreground">{moves}</span>
             </div>
             <p className="font-caption text-xs text-muted-foreground">Moves</p>
           </div>
@@ -71,95 +77,89 @@ const GameControls = ({
               gameState === 'paused' ? 'bg-accent' :
               gameState === 'completed' ? 'bg-primary' : 'bg-muted-foreground'}
           `}></div>
-          <span className="font-caption text-sm text-muted-foreground capitalize">
+          <span className="font-caption text-xs sm:text-sm text-muted-foreground capitalize hidden sm:inline">
             {gameState}
           </span>
         </div>
       </div>
       {/* Bottom Row - Controls */}
-      <div className="flex items-center justify-between">
-        {/* Left Controls */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        {/* Left Controls - Difficulty Selector */}
         <div className="flex items-center space-x-2">
-          {/* Difficulty Selector */}
-          <div className="flex items-center space-x-2">
-            <span className="font-caption text-sm text-muted-foreground">Level:</span>
-            <div className="flex items-center space-x-1">
-              {['easy', 'medium', 'hard']?.map((level) => (
-                <button
-                  key={level}
-                  onClick={() => onDifficultyChange(level)}
-                  className={`
-                    px-3 py-1 rounded-full text-xs font-caption font-medium border transition-all duration-fast
-                    ${difficulty === level 
-                      ? getDifficultyColor(level)
-                      : 'text-muted-foreground bg-muted border-border hover:bg-muted/80'
-                    }
-                  `}
-                >
-                  {level?.charAt(0)?.toUpperCase() + level?.slice(1)}
-                </button>
-              ))}
-            </div>
+          <span className="font-caption text-xs sm:text-sm text-muted-foreground hidden sm:inline">Level:</span>
+          <div className="flex items-center space-x-1">
+            {allowedDifficulties(maxDifficulty).map((level) => (
+              <button
+                key={level}
+                onClick={() => onDifficultyChange(level)}
+                style={{ touchAction: 'manipulation' }}
+                className={`
+                  px-2 sm:px-3 py-1.5 rounded-full text-xs font-caption font-medium border transition-all duration-fast min-h-[36px]
+                  ${difficulty === level
+                    ? getDifficultyColor(level)
+                    : 'text-muted-foreground bg-muted border-border hover:bg-muted/80'
+                  }
+                `}
+              >
+                {level?.charAt(0)?.toUpperCase() + level?.slice(1)}
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Right Controls */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1 sm:space-x-2">
           {/* Hint Button */}
-          <Button
-            variant="outline"
-            size="sm"
+          <button
             onClick={onHint}
+            aria-label={`Hint (${hintsRemaining} remaining)`}
             disabled={hintsRemaining === 0 || gameState !== 'playing'}
-            iconName="Lightbulb"
-            iconPosition="left"
-            className="relative"
+            style={{ touchAction: 'manipulation' }}
+            className="relative flex items-center gap-1 px-2 sm:px-3 py-2 rounded-lg border border-border bg-card text-foreground text-xs sm:text-sm font-medium disabled:opacity-50 hover:bg-muted transition-colors min-h-[40px]"
           >
-            Hint ({hintsRemaining})
-            {hintsRemaining > 0 && (
-              <div className="absolute -top-1 -right-1 w-5 h-5 bg-accent text-white rounded-full flex items-center justify-center">
-                <span className="font-mono text-xs">{hintsRemaining}</span>
-              </div>
-            )}
-          </Button>
+            <Icon name="Lightbulb" size={14} />
+            <span className="hidden sm:inline">Hint</span>
+            <span>({hintsRemaining})</span>
+          </button>
 
           {/* Pause/Resume Button */}
-          <Button
-            variant="outline"
-            size="sm"
+          <button
             onClick={onPause}
-            iconName={gameState === 'playing' ? 'Pause' : 'Play'}
-            iconPosition="left"
+            aria-label={gameState === 'paused' ? 'Resume game' : 'Pause game'}
+            disabled={gameState === 'completed'}
+            style={{ touchAction: 'manipulation' }}
+            className="flex items-center gap-1 px-2 sm:px-3 py-2 rounded-lg border border-border bg-card text-foreground text-xs sm:text-sm font-medium hover:bg-muted transition-colors min-h-[40px]"
           >
-            {gameState === 'playing' ? 'Pause' : 'Resume'}
-          </Button>
+            <Icon name={gameState === 'playing' ? 'Pause' : 'Play'} size={14} />
+            <span className="hidden sm:inline">{gameState === 'playing' ? 'Pause' : 'Resume'}</span>
+          </button>
 
           {/* Restart Button */}
-          <Button
-            variant="outline"
-            size="sm"
+          <button
             onClick={onRestart}
-            iconName="RotateCcw"
-            iconPosition="left"
+            aria-label="Restart game"
+            style={{ touchAction: 'manipulation' }}
+            className="flex items-center gap-1 px-2 sm:px-3 py-2 rounded-lg border border-border bg-card text-foreground text-xs sm:text-sm font-medium hover:bg-muted transition-colors min-h-[40px]"
           >
-            Restart
-          </Button>
+            <Icon name="RotateCcw" size={14} />
+            <span className="hidden sm:inline">Restart</span>
+          </button>
         </div>
       </div>
       {/* Progress Bar */}
-      <div className="mt-4 pt-4 border-t border-border">
+      <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-border">
         <div className="flex items-center justify-between mb-2">
-          <span className="font-caption text-sm text-muted-foreground">Game Progress</span>
-          <span className="font-mono text-sm text-primary">
-            {Math.round((moves > 0 ? (score / (moves * 10)) * 100 : 0))}% Efficiency
+          <span className="font-caption text-sm text-muted-foreground">{metrics.matchedPairs} of {metrics.totalPairs} pairs</span>
+          <span className="font-mono text-sm text-primary" title="Matched cards divided by card flips. Each flip counts as one move.">
+            {metrics.efficiencyPercent}% Efficiency
           </span>
         </div>
-        
+
         <div className="relative">
-          <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-            <div 
+          <div role="progressbar" aria-label="Matched pairs" aria-valuemin={0} aria-valuemax={metrics.totalPairs} aria-valuenow={metrics.matchedPairs} aria-valuetext={`${metrics.matchedPairs} of ${metrics.totalPairs} pairs matched`} className="w-full bg-muted rounded-full h-2 overflow-hidden">
+            <div
               className="h-full bg-gradient-to-r from-primary via-secondary to-accent rounded-full transition-all duration-normal animate-smooth"
-              style={{ width: `${Math.min(100, (score / 1000) * 100)}%` }}
+              style={{ width: `${metrics.progressPercent}%` }}
             ></div>
           </div>
         </div>

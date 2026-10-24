@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { freshCombat, createWave, startCombat, fireCombat, stepCombat, advanceCombat } from '../../services/germCombat.mjs';
+import { useDifficultyCeiling } from '../../components/GameAccessGate';
+import { permitsDifficulty } from '../../services/gameAccessPolicy.mjs';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
 import Header from '../../components/ui/Header';
@@ -12,64 +15,22 @@ import ScoreDisplay from './components/ScoreDisplay';
 import GameOverScreen from './components/GameOverScreen';
 import BodyLocationSelector from './components/BodyLocationSelector';
 import EducationalTips from './components/EducationalTips';
+import { saveGameScore } from '../../services/gameProgressService';
+import { trackGameModeStart, trackGameModeComplete, trackGameOver } from '../../services/analyticsService';
+import { useAuth } from '../../contexts/AuthContext';
 
 const GermBusterTowerDefense = () => {
-  // Game state
-  const [gameState, setGameState] = useState('location-select'); // location-select, playing, paused, game-over, victory
-  const [selectedLocation, setSelectedLocation] = useState(null);
-  const [difficulty, setDifficulty] = useState('easy');
-  const [currentWave, setCurrentWave] = useState(1);
-  const [totalWaves, setTotalWaves] = useState(3);
-  const [immuneHealth, setImmuneHealth] = useState(100);
-  const [bacterialBalance, setBacterialBalance] = useState(80); // Percentage of good bacteria
-  const [score, setScore] = useState(0);
-  const [defensePoints, setDefensePoints] = useState(100);
-  
-  // Game entities
-  const [bacteria, setBacteria] = useState([]);
-  const [defenseTowers, setDefenseTowers] = useState([]);
-  const [selectedTool, setSelectedTool] = useState(null);
-  const [projectiles, setProjectiles] = useState([]); // New: Track projectiles in flight
-  
-  // NEW: Galaga-style player ship state
-  const [playerShip, setPlayerShip] = useState({
-    x: 400, // Center of game board
-    y: 350, // Near bottom
-    width: 40,
-    height: 30,
-    speed: 8, // Movement speed
-    isMovingLeft: false,
-    isMovingRight: false,
-    isShooting: false,
-    lastShotTime: 0,
-    fireRate: 150 // Milliseconds between shots
-  });
-  
-  // NEW: Keyboard controls state
-  const [keysPressed, setKeysPressed] = useState({
-    ArrowLeft: false,
-    ArrowRight: false,
-    Space: false,
-    Enter: false
-  });
-  
-  // UI state
+  const maxDifficulty = useDifficultyCeiling();
+  const [difficulty, setDifficultyState] = useState('easy');
+  const setDifficulty = level => { if (permitsDifficulty(level, maxDifficulty)) setDifficultyState(level); };
+  const [combat, setCombat] = useState(freshCombat);
+  const { gameState, currentWave, totalWaves, immuneHealth, bacterialBalance, score, defensePoints, bacteria, projectiles, playerShip, ammoCount, rapidFire, hitIndicators, achievements } = combat;
+  const defenseTowers = [];
+  const keysPressed = useRef({});
   const { shouldShowGuide, hideGuide } = useGuideVisibility('germ-buster-tower-defense');
+  const { isPremium } = useAuth();
   const [showEducationalTip, setShowEducationalTip] = useState(false);
   const [currentTip, setCurrentTip] = useState(null);
-  const [achievements, setAchievements] = useState([]);
-  const [ammoCount, setAmmoCount] = useState({ // New: Ammo tracking
-    antibiotic: 25,
-    probiotic: 30,
-    immuneCell: 20,
-    hygiene: 40,
-    antiseptic: 15 // New ammo type
-  });
-
-  // Simplified aiming system state - removed complex targeting
-  const [rapidFire, setRapidFire] = useState(false); // Auto-fire mode
-  const [hitIndicators, setHitIndicators] = useState([]); // Damage number displays
-  const [muzzleFlash, setMuzzleFlash] = useState(null); // Enhanced visual launch effects
 
   // Body locations with their specific challenges
   const bodyLocations = [
@@ -199,140 +160,6 @@ const GermBusterTowerDefense = () => {
     }
   };
 
-  // NEW: Keyboard event handlers for intuitive controls
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (gameState !== 'playing') return;
-      
-      event?.preventDefault();
-      setKeysPressed(prev => ({
-        ...prev,
-        [event?.code]: true
-      }));
-    };
-
-    const handleKeyUp = (event) => {
-      if (gameState !== 'playing') return;
-      
-      event?.preventDefault();
-      setKeysPressed(prev => ({
-        ...prev,
-        [event?.code]: false
-      }));
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    };
-  }, [gameState]);
-
-  // NEW: Mouse event handlers for intuitive controls
-  const handleMouseMove = (event) => {
-    if (gameState !== 'playing') return;
-    
-    const rect = event?.currentTarget?.getBoundingClientRect();
-    const mouseX = event?.clientX - rect?.left;
-    
-    setPlayerShip(prev => ({
-      ...prev,
-      x: Math.max(20, Math.min(780, mouseX))
-    }));
-  };
-
-  const handleMouseClick = (event) => {
-    if (gameState !== 'playing') return;
-    
-    enhancedBiologicalShoot(playerShip?.x, playerShip?.y);
-  };
-
-  // NEW: Toggle rapid fire mode
-  const toggleRapidFire = () => {
-    setRapidFire(prev => !prev);
-  };
-
-  // NEW: Player ship movement and shooting system
-  useEffect(() => {
-    if (gameState !== 'playing') return;
-
-    const gameLoop = setInterval(() => {
-      // Update player ship position
-      setPlayerShip(prev => {
-        let newX = prev?.x;
-        
-        // Handle movement
-        if (keysPressed?.ArrowLeft || keysPressed?.KeyA) {
-          newX = Math.max(20, prev?.x - prev?.speed);
-        }
-        if (keysPressed?.ArrowRight || keysPressed?.KeyD) {
-          newX = Math.min(780, prev?.x + prev?.speed);
-        }
-        
-        // Handle shooting
-        const currentTime = Date.now();
-        const canShoot = currentTime - prev?.lastShotTime >= prev?.fireRate;
-        const shouldShoot = (keysPressed?.Space || keysPressed?.Enter || rapidFire) && canShoot;
-        
-        if (shouldShoot && selectedTool?.isShootable && ammoCount?.[selectedTool?.ammoType] > 0) {
-          // Fire projectile straight up from ship position
-          immuneShoot(newX, prev?.y);
-          return {
-            ...prev,
-            x: newX,
-            lastShotTime: currentTime
-          };
-        }
-        
-        return {
-          ...prev,
-          x: newX
-        };
-      });
-    }, 16); // ~60 FPS game loop
-
-    return () => clearInterval(gameLoop);
-  }, [gameState, keysPressed, selectedTool, ammoCount, rapidFire]);
-
-  // NEW: Immune system shooting function - shoots straight up
-  const immuneShoot = (shipX, shipY) => {
-    if (!selectedTool || !selectedTool?.isShootable || ammoCount?.[selectedTool?.ammoType] <= 0) return;
-    if (defensePoints < selectedTool?.cost) return;
-
-    // Create projectile that shoots straight up from ship
-    const newProjectile = {
-      id: Date.now() + Math.random(),
-      x: shipX,
-      y: shipY - 20, // Start slightly above ship
-      angle: -Math.PI / 2, // Straight up
-      speed: selectedTool?.projectileSpeed || 12,
-      color: selectedTool?.projectileColor,
-      size: selectedTool?.projectileSize,
-      toolId: selectedTool?.id,
-      isHoming: selectedTool?.isHoming,
-      isAreaEffect: selectedTool?.isAreaEffect,
-      biologicalStyle: true // Mark as biological-style projectile
-    };
-
-    setProjectiles(prev => [...prev, newProjectile]);
-    
-    // Consume ammo and defense points
-    setAmmoCount(prev => ({
-      ...prev,
-      [selectedTool?.ammoType]: prev?.[selectedTool?.ammoType] - 1
-    }));
-    setDefensePoints(prev => prev - selectedTool?.cost);
-
-    // Add shooting cooldown for tool
-    const currentTool = selectedTool;
-    setSelectedTool({ ...selectedTool, onCooldown: true });
-    setTimeout(() => {
-      setSelectedTool(prev => prev?.id === currentTool?.id ? { ...prev, onCooldown: false } : prev);
-    }, selectedTool?.cooldown || 100);
-  };
-
   // Enhanced Defense tools optimized for biological shooting
   const defenseTools = [
     {
@@ -429,389 +256,77 @@ const GermBusterTowerDefense = () => {
     }
   ];
 
-  // Updated projectile animation with biological movement
+  const selectedLocation = bodyLocations.find(location => location.id === combat.locationId);
+  const selectedTool = defenseTools.find(tool => tool.id === combat.selectedToolId);
+  const toolsRef = useRef(defenseTools);
+
   useEffect(() => {
     if (gameState !== 'playing') return;
+    let previous = performance.now();
+    const timer = setInterval(() => {
+      const now = performance.now(), elapsed = now - previous;
+      previous = now;
+      setCombat(state => stepCombat(state, elapsed, toolsRef.current, difficulty, keysPressed.current));
+    }, 16);
+    return () => clearInterval(timer);
+  }, [gameState, difficulty]);
 
-    const interval = setInterval(() => {
-      setProjectiles(prev => {
-        return prev?.map(projectile => {
-          let newX = projectile?.x;
-          let newY = projectile?.y;
-          
-          // Biological-style: most projectiles go straight up initially
-          if (projectile?.biologicalStyle) {
-            if (projectile?.isSpreadShot) {
-              // Spread shot projectiles fan out slightly
-              const spreadAngle = projectile?.spreadIndex * 0.3 - 0.3; // -0.3, 0, 0.3 radians
-              newX += Math.sin(spreadAngle) * projectile?.speed * 0.5;
-              newY += Math.cos(spreadAngle) * projectile?.speed;
-            } else if (projectile?.isHoming && projectile?.y < 300) {
-              // Homing missiles start straight, then home in
-              const nearestBadBacterium = bacteria?.filter(b => 
-                b?.type === 'bad' && b?.isAlive && b?.spawnDelay <= 0
-              )?.reduce((nearest, current) => {
-                if (!nearest) return current;
-                const currentDist = Math.sqrt(Math.pow(current?.x - projectile?.x, 2) + Math.pow(current?.y - projectile?.y, 2));
-                const nearestDist = Math.sqrt(Math.pow(nearest?.x - projectile?.x, 2) + Math.pow(nearest?.y - projectile?.y, 2));
-                return currentDist < nearestDist ? current : nearest;
-              }, null);
-
-              if (nearestBadBacterium) {
-                const angle = Math.atan2(nearestBadBacterium?.y - projectile?.y, nearestBadBacterium?.x - projectile?.x);
-                newX += Math.cos(angle) * projectile?.speed;
-                newY += Math.sin(angle) * projectile?.speed;
-              } else {
-                newY -= projectile?.speed; // Continue straight up
-              }
-            } else {
-              // Most projectiles just go straight up
-              newY -= projectile?.speed;
-            }
-          } else {
-            // Legacy projectile movement (for backwards compatibility)
-            newX += Math.cos(projectile?.angle) * projectile?.speed;
-            newY += Math.sin(projectile?.angle) * projectile?.speed;
-          }
-
-          // Check collision with bacteria
-          const hitBacterium = bacteria?.find(bacterium => {
-            if (!bacterium?.isAlive || bacterium?.spawnDelay > 0) return false;
-            const distance = Math.sqrt(Math.pow(bacterium?.x - newX, 2) + Math.pow(bacterium?.y - newY, 2));
-            return distance < 25; // Collision threshold
-          });
-
-          if (hitBacterium) {
-            // Apply projectile effect
-            handleProjectileHit(projectile, hitBacterium);
-            return { ...projectile, shouldRemove: true };
-          }
-
-          // Remove projectiles that go off-screen
-          if (newX > 850 || newX < -50 || newY > 450 || newY < -50) {
-            return { ...projectile, shouldRemove: true };
-          }
-
-          return { ...projectile, x: newX, y: newY };
-        })?.filter(projectile => !projectile?.shouldRemove);
-      });
-    }, 16); // Smooth 60fps projectile animation
-
-    return () => clearInterval(interval);
-  }, [gameState, bacteria]);
-
-  // Game initialization
   useEffect(() => {
-    if (gameState === 'playing' && selectedLocation) {
-      initializeGameForLocation(selectedLocation);
-    }
-  }, [gameState, selectedLocation]);
+    const controlled = ['ArrowLeft','ArrowRight','KeyA','KeyD','Space','Enter'];
+    const down = event => {
+      if (gameState !== 'playing' || !controlled.includes(event.code) || event.target.closest('button,a,input,select,textarea')) return;
+      event.preventDefault(); keysPressed.current[event.code] = true;
+    };
+    const up = event => { delete keysPressed.current[event.code]; };
+    const clear = () => { keysPressed.current = {}; };
+    window.addEventListener('keydown', down); window.addEventListener('keyup', up); window.addEventListener('blur', clear);
+    return () => { clear(); window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); window.removeEventListener('blur', clear); };
+  }, [gameState]);
 
-  // Auto-hide character guide after 8 seconds
+  useEffect(() => {
+    if (gameState === 'game-over') trackGameOver('germ-buster', { score, difficulty, currentWave });
+    if (gameState === 'victory') {
+      trackGameModeComplete('germ-buster', { score, difficulty, wavesCompleted: totalWaves });
+      saveGameScore({gameMode:'germ-buster',score,difficulty,metadata:{location:combat.locationId,immuneHealth,bacterialBalance,wavesCompleted:totalWaves}}).catch(console.error);
+    }
+  }, [gameState]);
+
   useEffect(() => {
     if (!shouldShowGuide) return;
-    const timer = setTimeout(() => {
-      hideGuide();
-    }, 8000);
+    const timer = setTimeout(hideGuide, 8000);
     return () => clearTimeout(timer);
   }, [shouldShowGuide, hideGuide]);
 
-  // Updated tool selection for Galaga-style gameplay
-  const selectTool = (tool) => {
-    if (defensePoints >= tool?.cost && ammoCount?.[tool?.ammoType] > 0) {
-      setSelectedTool(tool);
-    }
+  const selectTool = tool => setCombat(state => ({...state, selectedToolId:tool.id}));
+  const enhancedBiologicalShoot = () => setCombat(state => fireCombat(state, toolsRef.current.find(tool => tool.id === state.selectedToolId)));
+  const useTool = enhancedBiologicalShoot;
+  const handleMouseMove = event => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = Math.max(20, Math.min(780, (event.clientX - rect.left) * 800 / rect.width));
+    setCombat(state => state.gameState === 'playing' ? {...state, playerShip:{...state.playerShip,x}} : state);
   };
-
-  // NEW: Handle spread shot - fires multiple projectiles
-  const handleSpreadShot = (shipX, shipY) => {
-    if (!selectedTool?.isSpreadShot) return;
-    
-    // Fire 3 projectiles in a spread pattern
-    for (let i = 0; i < 3; i++) {
-      const spreadProjectile = {
-        id: Date.now() + Math.random() + i,
-        x: shipX,
-        y: shipY - 20,
-        angle: -Math.PI / 2,
-        speed: selectedTool?.projectileSpeed || 8,
-        color: selectedTool?.projectileColor,
-        size: selectedTool?.projectileSize,
-        toolId: selectedTool?.id,
-        galacticStyle: true,
-        isSpreadShot: true,
-        spreadIndex: i // 0, 1, 2 for left, center, right
-      };
-      
-      setProjectiles(prev => [...prev, spreadProjectile]);
-    }
+  const handleTouchMove = event => {
+    const touch = event.touches[0]; if (!touch) return;
+    handleMouseMove({clientX:touch.clientX,currentTarget:event.currentTarget});
   };
-
-  // NEW: Handle projectile hits with enhanced visual feedback
-  const handleProjectileHit = (projectile, bacterium) => {
-    const tool = defenseTools?.find(t => t?.id === projectile?.toolId);
-    if (!tool) return;
-
-    // Enhanced hit indicators with better visual feedback
-    const damage = tool?.damage || Math.abs(tool?.effect?.badBacteria || tool?.effect?.goodBacteria || 0);
-    setHitIndicators(prev => [...prev, {
-      id: Date.now() + Math.random(),
-      x: bacterium?.x,
-      y: bacterium?.y,
-      damage: damage,
-      type: bacterium?.type,
-      wasAutoAimed: projectile?.wasAutoAimed,
-      criticalHit: damage > 100, // Mark high damage hits as critical
-      weaponType: projectile?.toolId
-    }]);
-
-    // Remove hit indicator after enhanced animation
-    setTimeout(() => {
-      setHitIndicators(prev => prev?.filter(indicator => indicator?.id !== (Date.now() + Math.random())));
-    }, 2000); // Extended duration for better visibility
-
-    // Apply area effect if tool has it
-    if (tool?.isAreaEffect) {
-      const nearbyBacteria = bacteria?.filter(b => {
-        if (!b?.isAlive || b?.spawnDelay > 0) return false;
-        const distance = Math.sqrt(Math.pow(b?.x - projectile?.x, 2) + Math.pow(b?.y - projectile?.y, 2));
-        return distance < 50;
-      });
-      
-      nearbyBacteria?.forEach(b => applyToolEffect(tool, b));
-    } else {
-      applyToolEffect(tool, bacterium);
-    }
+  const handleMouseClick = enhancedBiologicalShoot;
+  const handleTouchEnd = event => { event.preventDefault(); enhancedBiologicalShoot(); };
+  const toggleRapidFire = () => setCombat(state => ({...state, rapidFire:!state.rapidFire}));
+  const selectLocation = location => {
+    const wave = createWave(1, location, bacteriaTypes);
+    setCombat(startCombat(location, wave));
+    trackGameModeStart('germ-buster', {location:location.id,difficulty});
   };
-
-  // New: Separate tool effect application
-  const applyToolEffect = (tool, bacterium) => {
-    const effect = tool?.effect;
-    
-    if (effect?.badBacteria && bacterium?.type === 'bad') {
-      setBacteria(prev => prev?.map(b => 
-        b?.id === bacterium?.id 
-          ? { ...b, currentHealth: Math.max(0, b?.currentHealth + effect?.badBacteria) }
-          : b
-      ));
-      
-      if (bacterium?.currentHealth + effect?.badBacteria <= 0) {
-        setScore(prev => prev + bacterium?.points);
-      }
-    }
-    
-    if (effect?.goodBacteria && bacterium?.type === 'good') {
-      if (effect?.goodBacteria > 0) {
-        setBacteria(prev => prev?.map(b => 
-          b?.id === bacterium?.id 
-            ? { ...b, currentHealth: Math.min(b?.health, b?.currentHealth + effect?.goodBacteria) }
-            : b
-        ));
-      } else {
-        setBacteria(prev => prev?.map(b => 
-          b?.id === bacterium?.id 
-            ? { ...b, currentHealth: Math.max(0, b?.currentHealth + effect?.goodBacteria) }
-            : b
-        ));
-        
-        if (bacterium?.currentHealth + effect?.goodBacteria <= 0) {
-          setScore(prev => prev + bacterium?.points);
-        }
-      }
-    }
-
-    if (effect?.immuneHealth) {
-      setImmuneHealth(prev => Math.min(100, prev + effect?.immuneHealth));
-    }
-
-    if (effect?.balance) {
-      setBacterialBalance(prev => Math.max(0, Math.min(100, prev + effect?.balance)));
-    }
-  };
-
-  // Enhanced shoot function with better visual launch effects
-  const enhancedBiologicalShoot = (shipX, shipY) => {
-    if (!selectedTool || !selectedTool?.isShootable || ammoCount?.[selectedTool?.ammoType] <= 0) return;
-    if (defensePoints < selectedTool?.cost) return;
-
-    if (selectedTool?.isSpreadShot) {
-      handleSpreadShot(shipX, shipY);
-    } else {
-      immuneShoot(shipX, shipY);
-    }
-
-    // Add enhanced launch flash effect
-    setMuzzleFlash({
-      id: Date.now(),
-      x: shipX,
-      y: shipY - 15,
-      color: selectedTool?.projectileColor || '#ffffff',
-      size: selectedTool?.projectileSize || 8,
-      weaponType: selectedTool?.id
-    });
-    
-    setTimeout(() => setMuzzleFlash(null), 250); // Slightly longer flash
-  };
-
-  const initializeGameForLocation = (location) => {
-    const locationData = bodyLocations?.find(loc => loc?.id === location?.id);
-    setTotalWaves(locationData?.challengeType === 'survival' ? 5 : 3);
-    setCurrentWave(1);
-    setImmuneHealth(100);
-    setBacterialBalance(80);
-    setScore(0);
-    setDefensePoints(100);
-    setBacteria([]);
-    setDefenseTowers([]);
-    setProjectiles([]);
-    // Reset ammo counts
-    setAmmoCount({
-      antibiotic: 25,
-      probiotic: 30,
-      immuneCell: 20,
-      hygiene: 40,
-      antiseptic: 15
-    });
-    startWave(1, locationData);
-  };
-
-  const startWave = (waveNumber, locationData) => {
-    const waveSize = Math.min(5 + waveNumber * 2, 15);
-    const newBacteria = [];
-    
-    for (let i = 0; i < waveSize; i++) {
-      const isGoodBacteria = Math.random() < 0.3;
-      let bacteriaType;
-      
-      if (isGoodBacteria) {
-        bacteriaType = locationData?.goodBacteria?.[Math.floor(Math.random() * locationData?.goodBacteria?.length)];
-      } else {
-        bacteriaType = locationData?.enemyTypes?.[Math.floor(Math.random() * locationData?.enemyTypes?.length)];
-      }
-      
-      newBacteria?.push({
-        id: `bacteria-${waveNumber}-${i}`,
-        type: bacteriaType,
-        ...bacteriaTypes?.[bacteriaType],
-        x: -50,
-        y: Math.random() * 400 + 100,
-        currentHealth: bacteriaTypes?.[bacteriaType]?.health,
-        isAlive: true,
-        spawnDelay: i * 1000
-      });
-    }
-    
-    setBacteria(newBacteria);
-    
-    setCurrentTip({
-      title: `Wave ${waveNumber} - ${locationData?.name}`,
-      fact: locationData?.fact,
-      advice: getWaveAdvice(waveNumber, locationData)
-    });
-    setShowEducationalTip(true);
-
-    // Refill some ammo at wave start
-    setAmmoCount(prev => ({
-      antibiotic: Math.min(prev?.antibiotic + 5, 15),
-      probiotic: Math.min(prev?.probiotic + 8, 20),
-      immuneCell: Math.min(prev?.immuneCell + 3, 10),
-      hygiene: Math.min(prev?.hygiene + 10, 25),
-      antiseptic: Math.min(prev?.antiseptic + 4, 15)
-    }));
-  };
-
-  const getWaveAdvice = (wave, location) => {
-    const tips = [
-      "Aim carefully! Use the crosshair to target harmful bacteria precisely!",
-      "Try rapid-fire mode with Sanitizer Spray for multiple targets!",
-      "Immune Launcher has smart targeting - great for moving bacteria!",
-      "Probiotic Boosters heal good bacteria - shoot them for extra health!",
-      "Antiseptic Cannon packs a punch but uses more ammo!"
-    ];
-    return tips?.[Math.min(wave - 1, tips?.length - 1)];
-  };
-
-  // Updated tool usage for non-shootable tools
-  const useTool = (position, bacteria) => {
-    if (!selectedTool || defensePoints < selectedTool?.cost) return;
-    
-    // If tool is shootable, use shooting system instead
-    if (selectedTool?.isShootable) {
-      // Use the enhanced galactic shoot function instead
-      enhancedBiologicalShoot(playerShip?.x, playerShip?.y);
-      return;
-    }
-
-    // Existing non-shootable tool logic (rest/recovery)
-    const effect = selectedTool?.effect;
-
-    if (effect?.immuneHealth) {
-      setImmuneHealth(prev => Math.min(100, prev + effect?.immuneHealth));
-    }
-
-    if (effect?.balance) {
-      setBacterialBalance(prev => Math.max(0, Math.min(100, prev + effect?.balance)));
-    }
-
-    setDefensePoints(prev => prev - selectedTool?.cost);
-    setSelectedTool(null);
-  };
-
-  const selectLocation = (location) => {
-    setSelectedLocation(location);
-    setGameState('playing');
-  };
-
-  const pauseGame = () => {
-    setGameState('paused');
-  };
-
-  const resumeGame = () => {
-    setGameState('playing');
-  };
-
-  const restartGame = () => {
-    setGameState('location-select');
-    setSelectedLocation(null);
-  };
-
+  const pauseGame = () => setCombat(state => ({...state,gameState:'paused',rapidFire:false}));
+  const resumeGame = () => setCombat(state => ({...state,gameState:'playing'}));
+  const restartGame = () => { setCombat(freshCombat()); setShowEducationalTip(false); };
   const nextWave = () => {
-    if (currentWave < totalWaves) {
-      const nextWaveNum = currentWave + 1;
-      setCurrentWave(nextWaveNum);
-      const locationData = bodyLocations?.find(loc => loc?.id === selectedLocation?.id);
-      startWave(nextWaveNum, locationData);
-    } else {
-      setGameState('victory');
-      checkAchievements();
-    }
-  };
-
-  const checkAchievements = () => {
-    const newAchievements = [];
-    
-    if (bacterialBalance >= 90) {
-      newAchievements?.push('Balance Master');
-    }
-    
-    if (immuneHealth >= 90) {
-      newAchievements?.push('Immune Champion');
-    }
-    
-    if (difficulty === 'hard') {
-      newAchievements?.push('Germ Buster Extraordinaire');
-    }
-
-    // New shooting-related achievements
-    if (projectiles?.length > 50) {
-      newAchievements?.push('Sharpshooter');
-    }
-    
-    setAchievements(prev => [...prev, ...newAchievements]);
+    const wave = currentWave < totalWaves ? createWave(currentWave+1,selectedLocation,bacteriaTypes) : [];
+    setCombat(state => advanceCombat(state,wave));
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background game-screen">
       <Header />
       <main className="pt-20 pb-8">
         <div className="container mx-auto px-4 lg:px-6">
@@ -832,12 +347,27 @@ const GermBusterTowerDefense = () => {
 
           {/* Game Content */}
           {gameState === 'location-select' && (
-            <BodyLocationSelector 
-              locations={bodyLocations}
-              onSelectLocation={selectLocation}
-              difficulty={difficulty}
-              setDifficulty={setDifficulty}
-            />
+            <>
+              <BodyLocationSelector
+                locations={bodyLocations}
+                onSelectLocation={selectLocation}
+                difficulty={difficulty}
+                maxDifficulty={maxDifficulty}
+                setDifficulty={setDifficulty}
+              />
+              {!isPremium && (
+                <div className="mt-6 max-w-xl mx-auto rounded-2xl p-6 text-center" style={{ background: 'linear-gradient(135deg, #1a1030 0%, #2d1b69 50%, #1a1030 100%)', border: '1px solid rgba(139,92,246,0.4)' }}>
+                  <div className="text-5xl mb-3">🔒</div>
+                  <h3 className="font-heading text-lg text-white mb-2">Premium Game Mode</h3>
+                  <p className="text-purple-200 text-sm mb-4">Germ Buster is part of MicrobeQuest Premium. Unlock all 6 game modules and 18 discoveries.</p>
+                  <Link to="/premium">
+                    <button className="px-6 py-3 rounded-xl font-bold text-gray-900 transition-all hover:opacity-90 hover:scale-105" style={{ backgroundColor: '#FFC107' }}>
+                      Unlock the Full Adventure 🌻
+                    </button>
+                  </Link>
+                </div>
+              )}
+            </>
           )}
 
           {gameState === 'playing' && (
@@ -845,31 +375,34 @@ const GermBusterTowerDefense = () => {
               {/* Game Board - Main Area */}
               <div className="lg:col-span-3 space-y-4">
                 {/* Health & Balance Meters */}
-                <HealthBalanceMeters 
+                <HealthBalanceMeters
                   immuneHealth={immuneHealth}
                   bacterialBalance={bacterialBalance}
                   selectedLocation={selectedLocation}
                 />
-                
+
                 {/* Wave Progress */}
-                <WaveProgress 
+                <WaveProgress
                   currentWave={currentWave}
                   totalWaves={totalWaves}
                   onPause={pauseGame}
                   onNextWave={nextWave}
+                  waveActive={!combat.waveReady}
+                  enemiesRemaining={bacteria.filter(b => b.type === 'bad').length}
                 />
-                
+
                 {/* Enhanced Game Board with Intuitive Controls */}
                 <GameBoard
                   location={selectedLocation}
                   bacteria={bacteria}
-                  setBacteria={setBacteria}
                   defenseTowers={defenseTowers}
                   selectedTool={selectedTool}
                   onUseTool={useTool}
                   onShoot={enhancedBiologicalShoot}
                   onMouseMove={handleMouseMove}
                   onMouseClick={handleMouseClick}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
                   projectiles={projectiles}
                   playerShip={playerShip}
                   gameState={gameState}
@@ -881,13 +414,13 @@ const GermBusterTowerDefense = () => {
               {/* Side Panel */}
               <div className="space-y-4">
                 {/* Score Display with Ammo Counter */}
-                <ScoreDisplay 
+                <ScoreDisplay
                   score={score}
                   defensePoints={defensePoints}
                   achievements={achievements}
                   ammoCount={ammoCount}
                 />
-                
+
                 {/* Enhanced Defense Tools Panel */}
                 <DefenseToolPanel
                   tools={defenseTools}
@@ -897,7 +430,7 @@ const GermBusterTowerDefense = () => {
                   onSelectTool={selectTool}
                   rapidFire={rapidFire}
                 />
-                
+
                 {/* NEW: Intuitive Controls Panel */}
                 <div className="bg-card border border-border rounded-lg p-4 space-y-3">
                   <div className="flex items-center justify-between">
@@ -905,19 +438,21 @@ const GermBusterTowerDefense = () => {
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={pauseGame}
+                        aria-label="Pause mission"
                         className="p-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors"
                       >
                         <Icon name="Pause" size={16} />
                       </button>
                       <button
                         onClick={restartGame}
+                        aria-label="Restart mission"
                         className="p-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/80 transition-colors"
                       >
                         <Icon name="RotateCcw" size={16} />
                       </button>
                     </div>
                   </div>
-                  
+
                   {/* Control Instructions */}
                   <div className="space-y-2 text-xs text-muted-foreground">
                     <div className="flex items-center space-x-2">
@@ -934,12 +469,12 @@ const GermBusterTowerDefense = () => {
                       <span>Move mouse to control defender</span>
                     </div>
                   </div>
-                  
+
                   {/* Rapid Fire Toggle */}
                   <button
                     onClick={toggleRapidFire}
                     className={`w-full p-2 rounded-lg text-sm font-medium transition-colors ${
-                      rapidFire 
+                      rapidFire
                         ? 'bg-red-100 text-red-800 border border-red-300' :'bg-gray-100 text-gray-600 border border-gray-300'
                     }`}
                   >
@@ -964,11 +499,11 @@ const GermBusterTowerDefense = () => {
                     </div>
                     <div className="flex items-center justify-between">
                       <span>Fire Rate:</span>
-                      <span className="font-mono">{selectedTool?.fireRate || 150}ms</span>
+                      <span className="font-mono">{selectedTool?.cooldown || 150}ms</span>
                     </div>
                   </div>
-                  
-                  <Link 
+
+                  <Link
                     to="/game-home-dashboard"
                     className="block w-full py-2 px-4 bg-primary text-primary-foreground rounded-button text-center font-body font-semibold text-sm hover:shadow-moderate transition-all duration-fast"
                   >
@@ -993,6 +528,7 @@ const GermBusterTowerDefense = () => {
                   </button>
                   <button
                     onClick={restartGame}
+                        aria-label="Restart mission"
                     className="w-full py-3 px-4 bg-secondary text-secondary-foreground rounded-button font-body font-semibold"
                   >
                     Restart Game
@@ -1015,7 +551,7 @@ const GermBusterTowerDefense = () => {
               achievements={achievements}
               selectedLocation={selectedLocation}
               onRestart={restartGame}
-              onBackToMenu={() => setGameState('location-select')}
+              onBackToMenu={restartGame}
             />
           )}
         </div>
@@ -1045,8 +581,8 @@ const GermBusterTowerDefense = () => {
       case 'location-select':
         return "Get ready for intuitive defense action! This simple shooting gameplay lets you move your immune defender and shoot straight up at harmful bacteria!";
       case 'playing':
-        return rapidFire 
-          ? "Rapid Fire activated! Hold down spacebar or click repeatedly to unleash a barrage of immune responses!" 
+        return rapidFire
+          ? "Rapid Fire activated! Hold down spacebar or click repeatedly to unleash a barrage of immune responses!"
           : "Use arrow keys or mouse to move, spacebar or click to shoot! Simple and intuitive controls for defending your body!";
       case 'paused':
         return "Master the art of immune defense! Use simple controls for maximum bacteria-busting efficiency!";

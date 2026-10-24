@@ -25,9 +25,9 @@ const SpecimenSelector = ({
     id: 1,
     name: 'E. coli Bacteria',
     category: 'bacteria',
-    image: "https://images.unsplash.com/photo-1574341792525-683b103fffe8",
+    image: "https://img.rocket.new/generatedImages/rocket_gen_img_1afb618e1-1772720842276.png",
     imageAlt: 'Microscopic view of E. coli bacteria showing rod-shaped green organisms',
-    microscopeImage: "https://images.unsplash.com/photo-1586019117069-0fb236e984bc",
+    microscopeImage: "https://img.rocket.new/generatedImages/rocket_gen_img_1e7986617-1774096897896.png",
     microscopeImageAlt: 'Detailed microscope view of E. coli bacteria with visible cellular structures',
     description: 'Rod-shaped bacteria commonly found in intestines',
     difficulty: 'beginner',
@@ -38,9 +38,9 @@ const SpecimenSelector = ({
     id: 2,
     name: 'Influenza Virus',
     category: 'virus',
-    image: "https://images.unsplash.com/photo-1728919083930-fdeef71420cd",
+    image: "https://images.unsplash.com/photo-1579781403337-de692320718a",
     imageAlt: 'Artistic representation of influenza virus particles in purple and blue colors',
-    microscopeImage: "https://images.unsplash.com/photo-1707079346010-33cf54e1e760",
+    microscopeImage: "https://img.rocket.new/generatedImages/rocket_gen_img_1ed1b5894-1775916879553.png",
     microscopeImageAlt: 'High magnification view of influenza virus showing geometric crystal-like structure',
     description: 'Respiratory virus causing seasonal flu',
     difficulty: 'intermediate',
@@ -51,9 +51,9 @@ const SpecimenSelector = ({
     id: 3,
     name: 'Penicillium Mold',
     category: 'fungi',
-    image: "https://images.unsplash.com/photo-1562898616-c98aa0ccf42a",
+    image: "https://images.unsplash.com/photo-1693089517079-fbb071b9e92b",
     imageAlt: 'Green and blue Penicillium mold growing in circular patterns',
-    microscopeImage: "https://images.unsplash.com/photo-1662887295613-4c1f1d797281",
+    microscopeImage: "https://img.rocket.new/generatedImages/rocket_gen_img_1aac1edc6-1766548194115.png",
     microscopeImageAlt: 'Microscopic view of Penicillium showing branching fungal structures with spores',
     description: 'Beneficial mold used to make antibiotics',
     difficulty: 'intermediate',
@@ -64,9 +64,9 @@ const SpecimenSelector = ({
     id: 4,
     name: 'Paramecium',
     category: 'protozoa',
-    image: "https://images.unsplash.com/photo-1569333393870-182ed614e9b2",
+    image: "https://img.rocket.new/generatedImages/rocket_gen_img_170178e6f-1765095177740.png",
     imageAlt: 'Elongated single-celled Paramecium organism with visible internal structures',
-    microscopeImage: "https://images.unsplash.com/photo-1732959642755-2c899e620929",
+    microscopeImage: "https://img.rocket.new/generatedImages/rocket_gen_img_1314dbf1c-1772978106232.png",
     microscopeImageAlt: 'Detailed view of Paramecium showing cilia and internal organelles',
     description: 'Single-celled organism with hair-like cilia',
     difficulty: 'advanced',
@@ -84,11 +84,7 @@ const SpecimenSelector = ({
   const handleSpecimenSelect = (specimen) => {
     if (specimen?.id === selectedSpecimen?.id) return;
 
-    setIsTransitioning(true);
-    setTimeout(() => {
-      onSpecimenSelect(specimen);
-      setIsTransitioning(false);
-    }, 300);
+    onSpecimenSelect(specimen);
   };
 
   const getDifficultyColor = (difficulty) => {
@@ -115,7 +111,7 @@ const SpecimenSelector = ({
             </p>
           </div>
         </div>
-        
+
         {isLoading &&
         <div className="flex items-center space-x-2">
             <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -174,7 +170,7 @@ const SpecimenSelector = ({
                 alt={specimen?.imageAlt}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-fast" />
 
-                  
+
                   {/* Difficulty Badge */}
                   <div className={`
                     absolute top-2 right-2 px-2 py-1 rounded-full border text-xs font-caption font-medium
@@ -202,11 +198,11 @@ const SpecimenSelector = ({
                       <span className="font-mono text-xs">{specimen?.discoveryPoints}</span>
                     </div>
                   </div>
-                  
+
                   <p className="font-body text-xs text-muted-foreground line-clamp-2">
                     {specimen?.description}
                   </p>
-                  
+
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-caption text-primary capitalize">
                       {specimen?.category}
@@ -241,7 +237,7 @@ const SpecimenSelector = ({
                 Now examining: <span className="font-semibold">{selectedSpecimen?.name}</span>
               </span>
             </div>
-            
+
             <div className="flex items-center space-x-1 text-accent">
               <Icon name="Zap" size={14} strokeWidth={2} />
               <span className="font-caption text-xs">

@@ -5,11 +5,11 @@ const ReadTheBookSection = ({ className = '' }) => {
   // Mock book data
   const bookData = {
     title: "The Adventures of Aunt Juju and Charlie the Zebra - MICROBIOLOGY EDITION",
-    subtitle: "The Complete Story Behind the Game", 
+    subtitle: "The Complete Story Behind the Game",
     coverImage: "/assets/images/000_COVER_1-1760837711045.jpg",
     coverAlt: "Book cover showing 'The Adventures of Aunt Juju and Charlie the Zebra - MICROBIOLOGY EDITION' with illustrated African American woman scientist in lab coat holding lab equipment, Charlie the zebra character on her head, laboratory background with scientific equipment, authored by Julianne Tajuba and illustrated by Ingrid Orlando Zon",
     amazonUrl: "https://www.amazon.com/Adventures-Aunt-Juju-Charlie-Zebra/dp/B0D43T9M29",
-    websiteUrl: "https://juliannetajuba.com/",
+    websiteUrl: "https://chasestreetpress.co/",
     description: "\"The Adventures of Aunt Juju and Charlie the Zebra: Microbiology Edition\" is an engaging children's book that takes readers on a thrilling journey through the world of microbiology. Throughout the book, the reader learns about the diverse career paths available to microbiologists, including food microbiology, water microbiology, and much more."
   };
 
@@ -22,7 +22,7 @@ const ReadTheBookSection = ({ className = '' }) => {
       description: "Available in print"
     },
     {
-      name: "Author\'s Website", 
+      name: "Author\'s Website",
       url: bookData?.websiteUrl,
       icon: "Globe",
       color: "bg-primary text-primary-foreground",
@@ -48,7 +48,7 @@ const ReadTheBookSection = ({ className = '' }) => {
             <div className="relative group">
               {/* Book Shadow */}
               <div className="absolute -bottom-4 -right-4 w-full h-full bg-gradient-to-br from-gray-400/30 to-gray-600/30 rounded-lg blur-sm transform rotate-2" />
-              
+
               {/* Book Cover */}
               <div className="relative bg-gradient-to-br from-primary to-secondary p-6 rounded-lg shadow-pronounced transform transition-transform duration-moderate hover:-rotate-1 hover:scale-105">
                 <img
@@ -69,7 +69,7 @@ const ReadTheBookSection = ({ className = '' }) => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Floating elements */}
               <div className="absolute -top-2 -right-2 w-8 h-8 bg-accent rounded-full flex items-center justify-center shadow-moderate animate-bounce-gentle">
                 <Icon name="Heart" size={16} color="white" />
@@ -132,9 +132,9 @@ const ReadTheBookSection = ({ className = '' }) => {
                         <span className="font-caption text-xs opacity-90">{option?.description}</span>
                       </div>
                     </div>
-                    <Icon 
-                      name="ExternalLink" 
-                      size={16} 
+                    <Icon
+                      name="ExternalLink"
+                      size={16}
                       className="transition-transform duration-fast group-hover:translate-x-1"
                     />
                   </div>

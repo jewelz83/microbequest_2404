@@ -119,7 +119,7 @@ const CaseSelectionBoard = ({ unlockedCases, completedCases, onSelectCase, onBac
       {/* Header */}
       <div className="bg-gradient-to-r from-indigo-800 to-purple-800 py-6">
         <div className="container mx-auto px-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 items-center justify-between md:flex-row">
             <button
               onClick={onBack}
               className="flex items-center gap-3 text-white/80 hover:text-white transition-colors"
@@ -131,7 +131,7 @@ const CaseSelectionBoard = ({ unlockedCases, completedCases, onSelectCase, onBac
               <h1 className="text-3xl font-bold text-white">🕵️‍♀️ Case Selection Board</h1>
               <p className="text-purple-200">Choose your investigation</p>
             </div>
-            <div className="text-right text-white">
+            <div className="text-center md:text-right text-white">
               <div className="text-sm opacity-80">Detective Stats</div>
               <div className="font-semibold">{completedCases?.length}/6 Cases Solved</div>
             </div>

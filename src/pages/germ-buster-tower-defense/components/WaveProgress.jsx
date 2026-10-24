@@ -9,7 +9,7 @@ const WaveProgress = ({
   waveActive = true,
   enemiesRemaining = 0
 }) => {
-  const progress = (currentWave / totalWaves) * 100;
+  const progress = ((currentWave - (waveActive ? 1 : 0)) / totalWaves) * 100;
   const isLastWave = currentWave === totalWaves;
 
   return (
@@ -39,12 +39,12 @@ const WaveProgress = ({
             <Icon name="Pause" size={16} strokeWidth={2.5} />
           </button>
           
-          {!waveActive && enemiesRemaining === 0 && currentWave < totalWaves && (
+          {!waveActive && enemiesRemaining === 0 && (
             <button
               onClick={onNextWave}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center space-x-2"
             >
-              <span className="font-body font-semibold text-sm">Next Wave</span>
+              <span className="font-body font-semibold text-sm">{isLastWave ? 'Finish Mission' : 'Next Wave'}</span>
               <Icon name="ArrowRight" size={16} strokeWidth={2.5} />
             </button>
           )}

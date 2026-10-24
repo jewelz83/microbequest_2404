@@ -1,3 +1,4 @@
+import { quizMetrics } from '../../../services/quizMetrics.mjs';
 import React from 'react';
 import Icon from '../../../components/AppIcon';
 
@@ -5,12 +6,13 @@ const QuizProgress = ({
   currentQuestion = 1,
   totalQuestions = 10,
   score = 0,
+  answeredQuestions = 0,
+  correctAnswers = 0,
   timeRemaining = null,
   difficulty = 'medium',
   className = ""
 }) => {
-  const progress = (currentQuestion / totalQuestions) * 100;
-  const accuracy = currentQuestion > 1 ? Math.round((score / ((currentQuestion - 1) * 10)) * 100) : 0;
+  const { progress, accuracy } = quizMetrics({ totalQuestions, answeredQuestions, correctAnswers });
 
   const difficultyConfig = {
     easy: { color: 'text-success', bgColor: 'bg-success/10', icon: 'Smile' },

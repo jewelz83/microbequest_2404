@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Microscope, Beaker, Search, CheckCircle, XCircle, AlertCircle, Zap, FlaskConical } from 'lucide-react';
 
@@ -8,6 +8,11 @@ const DigitalLab = ({ selectedCase, collectedClues, onMicrobeIdentified, identif
   const [currentMicrobe, setCurrentMicrobe] = useState(null);
   const [showMicrobeOptions, setShowMicrobeOptions] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
+
+  const testTimer = useRef(null);
+  const answerTimer = useRef(null);
+  const runningTest = useRef(false);
+  useEffect(() => () => {clearTimeout(testTimer.current);clearTimeout(answerTimer.current);}, []);
 
   // Microbe database for each case
   const getMicrobeOptions = () => {
@@ -216,14 +221,16 @@ const DigitalLab = ({ selectedCase, collectedClues, onMicrobeIdentified, identif
   ];
 
   const handleTestSelect = (test) => {
-    if (collectedClues?.length < test?.requiresClues) {
+    if (runningTest.current || testResults.includes(test.id) || collectedClues?.length < test?.requiresClues) {
       return;
     }
 
+    runningTest.current = true;
     setSelectedTest(test);
     
     // Simulate test running
-    setTimeout(() => {
+    testTimer.current = setTimeout(() => {
+      runningTest.current = false;
       setTestResults(prev => [...prev, test?.id]);
       setSelectedTest(null);
       
@@ -239,7 +246,7 @@ const DigitalLab = ({ selectedCase, collectedClues, onMicrobeIdentified, identif
     
     const options = getMicrobeOptions();
     if (microbe?.id === options?.correct?.id) {
-      setTimeout(() => {
+      answerTimer.current = setTimeout(() => {
         setCurrentMicrobe(options?.correct);
         onMicrobeIdentified(options?.correct);
       }, 1500);
@@ -247,7 +254,7 @@ const DigitalLab = ({ selectedCase, collectedClues, onMicrobeIdentified, identif
   };
 
   const microbeOptions = getMicrobeOptions();
-  const allOptions = [microbeOptions?.correct, ...(microbeOptions?.wrong || [])]?.sort(() => Math.random() - 0.5);
+  const allOptions = [microbeOptions?.correct, ...(microbeOptions?.wrong || [])];
 
   const getColorClasses = (color) => {
     const colors = {
@@ -477,6 +484,9 @@ const DigitalLab = ({ selectedCase, collectedClues, onMicrobeIdentified, identif
               </motion.div>
             )}
 
+            {selectedAnswer && selectedAnswer.id !== microbeOptions.correct.id && (
+              <button className="px-6 py-3 rounded-lg bg-blue-600 text-white" onClick={() => setSelectedAnswer(null)}>Try identification again</button>
+            )}
             {/* Progress Indicator */}
             {testResults?.length > 0 && !showMicrobeOptions && (
               <motion.div

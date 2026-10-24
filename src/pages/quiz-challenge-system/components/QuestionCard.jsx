@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
-import Button from '../../../components/ui/Button';
+
 
 const QuestionCard = ({
   question,
@@ -44,7 +44,7 @@ const QuestionCard = ({
           <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
             <Icon name="HelpCircle" size={24} color="white" strokeWidth={2.5} />
           </div>
-          
+
           <div className="flex-1">
             <h3 className="font-heading text-xl text-foreground mb-2">
               {question?.title}
@@ -64,16 +64,16 @@ const QuestionCard = ({
                 alt={question?.imageAlt}
                 className="w-full h-full object-cover"
               />
-              
+
               {/* Overlay for scientific accuracy */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-              
+
               {/* Magnifying glass effect */}
               <div className="absolute top-4 right-4 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center">
                 <Icon name="Search" size={16} className="text-primary" />
               </div>
             </div>
-            
+
             {question?.imageCaption && (
               <p className="font-caption text-sm text-muted-foreground mt-2 text-center">
                 {question?.imageCaption}
@@ -83,12 +83,12 @@ const QuestionCard = ({
         )}
       </div>
       {/* Answer Options */}
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="space-y-3">
           {question?.options?.map((option, index) => {
             const status = getAnswerStatus(option?.id);
             const isSelected = selectedAnswer === option?.id;
-            
+
             return (
               <div
                 key={option?.id}
@@ -98,24 +98,28 @@ const QuestionCard = ({
                   ${isAnimating && status === 'incorrect' ? 'animate-shake' : ''}
                 `}
               >
-                <Button
-                  variant={getAnswerVariant(status === 'default' ? option?.id : status)}
-                  fullWidth
+                <button
                   disabled={showResult}
                   onClick={() => onAnswerSelect(option?.id)}
+                  style={{ touchAction: 'manipulation' }}
                   className={`
-                    justify-start text-left p-4 h-auto relative overflow-hidden
-                    ${isSelected && !showResult ? 'ring-2 ring-primary' : ''}
+                    w-full text-left p-4 rounded-xl border-2 transition-all duration-fast
+                    relative overflow-hidden min-h-[56px]
+                    ${isSelected && !showResult ? 'border-primary bg-primary/5 ring-2 ring-primary' : 'border-border bg-card hover:border-primary/40 hover:bg-primary/5'}
+                    ${status === 'correct' ? 'border-success bg-success/10' : ''}
+                    ${status === 'incorrect' ? 'border-error bg-error/10' : ''}
+                    ${status === 'disabled' ? 'opacity-60' : ''}
+                    ${showResult ? 'cursor-default' : 'cursor-pointer active:scale-[0.98]'}
                   `}
                 >
                   {/* Option Content */}
-                  <div className="flex items-center space-x-4 w-full">
+                  <div className="flex items-center space-x-3 w-full">
                     {/* Option Letter */}
                     <div className={`
-                      w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
+                      w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0
                       ${status === 'correct' ? 'bg-success text-success-foreground' :
                         status === 'incorrect' ? 'bg-error text-error-foreground' :
-                        'bg-muted text-muted-foreground'}
+                        isSelected ? 'bg-primary text-primary-foreground': 'bg-muted text-muted-foreground'}
                     `}>
                       <span className="font-heading text-sm font-bold">
                         {String.fromCharCode(65 + index)}
@@ -155,9 +159,9 @@ const QuestionCard = ({
 
                   {/* Animated Background for Correct Answer */}
                   {showResult && status === 'correct' && (
-                    <div className="absolute inset-0 bg-success/10 animate-pulse-soft"></div>
+                    <div className="absolute inset-0 bg-success/10 animate-pulse-soft rounded-xl"></div>
                   )}
-                </Button>
+                </button>
               </div>
             );
           })}
@@ -172,7 +176,7 @@ const QuestionCard = ({
                 {question?.timeLimit || 60}s
               </span>
             </div>
-            
+
             <div className="flex items-center space-x-1">
               <Icon name="Target" size={16} className="text-accent" />
               <span className="font-caption text-muted-foreground">

@@ -38,7 +38,7 @@ export const microbeDatabase = {
     habitat: "Moist soil and organic matter"
   },
 
-  // Water Environment Microbes  
+  // Water Environment Microbes
   'water-1': {
     id: 'water-1',
     name: 'E. coli',
@@ -78,7 +78,7 @@ export const microbeDatabase = {
 
   // Body Environment Microbes
   'body-1': {
-    id: 'body-1', 
+    id: 'body-1',
     name: 'Lactobacillus',
     type: 'bacteria',
     environment: 'body',
@@ -110,7 +110,7 @@ export const microbeDatabase = {
     funFact: "Your gut bacteria are like a second brain! They produce neurotransmitters like serotonin (the happiness chemical) and can actually influence your mood, cravings, and behavior.",
     description: "Diverse collection of beneficial bacteria living in the human digestive system, forming the gut microbiome.",
     benefits: ["Aids food digestion", "Produces vitamins", "Protects against pathogens", "Supports immune system"],
-    size: "Various sizes, typically 0.5-5 micrometers", 
+    size: "Various sizes, typically 0.5-5 micrometers",
     habitat: "Human large intestine and colon"
   }
 };
@@ -122,7 +122,7 @@ export const getMicrobeById = (id) => {
 
 // Helper function to get all microbes for an environment
 export const getMicrobesByEnvironment = (environment) => {
-  return Object.values(microbeDatabase)?.filter(microbe => microbe?.environment === environment);
+  return Object.values(microbeDatabase)?.filter((microbe) => microbe?.environment === environment);
 };
 
 // Helper function to get environment data structure for the exploration component
@@ -130,46 +130,46 @@ export const getEnvironmentData = () => {
   return {
     soil: {
       name: 'Soil Cross-Section',
-      background: "https://images.unsplash.com/photo-1706225663100-1354e86470a2",
+      background: "https://img.rocket.new/generatedImages/rocket_gen_img_1823127e6-1764839854125.png",
       backgroundAlt: 'High-resolution cross-section view of rich brown soil layers with visible organic matter, root systems and soil particles',
       layers: [
-        { depth: '0-20%', color: 'bg-amber-800/20', name: 'Topsoil' },
-        { depth: '20-60%', color: 'bg-orange-900/25', name: 'Subsoil' },
-        { depth: '60-100%', color: 'bg-stone-800/30', name: 'Bedrock' }
-      ],
+      { depth: '0-20%', color: 'bg-amber-800/20', name: 'Topsoil' },
+      { depth: '20-60%', color: 'bg-orange-900/25', name: 'Subsoil' },
+      { depth: '60-100%', color: 'bg-stone-800/30', name: 'Bedrock' }],
+
       highlightedAreas: [
-        {
-          id: 'soil-organic-matter',
-          name: 'Organic Matter Zone',
-          description: 'Rich in decomposing materials where microbes thrive',
-          x: 25, y: 40, width: 30, height: 20,
-          color: 'bg-green-500/30',
-          borderColor: 'border-green-400',
-          icon: 'Leaf',
-          hint: 'Bacteria love organic matter!'
-        },
-        {
-          id: 'soil-root-zone',
-          name: 'Root Zone',
-          description: 'Area around plant roots where fungi form partnerships',
-          x: 60, y: 50, width: 25, height: 25,
-          color: 'bg-orange-500/30',
-          borderColor: 'border-orange-400',
-          icon: 'TreePine',
-          hint: 'Fungi create networks with roots here!'
-        },
-        {
-          id: 'soil-moisture-pocket',
-          name: 'Moisture Pocket',
-          description: 'Damp areas where protozoa hunt for prey',
-          x: 40, y: 70, width: 20, height: 15,
-          color: 'bg-blue-500/30',
-          borderColor: 'border-blue-400',
-          icon: 'Droplets',
-          hint: 'Protozoa need moisture to survive!'
-        }
-      ],
-      hiddenMicrobes: getMicrobesByEnvironment('soil')?.map(microbe => ({
+      {
+        id: 'soil-organic-matter',
+        name: 'Organic Matter Zone',
+        description: 'Rich in decomposing materials where microbes thrive',
+        x: 15, y: 25, width: 30, height: 20,
+        color: 'bg-green-500/30',
+        borderColor: 'border-green-400',
+        icon: 'Leaf',
+        hint: 'Bacteria love organic matter!'
+      },
+      {
+        id: 'soil-root-zone',
+        name: 'Root Zone',
+        description: 'Area around plant roots where fungi form partnerships',
+        x: 60, y: 50, width: 25, height: 25,
+        color: 'bg-orange-500/30',
+        borderColor: 'border-orange-400',
+        icon: 'TreePine',
+        hint: 'Fungi create networks with roots here!'
+      },
+      {
+        id: 'soil-moisture-pocket',
+        name: 'Moisture Pocket',
+        description: 'Damp areas where protozoa hunt for prey',
+        x: 40, y: 70, width: 20, height: 15,
+        color: 'bg-blue-500/30',
+        borderColor: 'border-blue-400',
+        icon: 'Droplets',
+        hint: 'Protozoa need moisture to survive!'
+      }],
+
+      hiddenMicrobes: getMicrobesByEnvironment('soil')?.map((microbe) => ({
         id: microbe?.id,
         x: microbe?.position?.x,
         y: microbe?.position?.y,
@@ -182,43 +182,43 @@ export const getEnvironmentData = () => {
       background: "https://images.unsplash.com/photo-1602051261083-73f809d3f2c2",
       backgroundAlt: 'Ultra-clear water droplet with pristine transparency showing light refraction and microscopic detail',
       layers: [
-        { depth: '0-30%', color: 'bg-blue-400/15', name: 'Surface Layer' },
-        { depth: '30-70%', color: 'bg-blue-500/20', name: 'Middle Zone' },
-        { depth: '70-100%', color: 'bg-blue-700/25', name: 'Deep Water' }
-      ],
+      { depth: '0-30%', color: 'bg-blue-400/15', name: 'Surface Layer' },
+      { depth: '30-70%', color: 'bg-blue-500/20', name: 'Middle Zone' },
+      { depth: '70-100%', color: 'bg-blue-700/25', name: 'Deep Water' }],
+
       highlightedAreas: [
-        {
-          id: 'water-surface-tension',
-          name: 'Surface Tension Zone',
-          description: 'Where bacteria cling to the water surface',
-          x: 25, y: 20, width: 35, height: 15,
-          color: 'bg-cyan-500/30',
-          borderColor: 'border-cyan-400',
-          icon: 'Waves',
-          hint: 'Bacteria can float at the surface!'
-        },
-        {
-          id: 'water-nutrient-rich',
-          name: 'Nutrient-Rich Zone',
-          description: 'Abundant food particles attract protozoa',
-          x: 65, y: 40, width: 25, height: 20,
-          color: 'bg-green-500/30',
-          borderColor: 'border-green-400',
-          icon: 'Sparkles',
-          hint: 'Protozoa gather where food is plentiful!'
-        },
-        {
-          id: 'water-photosynthesis',
-          name: 'Light Zone',
-          description: 'Bright area perfect for algae photosynthesis',
-          x: 45, y: 65, width: 30, height: 20,
-          color: 'bg-yellow-500/30',
-          borderColor: 'border-yellow-400',
-          icon: 'Sun',
-          hint: 'Algae need sunlight to grow!'
-        }
-      ],
-      hiddenMicrobes: getMicrobesByEnvironment('water')?.map(microbe => ({
+      {
+        id: 'water-surface-tension',
+        name: 'Surface Tension Zone',
+        description: 'Where bacteria cling to the water surface',
+        x: 25, y: 20, width: 35, height: 15,
+        color: 'bg-cyan-500/30',
+        borderColor: 'border-cyan-400',
+        icon: 'Waves',
+        hint: 'Bacteria can float at the surface!'
+      },
+      {
+        id: 'water-nutrient-rich',
+        name: 'Nutrient-Rich Zone',
+        description: 'Abundant food particles attract protozoa',
+        x: 65, y: 40, width: 25, height: 20,
+        color: 'bg-green-500/30',
+        borderColor: 'border-green-400',
+        icon: 'Sparkles',
+        hint: 'Protozoa gather where food is plentiful!'
+      },
+      {
+        id: 'water-photosynthesis',
+        name: 'Light Zone',
+        description: 'Bright area perfect for algae photosynthesis',
+        x: 45, y: 65, width: 30, height: 20,
+        color: 'bg-yellow-500/30',
+        borderColor: 'border-yellow-400',
+        icon: 'Sun',
+        hint: 'Algae need sunlight to grow!'
+      }],
+
+      hiddenMicrobes: getMicrobesByEnvironment('water')?.map((microbe) => ({
         id: microbe?.id,
         x: microbe?.position?.x,
         y: microbe?.position?.y,
@@ -228,72 +228,72 @@ export const getEnvironmentData = () => {
     },
     body: {
       name: 'Human Body System',
-      background: "https://images.unsplash.com/photo-1715523520522-27158f7d75de",
+      background: "https://images.unsplash.com/photo-1725399078960-7bb17a7d1653",
       backgroundAlt: 'Detailed anatomical illustration of human circulatory system with clearly defined blood vessels and organs',
       layers: [
-        { depth: '0-25%', color: 'bg-red-400/15', name: 'Bloodstream' },
-        { depth: '25-50%', color: 'bg-pink-500/20', name: 'Tissue' },
-        { depth: '50-75%', color: 'bg-orange-600/18', name: 'Organs' },
-        { depth: '75-100%', color: 'bg-yellow-700/20', name: 'Digestive System' }
-      ],
+      { depth: '0-25%', color: 'bg-red-400/15', name: 'Bloodstream' },
+      { depth: '25-50%', color: 'bg-pink-500/20', name: 'Tissue' },
+      { depth: '50-75%', color: 'bg-orange-600/18', name: 'Organs' },
+      { depth: '75-100%', color: 'bg-yellow-700/20', name: 'Digestive System' }],
+
       highlightedAreas: [
-        {
-          id: 'body-gut-microbiome',
-          name: 'Gut Microbiome Hub',
-          description: 'The intestinal tract where beneficial bacteria flourish',
-          x: 75, y: 65, width: 20, height: 25,
-          color: 'bg-green-500/40',
-          borderColor: 'border-green-400',
-          icon: 'Heart',
-          hint: 'Your gut is home to trillions of helpful bacteria!',
-          systemName: 'Digestive System'
-        },
-        {
-          id: 'body-respiratory-tract',
-          name: 'Respiratory Gateway',
-          description: 'Airways where viruses often enter the body',
-          x: 55, y: 35, width: 25, height: 20,
-          color: 'bg-red-500/40',
-          borderColor: 'border-red-400',
-          icon: 'Wind',
-          hint: 'Viruses love to travel through your nose and throat!',
-          systemName: 'Respiratory System'
-        },
-        {
-          id: 'body-probiotic-zone',
-          name: 'Probiotic Sanctuary',
-          description: 'Small intestine where lactobacillus helps digestion',
-          x: 15, y: 25, width: 20, height: 20,
-          color: 'bg-blue-500/40',
-          borderColor: 'border-blue-400',
-          icon: 'Shield',
-          hint: 'Lactobacillus protects your digestive system!',
-          systemName: 'Digestive System'
-        },
-        {
-          id: 'body-immune-patrol',
-          name: 'Immune Patrol Zone',
-          description: 'Lymphatic areas where immune cells monitor for threats',
-          x: 40, y: 55, width: 22, height: 18,
-          color: 'bg-purple-500/40',
-          borderColor: 'border-purple-400',
-          icon: 'Shield',
-          hint: 'Your immune system is always on guard!',
-          systemName: 'Immune System'
-        },
-        {
-          id: 'body-circulation-highway',
-          name: 'Circulation Highway',
-          description: 'Blood vessels where microbes can travel throughout the body',
-          x: 30, y: 10, width: 35, height: 15,
-          color: 'bg-red-500/30',
-          borderColor: 'border-red-400',
-          icon: 'Activity',
-          hint: 'Blood carries both nutrients and sometimes unwanted visitors!',
-          systemName: 'Circulatory System'
-        }
-      ],
-      hiddenMicrobes: getMicrobesByEnvironment('body')?.map(microbe => ({
+      {
+        id: 'body-gut-microbiome',
+        name: 'Gut Microbiome Hub',
+        description: 'The intestinal tract where beneficial bacteria flourish',
+        x: 75, y: 65, width: 20, height: 25,
+        color: 'bg-green-500/40',
+        borderColor: 'border-green-400',
+        icon: 'Heart',
+        hint: 'Your gut is home to trillions of helpful bacteria!',
+        systemName: 'Digestive System'
+      },
+      {
+        id: 'body-respiratory-tract',
+        name: 'Respiratory Gateway',
+        description: 'Airways where viruses often enter the body',
+        x: 55, y: 35, width: 25, height: 20,
+        color: 'bg-red-500/40',
+        borderColor: 'border-red-400',
+        icon: 'Wind',
+        hint: 'Viruses love to travel through your nose and throat!',
+        systemName: 'Respiratory System'
+      },
+      {
+        id: 'body-probiotic-zone',
+        name: 'Probiotic Sanctuary',
+        description: 'Small intestine where lactobacillus helps digestion',
+        x: 15, y: 25, width: 20, height: 20,
+        color: 'bg-blue-500/40',
+        borderColor: 'border-blue-400',
+        icon: 'Shield',
+        hint: 'Lactobacillus protects your digestive system!',
+        systemName: 'Digestive System'
+      },
+      {
+        id: 'body-immune-patrol',
+        name: 'Immune Patrol Zone',
+        description: 'Lymphatic areas where immune cells monitor for threats',
+        x: 40, y: 55, width: 22, height: 18,
+        color: 'bg-purple-500/40',
+        borderColor: 'border-purple-400',
+        icon: 'Shield',
+        hint: 'Your immune system is always on guard!',
+        systemName: 'Immune System'
+      },
+      {
+        id: 'body-circulation-highway',
+        name: 'Circulation Highway',
+        description: 'Blood vessels where microbes can travel throughout the body',
+        x: 30, y: 10, width: 35, height: 15,
+        color: 'bg-red-500/30',
+        borderColor: 'border-red-400',
+        icon: 'Activity',
+        hint: 'Blood carries both nutrients and sometimes unwanted visitors!',
+        systemName: 'Circulatory System'
+      }],
+
+      hiddenMicrobes: getMicrobesByEnvironment('body')?.map((microbe) => ({
         id: microbe?.id,
         x: microbe?.position?.x,
         y: microbe?.position?.y,

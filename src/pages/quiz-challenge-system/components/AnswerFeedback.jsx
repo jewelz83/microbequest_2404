@@ -5,6 +5,7 @@ import Button from '../../../components/ui/Button';
 
 const AnswerFeedback = ({
   isCorrect = false,
+  pointsEarned = 0,
   explanation = '',
   microbeInfo = null,
   onContinue,
@@ -164,7 +165,7 @@ const AnswerFeedback = ({
           <div className="flex items-center space-x-2">
             <Icon name="Trophy" size={16} className="text-accent" />
             <span className="font-body text-sm text-foreground">
-              +{isCorrect ? 10 : 5} points earned
+              +{pointsEarned} points earned
             </span>
           </div>
           

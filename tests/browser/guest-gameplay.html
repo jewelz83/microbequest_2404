@@ -1,0 +1,58 @@
+<!doctype html>
+<meta charset="utf-8"><title>Guest gameplay regression checks</title>
+<style>body{font:16px system-ui;margin:24px}iframe{width:100%;height:750px}pre{white-space:pre-wrap}</style>
+<h1>Guest gameplay regression checks</h1>
+<p>Local synthetic guest only. Resets localhost guest controls and timing; preserves saved timeline progress.</p>
+<button id="run">Run guest regression checks</button><pre id="results">Ready</pre><div id="game"></div>
+<script type="module">
+import {defaultControls} from '/src/services/parentalControlsService.js';
+if(!['127.0.0.1','localhost'].includes(location.hostname)) throw Error('Localhost only');
+const output=document.querySelector('#results'), rows=[];
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const assert=(ok,message)=>{if(!ok)throw Error(message);rows.push('PASS: '+message);output.textContent=rows.join('\n')};
+async function until(predicate,description){for(let i=0;i<600;i++){if(predicate())return;await wait(100)}throw Error('Timed out: '+description)}
+let frame;
+const doc=()=>frame.contentDocument;
+const heading=()=>[...doc().querySelectorAll('h1')].find(h=>h.textContent.trim()!=='MicrobeQuest');
+const cards=()=>[...doc().querySelectorAll('button.game-card')];
+const button=label=>doc().querySelector(`button[aria-label="${label}"]`);
+const progress=()=>Number(doc().querySelector('[role="progressbar"][aria-label="Matched pairs"]')?.getAttribute('aria-valuenow'));
+const act=async el=>{if(!el)throw Error('Missing control');el.click();await wait(40)};
+const pair=()=>{const all=cards().filter(c=>!c.disabled),first=all[0];return [first,all.find(c=>c!==first&&c.querySelector('h4').textContent===first.querySelector('h4').textContent)]};
+async function open(route){frame.src='/'+route;await until(()=>frame.contentWindow.location.pathname==='/'+route&&heading()&&!heading().textContent.startsWith('Checking'),'route '+route);await wait(400)}
+async function restart(){await act(button('Restart game'));await wait(1600);assert(progress()===0 && !doc().body.textContent.includes('Continue Playing'),'restart clears pairs and educational panel')}
+document.querySelector('#run').onclick=async()=>{
+ document.querySelector('#run').disabled=true;rows.length=0;output.textContent='Running…';
+ try{
+ document.querySelector('#game').replaceChildren();await wait(2200);
+ localStorage.removeItem('microbequest_usage:v1:guest');
+ localStorage.setItem('microbequest_parental_controls',JSON.stringify({...defaultControls,screenTimeEnabled:false,allowedStartTime:'00:00',allowedEndTime:'23:59'}));
+ localStorage.setItem('microbequest_onboarding_done','true');
+ frame=document.createElement('iframe');document.querySelector('#game').append(frame);
+ await open('microbe-matching-game');await until(()=>cards().length===12,'matching board');
+ assert(cards().every(c=>c.getAttribute('aria-label').endsWith('Hidden microbe')&&c.querySelector('[aria-hidden="true"]')),'face-down card content is excluded from accessibility');
+ let selection=pair();await act(selection[0]);await act(selection[1]);await restart();
+ assert([...doc().querySelectorAll('p')].filter(p=>p.textContent.trim()==='Moves').some(p=>p.parentElement.querySelector('span')?.textContent==='0'),'restart resets move count');
+ selection=pair();await act(selection[0]);await act(selection[1]);await act(button('Pause game'));await wait(1600);
+ assert(progress()===0&&cards().every(c=>c.disabled),'pending match stops while paused');
+ await act(button('Resume game'));await until(()=>progress()===1,'match resumes');
+ assert(progress()===1,'resume resolves pending match once');await restart();
+ let all=cards();await act(all[0]);await act(all.find(c=>c.querySelector('h4').textContent!==all[0].querySelector('h4').textContent));
+ await act(button('Restart game'));await act(cards()[0]);await wait(1700);
+ assert(cards().filter(c=>c.getAttribute('aria-pressed')==='true').length===1,'old mismatch cannot hide a new-round card');await restart();
+ selection=pair();await act(selection[0]);await act(selection[1]);await act([...doc().querySelectorAll('button')].find(b=>b.textContent==='Medium'));await wait(1600);
+ assert(progress()===0&&!doc().body.textContent.includes('Continue Playing'),'difficulty change cancels previous round match');
+ await act([...doc().querySelectorAll('button')].find(b=>b.textContent==='Easy'));await act(button('Hint (3 remaining)'));await restart();
+ assert(Boolean(button('Hint (3 remaining)')),'restart restores hint allowance');
+
+ for(let n=1;n<=6;n++){selection=pair();await act(selection[0]);await act(selection[1]);await until(()=>progress()===n,'pair '+n);const close=[...doc().querySelectorAll('button')].find(b=>b.textContent==='Continue Playing');if(close)await act(close)}
+ assert(doc().body.textContent.includes('Congratulations!')&&button('Pause game').disabled,'completed round cannot resume');
+ assert(progress()===6 && doc().body.textContent.includes('100% Efficiency'),'full round retains correct completion and efficiency');await restart();
+ await open('game-home-dashboard');assert(doc().body.textContent.includes('Your saved progress')&&!doc().body.textContent.includes('Bacteria Expert')&&!doc().body.textContent.includes('23:45:12')&&!doc().body.textContent.includes('100 bonus points'),'Home directs guests to saved progress without fabricated awards');
+ const routes=['progress-achievement-hub','world-explorer-mode','quiz-challenge-system','microscope-discovery-lab','germ-buster-tower-defense','microbe-detective-mystery-outbreak','microbe-timeline-adventure'];
+ for(const route of routes){await open(route);assert(!doc().body.textContent.includes('Something went wrong')&&!doc().body.textContent.includes('Time for a play break'),route+' loads: '+heading().textContent)}
+ rows.push('DONE — route loading is a smoke check, not full-game certification.');output.textContent=rows.join('\n');
+ }catch(e){rows.push('FAIL: '+e.message);output.textContent=rows.join('\n')}
+ finally{document.querySelector('#run').disabled=false}
+};
+</script>

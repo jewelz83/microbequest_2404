@@ -1,3 +1,4 @@
+import { permitsDifficulty } from '../../../services/gameAccessPolicy.mjs';
 import React, { useState } from 'react';
 import Icon from '../../../components/AppIcon';
 
@@ -5,6 +6,7 @@ const BodyLocationSelector = ({
   locations, 
   onSelectLocation, 
   difficulty, 
+  maxDifficulty = 'easy',
   setDifficulty 
 }) => {
   const [selectedLocationId, setSelectedLocationId] = useState(null);
@@ -88,7 +90,7 @@ const BodyLocationSelector = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          {Object.entries(difficultySettings)?.map(([key, setting]) => (
+          {Object.entries(difficultySettings).filter(([level]) => permitsDifficulty(level, maxDifficulty)).map(([key, setting]) => (
             <button
               key={key}
               onClick={() => setDifficulty(key)}

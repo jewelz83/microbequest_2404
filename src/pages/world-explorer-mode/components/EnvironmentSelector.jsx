@@ -10,49 +10,49 @@ const EnvironmentSelector = ({
   className = ""
 }) => {
   const environments = [
-    {
-      id: 'soil',
-      name: 'Soil Cross-Section',
-      description: 'Explore the rich underground world of soil microorganisms',
-      image: "https://images.unsplash.com/photo-1706225663100-1354e86470a2",
-      imageAlt: 'High-resolution cross-section view of rich brown soil layers with visible organic matter, root systems and soil particles',
-      icon: 'Mountain',
-      color: 'text-amber-600',
-      bgColor: 'bg-amber-50',
-      borderColor: 'border-amber-200',
-      totalMicrobes: 3,
-      difficulty: 'Easy',
-      difficultyColor: 'text-success'
-    },
-    {
-      id: 'water',
-      name: 'Water Droplet',
-      description: 'Dive into the microscopic aquatic ecosystem',
-      image: "https://images.unsplash.com/photo-1602051261083-73f809d3f2c2",
-      imageAlt: 'Ultra-clear water droplet with pristine transparency showing light refraction and microscopic detail',
-      icon: 'Droplets',
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200',
-      totalMicrobes: 3,
-      difficulty: 'Medium',
-      difficultyColor: 'text-warning'
-    },
-    {
-      id: 'body',
-      name: 'Human Body System',
-      description: 'Discover the microorganisms living inside us',
-      image: "https://images.unsplash.com/photo-1715523520522-27158f7d75de",
-      imageAlt: 'Detailed anatomical illustration of human circulatory system with clearly defined blood vessels and organs',
-      icon: 'Heart',
-      color: 'text-red-600',
-      bgColor: 'bg-red-50',
-      borderColor: 'border-red-200',
-      totalMicrobes: 3,
-      difficulty: 'Hard',
-      difficultyColor: 'text-error'
-    }
-  ];
+  {
+    id: 'soil',
+    name: 'Soil Cross-Section',
+    description: 'Explore the rich underground world of soil microorganisms',
+    image: "https://img.rocket.new/generatedImages/rocket_gen_img_1823127e6-1764839854125.png",
+    imageAlt: 'High-resolution cross-section view of rich brown soil layers with visible organic matter, root systems and soil particles',
+    icon: 'Mountain',
+    color: 'text-amber-600',
+    bgColor: 'bg-amber-50',
+    borderColor: 'border-amber-200',
+    totalMicrobes: 3,
+    difficulty: 'Easy',
+    difficultyColor: 'text-success'
+  },
+  {
+    id: 'water',
+    name: 'Water Droplet',
+    description: 'Dive into the microscopic aquatic ecosystem',
+    image: "https://images.unsplash.com/photo-1602051261083-73f809d3f2c2",
+    imageAlt: 'Ultra-clear water droplet with pristine transparency showing light refraction and microscopic detail',
+    icon: 'Droplets',
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50',
+    borderColor: 'border-blue-200',
+    totalMicrobes: 3,
+    difficulty: 'Medium',
+    difficultyColor: 'text-warning'
+  },
+  {
+    id: 'body',
+    name: 'Human Body System',
+    description: 'Discover the microorganisms living inside us',
+    image: "https://images.unsplash.com/photo-1725399078960-7bb17a7d1653",
+    imageAlt: 'Detailed anatomical illustration of human circulatory system with clearly defined blood vessels and organs',
+    icon: 'Heart',
+    color: 'text-red-600',
+    bgColor: 'bg-red-50',
+    borderColor: 'border-red-200',
+    totalMicrobes: 3,
+    difficulty: 'Hard',
+    difficultyColor: 'text-error'
+  }];
+
 
   const handleExploreEnvironment = (environmentId) => {
     // First select the environment
@@ -70,7 +70,7 @@ const EnvironmentSelector = ({
             Click "Explore" to select and immediately start exploring an environment
           </p>
         </div>
-        
+
         <div className="flex items-center space-x-2 text-primary">
           <Icon name="Compass" size={20} strokeWidth={2} />
           <span className="font-heading text-sm">Explorer Mode</span>
@@ -88,25 +88,25 @@ const EnvironmentSelector = ({
               key={env.id}
               className={`
                 relative rounded-xl border-2 transition-all duration-300 overflow-hidden
-                ${isSelected ? 
-                  `${env.borderColor} shadow-lg` : 
-                  'border-border hover:border-primary/30 hover:shadow-moderate'}
-              `}
-            >
+                ${isSelected ?
+              `${env.borderColor} shadow-lg` :
+              'border-border hover:border-primary/30 hover:shadow-moderate'}
+              `}>
+
               {/* Environment Image */}
               <div className="relative h-32 overflow-hidden">
                 <Image
                   src={env.image}
                   alt={env.imageAlt}
-                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-110 filter-none"
-                />
-                
+                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-110 filter-none" />
+
+
                 {/* Reduced Overlay opacity for clearer images */}
                 <div className={`
                   absolute inset-0 bg-gradient-to-t from-black/40 to-transparent
                   ${isSelected ? 'from-black/25' : ''}
                 `}></div>
-                
+
                 {/* Environment Icon */}
                 <div className={`
                   absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center
@@ -116,11 +116,11 @@ const EnvironmentSelector = ({
                 </div>
 
                 {/* Progress Badge */}
-                {discoveredCount > 0 && (
-                  <div className="absolute top-3 left-3 bg-success text-success-foreground px-2 py-1 rounded-full text-xs font-caption font-semibold">
+                {discoveredCount > 0 &&
+                <div className="absolute top-3 left-3 bg-success text-success-foreground px-2 py-1 rounded-full text-xs font-caption font-semibold">
                     {discoveredCount}/{env.totalMicrobes}
                   </div>
-                )}
+                }
               </div>
 
               {/* Content */}
@@ -140,7 +140,7 @@ const EnvironmentSelector = ({
                       {env.totalMicrobes} microbes
                     </span>
                   </div>
-                  
+
                   <div className="flex items-center space-x-1">
                     <Icon name="BarChart3" size={14} className={env.difficultyColor} />
                     <span className={`font-caption text-xs ${env.difficultyColor}`}>
@@ -160,10 +160,10 @@ const EnvironmentSelector = ({
                   <div className="w-full bg-muted rounded-full h-2">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${
-                        completionPercentage === 100 ? 'bg-success' : 'bg-primary'
-                      }`}
-                      style={{ width: `${completionPercentage}%` }}
-                    ></div>
+                      completionPercentage === 100 ? 'bg-success' : 'bg-primary'}`
+                      }
+                      style={{ width: `${completionPercentage}%` }}>
+                    </div>
                   </div>
                 </div>
 
@@ -173,33 +173,33 @@ const EnvironmentSelector = ({
                   className={`
                     w-full flex items-center justify-center py-3 px-4 rounded-button transition-all duration-200
                     font-caption text-sm font-semibold
-                    ${isSelected ? 
-                      `${env.bgColor} ${env.color} border-2 ${env.borderColor}` :
-                      'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 shadow-sm hover:shadow-md'
-                    }
-                  `}
-                >
+                    ${isSelected ?
+                  `${env.bgColor} ${env.color} border-2 ${env.borderColor}` :
+                  'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 shadow-sm hover:shadow-md'}
+                  `
+                  }>
+
                   <Icon
                     name={isSelected ? 'CheckCircle' : 'Play'}
                     size={16}
                     strokeWidth={2}
-                    className="mr-2"
-                  />
+                    className="mr-2" />
+
                   {isSelected ? 'Selected Environment' : 'Explore Now'}
                 </button>
               </div>
 
               {/* Selection Indicator */}
-              {isSelected && (
-                <div className="absolute inset-0 pointer-events-none">
+              {isSelected &&
+              <div className="absolute inset-0 pointer-events-none">
                   <div className={`absolute inset-0 ${env.borderColor} border-2 rounded-xl`}></div>
                   <div className="absolute top-2 left-2 w-4 h-4 bg-success rounded-full flex items-center justify-center">
                     <Icon name="Check" size={10} color="white" strokeWidth={3} />
                   </div>
                 </div>
-              )}
-            </div>
-          );
+              }
+            </div>);
+
         })}
       </div>
 
@@ -212,7 +212,7 @@ const EnvironmentSelector = ({
               Total Progress: {Object.values(discoveredCounts)?.reduce((sum, count) => sum + count, 0)}/9 microbes discovered
             </span>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-1">
               <div className="w-3 h-3 bg-success rounded-full"></div>
@@ -229,8 +229,8 @@ const EnvironmentSelector = ({
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default EnvironmentSelector;

@@ -126,5 +126,20 @@ module.exports = {
   },
   plugins: [
     require("tailwindcss-animate"),
+    function({ addUtilities }) {
+      addUtilities({
+        '.scrollbar-hide': {
+          '-ms-overflow-style': 'none',
+          'scrollbar-width': 'none',
+          '&::-webkit-scrollbar': { display: 'none' },
+        },
+        '.safe-area-pb': {
+          'padding-bottom': 'env(safe-area-inset-bottom, 0px)',
+        },
+        '.touch-action-manipulation': {
+          'touch-action': 'manipulation',
+        },
+      });
+    },
   ],
 }

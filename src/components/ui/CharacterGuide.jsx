@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import Icon from '../AppIcon';
 import Image from '../AppImage';
 
-const CharacterGuide = ({ 
-  character = 'aunt-juju', 
-  message = '', 
-  emotion = 'happy', 
+const CharacterGuide = ({
+  character = 'aunt-juju',
+  message = '',
+  emotion = 'happy',
   position = 'bottom-right',
   isVisible = true,
   onClose,
@@ -66,41 +66,41 @@ const CharacterGuide = ({
   return (
     <div className={`${positionClasses?.[position]} ${className}`}>
       <div className={`
-        bg-card border-2 ${currentCharacter?.borderColor} rounded-2xl shadow-pronounced 
+        bg-card border-2 ${currentCharacter?.borderColor} rounded-2xl shadow-pronounced
         max-w-sm animate-slide-up
         ${isAnimating ? 'animate-bounce-gentle' : ''}
       `}>
         {/* Character Header */}
         <div className={`
-          flex items-center space-x-3 p-4 ${currentCharacter?.bgColor} 
+          flex items-center space-x-3 p-4 ${currentCharacter?.bgColor}
           rounded-t-xl border-b ${currentCharacter?.borderColor}
         `}>
           <div className="relative">
             <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-moderate">
-              <Image 
+              <Image
                 src={currentCharacter?.avatar}
                 alt={`${currentCharacter?.name} avatar`}
                 className="w-full h-full object-cover"
               />
             </div>
-            
+
             {/* Emotion Indicator - hidden for charlie-zebra */}
             {character !== 'charlie-zebra' && (
               <div className={`
-                absolute -bottom-1 -right-1 w-6 h-6 bg-card rounded-full 
+                absolute -bottom-1 -right-1 w-6 h-6 bg-card rounded-full
                 flex items-center justify-center border-2 ${currentCharacter?.borderColor}
                 ${currentEmotionData?.bounce ? 'animate-bounce-gentle' : ''}
               `}>
-                <Icon 
-                  name={currentEmotionData?.icon} 
-                  size={12} 
+                <Icon
+                  name={currentEmotionData?.icon}
+                  size={12}
                   className={currentCharacter?.color}
                   strokeWidth={2.5}
                 />
               </div>
             )}
           </div>
-          
+
           <div className="flex-1">
             <h4 className={`font-heading text-sm ${currentCharacter?.color}`}>
               {currentCharacter?.name}
@@ -109,10 +109,11 @@ const CharacterGuide = ({
               Your Learning Guide
             </p>
           </div>
-          
+
           {onClose && (
             <button
               onClick={onClose}
+              aria-label="Close character guide"
               className="p-1 hover:bg-white/50 rounded-full transition-colors duration-fast"
             >
               <Icon name="X" size={16} className="text-muted-foreground" />
@@ -134,10 +135,10 @@ const CharacterGuide = ({
           <div className="px-4 pb-4">
             <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
               <div className="flex items-start space-x-2">
-                <Icon 
-                  name="Lightbulb" 
-                  size={16} 
-                  className="text-accent mt-0.5 flex-shrink-0" 
+                <Icon
+                  name="Lightbulb"
+                  size={16}
+                  className="text-accent mt-0.5 flex-shrink-0"
                   strokeWidth={2}
                 />
                 <div>
@@ -161,8 +162,8 @@ const CharacterGuide = ({
               <span className="font-caption text-xs text-muted-foreground">More Help</span>
             </button>
           )}
-          
-          <button 
+
+          <button
             onClick={onClose}
             className={`
               flex items-center space-x-1 px-3 py-1 rounded-full transition-colors duration-fast
@@ -177,8 +178,8 @@ const CharacterGuide = ({
         {/* Speech Bubble Tail */}
         {position?.includes('bottom') && (
           <div className={`
-            absolute top-full ${position?.includes('right') ? 'right-8' : 'left-8'} 
-            w-0 h-0 border-l-8 border-r-8 border-t-8 
+            absolute top-full ${position?.includes('right') ? 'right-8' : 'left-8'}
+            w-0 h-0 border-l-8 border-r-8 border-t-8
             border-transparent border-t-card
           `}></div>
         )}

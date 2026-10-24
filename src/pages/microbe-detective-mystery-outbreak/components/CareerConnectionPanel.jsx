@@ -257,12 +257,11 @@ const CareerConnectionPanel = ({ onBack, playerStats }) => {
           </div>
         </div>
       </div>
-
       <div className="container mx-auto px-6 py-12">
         {!selectedCareer ? (
           /* Career Grid */
-          <div>
-            <motion.div 
+          (<div>
+            <motion.div
               className="text-center mb-12"
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -275,11 +274,10 @@ const CareerConnectionPanel = ({ onBack, playerStats }) => {
                 Real Careers in Public Health & Microbiology
               </h2>
               <p className="text-xl text-white/80 max-w-3xl mx-auto">
-                The skills you used in this game - investigating outbreaks, identifying microbes, and solving problems - 
+                The skills you used in this game - investigating outbreaks, identifying microbes, and solving problems -
                 are the same skills these professionals use every day to protect public health!
               </p>
             </motion.div>
-
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
               {careers?.map((career, index) => (
                 <motion.button
@@ -297,7 +295,7 @@ const CareerConnectionPanel = ({ onBack, playerStats }) => {
                   <h3 className="text-2xl font-bold text-white mb-2">{career?.title}</h3>
                   <p className="text-teal-200 text-sm mb-4 italic">{career?.tagline}</p>
                   <p className="text-white/70 text-sm mb-4 line-clamp-3">{career?.description}</p>
-                  
+
                   <div className="flex items-center justify-end text-blue-300 font-semibold group-hover:gap-3 gap-2 transition-all">
                     <span>Learn More</span>
                     <Sparkles className="w-4 h-4" />
@@ -305,7 +303,6 @@ const CareerConnectionPanel = ({ onBack, playerStats }) => {
                 </motion.button>
               ))}
             </div>
-
             {/* Educational Message */}
             <motion.div
               className="mt-12 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 rounded-2xl p-8 max-w-4xl mx-auto"
@@ -341,10 +338,10 @@ const CareerConnectionPanel = ({ onBack, playerStats }) => {
                 </div>
               </div>
             </motion.div>
-          </div>
+          </div>)
         ) : (
           /* Detailed Career View */
-          <AnimatePresence mode="wait">
+          (<AnimatePresence mode="wait">
             <motion.div
               key={selectedCareer?.id}
               initial={{ opacity: 0, x: 20 }}
@@ -368,7 +365,7 @@ const CareerConnectionPanel = ({ onBack, playerStats }) => {
                     <h2 className="text-4xl font-bold text-white mb-2">{selectedCareer?.title}</h2>
                     <p className="text-2xl text-blue-200 italic mb-4">{selectedCareer?.tagline}</p>
                     <p className="text-white/90 text-lg leading-relaxed">{selectedCareer?.description}</p>
-                    
+
                     {selectedCareer?.relatedTo && (
                       <div className="mt-6 bg-yellow-500/20 border border-yellow-400/30 rounded-lg p-4">
                         <div className="flex items-start gap-2">
@@ -455,7 +452,7 @@ const CareerConnectionPanel = ({ onBack, playerStats }) => {
                   <p className="text-green-200 text-lg">{selectedCareer?.salary}</p>
                   <p className="text-white/60 text-sm mt-2">*Varies by experience, location, and employer</p>
                 </div>
-                
+
                 <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 rounded-xl p-6">
                   <h4 className="text-xl font-bold text-white mb-2">📈 Job Outlook</h4>
                   <p className="text-blue-200 text-lg">{selectedCareer?.outlook}</p>
@@ -463,7 +460,7 @@ const CareerConnectionPanel = ({ onBack, playerStats }) => {
                 </div>
               </div>
             </motion.div>
-          </AnimatePresence>
+          </AnimatePresence>)
         )}
       </div>
     </motion.div>

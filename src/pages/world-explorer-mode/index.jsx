@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/ui/Header';
 import CharacterGuide from '../../components/ui/CharacterGuide';
@@ -7,6 +7,8 @@ import useGuideVisibility from '../../hooks/useGuideVisibility';
 import Button from '../../components/ui/Button';
 import Icon from '../../components/AppIcon';
 import { getMicrobeById } from '../../utils/microbeData';
+import { saveGameScore } from '../../services/gameProgressService';
+import { trackGameModeStart, trackGameModeComplete, trackMicrobeDiscovery } from '../../services/analyticsService';
 
 // Import page-specific components
 import ExplorationEnvironment from './components/ExplorationEnvironment';
@@ -17,7 +19,12 @@ import EnvironmentSelector from './components/EnvironmentSelector';
 
 const WorldExplorerMode = () => {
   const navigate = useNavigate();
-  
+
+  const discoveredIds = useRef(new Set());
+  const completedEnvironments = useRef(new Set());
+  const factTimer = useRef(null);
+  useEffect(() => () => clearTimeout(factTimer.current), []);
+
   // Game state
   const [currentEnvironment, setCurrentEnvironment] = useState('soil');
   const [isExploring, setIsExploring] = useState(false);
@@ -27,7 +34,7 @@ const WorldExplorerMode = () => {
   const [gamePhase, setGamePhase] = useState('selection'); // 'selection', 'exploring', 'completed'
   const { shouldShowGuide: showGuide, hideGuide: setShowGuide } = useGuideVisibility('world-explorer-mode');
   const { shouldShowGuide: showLocalGuide, hideGuide: handleLocalGuideClose } = useGuideVisibility('world-explorer-local');
-  
+
   // Fun fact modal state
   const [showFunFact, setShowFunFact] = useState(false);
   const [currentFunFactMicrobe, setCurrentFunFactMicrobe] = useState(null);
@@ -60,6 +67,20 @@ const WorldExplorerMode = () => {
       setGamePhase('completed');
       setGuideMessage(`Amazing work! You've discovered all microorganisms in the ${currentEnvironment} environment!`);
       setGuideEmotion('celebrating');
+      if (completedEnvironments.current.has(currentEnvironment)) return;
+      completedEnvironments.current.add(currentEnvironment);
+      // Persist score to Supabase
+      const totalDiscoveredNow = Object.values(counts)?.reduce((sum, c) => sum + c, 0);
+      trackGameModeComplete('world-explorer', { score: totalDiscoveredNow * 100, environment: currentEnvironment, discoveredMicrobes: discoveredMicrobes?.length });
+      saveGameScore({
+        gameMode: 'world-explorer',
+        score: totalDiscoveredNow * 100,
+        correctAnswers: currentCount,
+        totalQuestions: 3,
+        timeElapsed: 0,
+        difficulty: 'easy',
+        metadata: { environment: currentEnvironment, discoveredMicrobes: discoveredMicrobes?.length },
+      })?.catch((err) => console.error('Failed to save explorer score:', err));
     }
   }, [discoveredMicrobes, currentEnvironment, isExploring]);
 
@@ -68,7 +89,7 @@ const WorldExplorerMode = () => {
     if (environmentId !== currentEnvironment) {
       setCurrentEnvironment(environmentId);
     }
-    
+    trackGameModeStart('world-explorer', { environment: environmentId });
     setGamePhase('exploring');
     setIsExploring(true);
     setGuideMessage(`Welcome to the ${environmentId} environment! Use your magnifying glass to search for hidden microorganisms.`);
@@ -83,7 +104,7 @@ const WorldExplorerMode = () => {
     setShowMicroscope(false);
     setGuideMessage(`You've selected the ${environmentId} environment. Ready to start exploring?`);
     setGuideEmotion('happy');
-    
+
     // Show any pending fun facts when changing environments
     if (pendingFunFacts?.length > 0) {
       setCurrentFunFactMicrobe(pendingFunFacts?.[0]);
@@ -93,9 +114,11 @@ const WorldExplorerMode = () => {
   };
 
   const handleMicrobeDiscovered = (microbe) => {
-    if (!discoveredMicrobes?.includes(microbe?.id)) {
+    if (!discoveredIds.current.has(microbe?.id)) {
+      discoveredIds.current.add(microbe.id);
       setDiscoveredMicrobes(prev => [...prev, microbe?.id]);
-      
+      trackMicrobeDiscovery(microbe?.name, currentEnvironment);
+
       // Get detailed microbe data
       const detailedMicrobe = getMicrobeById(microbe?.id);
       if (detailedMicrobe) {
@@ -119,10 +142,11 @@ const WorldExplorerMode = () => {
   const handleFunFactClose = () => {
     setShowFunFact(false);
     setCurrentFunFactMicrobe(null);
-    
+
     // Show next pending fun fact if available
     if (pendingFunFacts?.length > 0) {
-      setTimeout(() => {
+      clearTimeout(factTimer.current);
+      factTimer.current = setTimeout(() => {
         setCurrentFunFactMicrobe(pendingFunFacts?.[0]);
         setShowFunFact(true);
         setPendingFunFacts(prev => prev?.slice(1));
@@ -147,14 +171,14 @@ const WorldExplorerMode = () => {
   };
 
   const handleNavigateToLab = () => {
-    navigate('/microscope-discovery-lab', { 
-      state: { selectedMicrobe, fromExplorer: true } 
+    navigate('/microscope-discovery-lab', {
+      state: { selectedMicrobe, fromExplorer: true }
     });
   };
 
   const handleNavigateToQuiz = () => {
-    navigate('/quiz-challenge-system', { 
-      state: { discoveredMicrobes, currentEnvironment } 
+    navigate('/quiz-challenge-system', {
+      state: { discoveredMicrobes, currentEnvironment }
     });
   };
 
@@ -170,7 +194,7 @@ const WorldExplorerMode = () => {
     setShowMicroscope(false);
     setGuideMessage('Choose another environment to continue your exploration journey!');
     setGuideEmotion('encouraging');
-    
+
     // Show any pending fun facts when returning to selection
     if (pendingFunFacts?.length > 0) {
       setCurrentFunFactMicrobe(pendingFunFacts?.[0]);
@@ -184,31 +208,32 @@ const WorldExplorerMode = () => {
   const overallProgress = (totalDiscovered / totalMicrobes) * 100;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background game-screen">
       <Header />
       <main className="pt-16">
         {/* Hero Section */}
         <div className="bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 border-b border-border">
-          <div className="max-w-7xl mx-auto px-4 py-8">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h1 className="text-3xl lg:text-4xl font-heading text-foreground mb-2">
+          <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
+            <div className="flex items-start sm:items-center justify-between mb-6 gap-4">
+              <div className="flex-1">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-heading text-foreground mb-2">
                   World Explorer Mode
                 </h1>
-                <p className="font-body text-muted-foreground max-w-2xl">
-                  Embark on an exciting journey to discover hidden microorganisms in different environments. 
+                <p className="font-body text-sm sm:text-base text-muted-foreground max-w-2xl">
+                  Embark on an exciting journey to discover hidden microorganisms in different environments.
                   Use your scientific tools to explore soil, water, and biological systems!
                 </p>
               </div>
-              
-              <div className="hidden lg:flex items-center space-x-4">
+
+              {/* Stats — visible on all screen sizes */}
+              <div className="flex items-center space-x-4 flex-shrink-0">
                 <div className="text-center">
-                  <div className="text-2xl font-heading text-primary">{totalDiscovered}</div>
-                  <div className="font-caption text-xs text-muted-foreground">Discovered</div>
+                  <div className="text-xl sm:text-2xl font-heading text-primary">{totalDiscovered}</div>
+                  <div className="font-caption text-xs text-muted-foreground">Found</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-heading text-accent">{Math.round(overallProgress)}%</div>
-                  <div className="font-caption text-xs text-muted-foreground">Complete</div>
+                  <div className="text-xl sm:text-2xl font-heading text-accent">{Math.round(overallProgress)}%</div>
+                  <div className="font-caption text-xs text-muted-foreground">Done</div>
                 </div>
               </div>
             </div>
@@ -222,7 +247,7 @@ const WorldExplorerMode = () => {
                 </span>
               </div>
               <div className="w-full bg-muted rounded-full h-3">
-                <div 
+                <div
                   className="h-full bg-gradient-to-r from-primary via-secondary to-accent rounded-full transition-all duration-500"
                   style={{ width: `${overallProgress}%` }}
                 ></div>
@@ -258,7 +283,7 @@ const WorldExplorerMode = () => {
                   >
                     Change Environment
                   </Button>
-                  
+
                   <div className="flex items-center space-x-2 text-sm">
                     <Icon name="Target" size={16} className="text-primary" />
                     <span className="font-body text-foreground">
@@ -266,7 +291,7 @@ const WorldExplorerMode = () => {
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   <Button
                     variant="outline"
@@ -301,17 +326,17 @@ const WorldExplorerMode = () => {
                 <p className="font-body text-foreground mb-6">
                   Congratulations! You've discovered all microorganisms in the {currentEnvironment} environment.
                 </p>
-                
+
                 {/* Show pending fun facts notification */}
                 {pendingFunFacts?.length > 0 && (
                   <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 mb-4">
                     <p className="font-body text-sm text-foreground">
-                      You have {pendingFunFacts?.length} fun fact{pendingFunFacts?.length !== 1 ? 's' : ''} waiting! 
+                      You have {pendingFunFacts?.length} fun fact{pendingFunFacts?.length !== 1 ? 's' : ''} waiting!
                       They'll appear when you return to environment selection.
                     </p>
                   </div>
                 )}
-                
+
                 <div className="flex justify-center space-x-4">
                   <Button
                     onClick={handleReturnToSelection}
@@ -320,7 +345,7 @@ const WorldExplorerMode = () => {
                   >
                     Explore Another Environment
                   </Button>
-                  
+
                   <Button
                     variant="outline"
                     onClick={handleNavigateToQuiz}
@@ -371,7 +396,7 @@ const WorldExplorerMode = () => {
         onClose={handleMicroscopeClose}
         onNavigateToLab={handleNavigateToLab}
       />
-      
+
       {/* Fun Fact Modal */}
       <FunFactModal
         microbe={currentFunFactMicrobe}

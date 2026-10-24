@@ -99,7 +99,7 @@ const InteractiveLab = ({ className = "" }) => {
             </p>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 bg-success rounded-full animate-pulse-soft" />
           <span className="font-caption text-sm text-muted-foreground">Lab Active</span>
@@ -110,11 +110,11 @@ const InteractiveLab = ({ className = "" }) => {
         {/* Background Laboratory Image */}
         <div className="relative w-full h-64 lg:h-80 bg-gradient-to-br from-muted/30 to-muted/10 rounded-xl overflow-hidden border border-border">
           <Image
-            src="https://images.unsplash.com/photo-1657778752180-53adc732cf9e"
+            src="https://img.rocket.new/generatedImages/rocket_gen_img_18862bebe-1772521322127.png"
             alt="Modern scientific laboratory with workbenches, equipment, microscopes, test tubes, and research instruments arranged on clean white surfaces"
             className="w-full h-full object-cover opacity-80" />
 
-          
+
           {/* Laboratory Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent" />
 
@@ -137,7 +137,7 @@ const InteractiveLab = ({ className = "" }) => {
               size={20}
               strokeWidth={2.5} />
 
-              
+
               {/* Pulse Ring */}
               <div className={`
                 absolute inset-0 rounded-full border-2 animate-ping
@@ -175,7 +175,7 @@ const InteractiveLab = ({ className = "" }) => {
             `}>
               <div className="flex items-start space-x-3">
                 <div className={`
-                  w-10 h-10 ${activeEquipment?.bgColor} rounded-full 
+                  w-10 h-10 ${activeEquipment?.bgColor} rounded-full
                   flex items-center justify-center border border-white/20
                 `}>
                   <Icon
@@ -185,7 +185,7 @@ const InteractiveLab = ({ className = "" }) => {
                   strokeWidth={2.5} />
 
                 </div>
-                
+
                 <div className="flex-1">
                   <h4 className="font-heading text-foreground mb-1">
                     {activeEquipment?.name}
@@ -193,17 +193,17 @@ const InteractiveLab = ({ className = "" }) => {
                   <p className="font-body text-sm text-muted-foreground mb-2">
                     {activeEquipment?.description}
                   </p>
-                  
+
                   <button className={`
                     px-3 py-1 rounded-full font-caption text-xs font-medium
-                    ${activeEquipment?.color} ${activeEquipment?.bgColor} 
+                    ${activeEquipment?.color} ${activeEquipment?.bgColor}
                     border ${activeEquipment?.color?.replace('text-', 'border-')}/20
                     hover:opacity-80 transition-opacity duration-fast
                   `}>
                     {activeEquipment?.action}
                   </button>
                 </div>
-                
+
                 <button
                 onClick={() => setActiveEquipment(null)}
                 className="p-1 hover:bg-white/20 rounded-full transition-colors duration-fast">
@@ -249,7 +249,7 @@ const InteractiveLab = ({ className = "" }) => {
             </div>
             <p className="font-caption text-xs text-muted-foreground">Equipment</p>
           </div>
-          
+
           <div>
             <div className="flex items-center justify-center space-x-1 mb-1">
               <Icon name="FlaskConical" size={16} className="text-primary" />
@@ -257,7 +257,7 @@ const InteractiveLab = ({ className = "" }) => {
             </div>
             <p className="font-caption text-xs text-muted-foreground">Experiments</p>
           </div>
-          
+
           <div>
             <div className="flex items-center justify-center space-x-1 mb-1">
               <Icon name="Award" size={16} className="text-success" />

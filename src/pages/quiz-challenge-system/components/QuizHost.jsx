@@ -24,7 +24,7 @@ const QuizHost = ({
     },
     'charlie-zebra': {
       name: 'Charlie',
-      avatar: "https://images.unsplash.com/photo-1643617065900-78996668dd57",
+      avatar: "https://img.rocket.new/generatedImages/rocket_gen_img_14186ec90-1768672302962.png",
       avatarAlt: 'Cartoon zebra mascot with friendly smile and educational hat',
       color: 'text-secondary',
       bgColor: 'bg-secondary/10',
@@ -58,7 +58,7 @@ const QuizHost = ({
   return (
     <div className={`relative ${className}`}>
       <div className={`
-        bg-card border-2 ${currentCharacter?.borderColor} rounded-2xl shadow-pronounced 
+        bg-card border-2 ${currentCharacter?.borderColor} rounded-2xl shadow-pronounced
         p-6 animate-slide-up relative overflow-hidden
         ${isAnimating ? 'animate-bounce-gentle' : ''}
       `}>
@@ -77,10 +77,10 @@ const QuizHost = ({
                 className="w-full h-full object-cover" />
 
             </div>
-            
+
             {/* Emotion Indicator */}
             <div className={`
-              absolute -bottom-2 -right-2 w-8 h-8 bg-card rounded-full 
+              absolute -bottom-2 -right-2 w-8 h-8 bg-card rounded-full
               flex items-center justify-center border-2 ${currentCharacter?.borderColor}
               ${currentEmotionData?.bounce ? 'animate-bounce-gentle' : ''}
             `}>
@@ -92,7 +92,7 @@ const QuizHost = ({
 
             </div>
           </div>
-          
+
           <div className="flex-1">
             <h3 className={`font-heading text-lg ${currentCharacter?.color}`}>
               {currentCharacter?.name}
@@ -131,10 +131,10 @@ const QuizHost = ({
           <p className="font-body text-foreground leading-relaxed">
             {message || currentEmotionData?.message}
           </p>
-          
+
           {/* Speech Bubble Tail */}
           <div className={`
-            absolute -top-2 left-6 w-0 h-0 border-l-4 border-r-4 border-b-4 
+            absolute -top-2 left-6 w-0 h-0 border-l-4 border-r-4 border-b-4
             border-transparent border-b-current ${currentCharacter?.color}
           `}></div>
         </div>
@@ -147,7 +147,7 @@ const QuizHost = ({
               Science is fun!
             </span>
           </div>
-          
+
           {onMessageComplete &&
           <button
             onClick={onMessageComplete}
