@@ -191,11 +191,11 @@ const MicroscopeDiscoveryLab = () => {
               </div>
 
               {/* Center Panel - Microscope and Lab */}
-              <div className="xl:col-span-6">
+              <div className="min-w-0 xl:col-span-6">
                 <div className="space-y-6">
                   {/* Lab Environment */}
                   <div className="bg-card border border-border rounded-lg p-6 shadow-moderate">
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex flex-wrap gap-2 items-center justify-between mb-4">
                       <h3 className="font-heading text-lg text-foreground">Virtual Laboratory</h3>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-success rounded-full animate-pulse-soft"></div>
@@ -214,7 +214,7 @@ const MicroscopeDiscoveryLab = () => {
 
                   {/* Microscope Viewport */}
                   <div className="bg-card border border-border rounded-lg p-6 shadow-moderate">
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex flex-wrap gap-2 items-center justify-between mb-6">
                       <h3 className="font-heading text-lg text-foreground">Microscope View</h3>
                       {selectedSpecimen && (
                         <div className="flex items-center space-x-2 text-sm">

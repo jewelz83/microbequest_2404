@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Icon from '../../../components/AppIcon';
 
 const GameBoard = ({
@@ -18,6 +18,13 @@ const GameBoard = ({
   hitIndicators,
   rapidFire
 }) => {
+  const boardContainer = useRef(null);
+  const [boardScale, setBoardScale] = useState(1);
+  useEffect(() => {
+    const observer = new ResizeObserver(([entry]) => setBoardScale(Math.min(1, entry.contentRect.width / 800)));
+    observer.observe(boardContainer.current);
+    return () => observer.disconnect();
+  }, []);
   const [animatingBacteria, setAnimatingBacteria] = useState([]);
   const [selectedBacterium, setSelectedBacterium] = useState(null);
   const [explosions, setExplosions] = useState([]);
@@ -294,16 +301,17 @@ const GameBoard = ({
   };
 
   return (
-    <div className="relative overflow-x-auto">
+    <div ref={boardContainer} className="relative w-full min-w-0" style={{ height: 400 * boardScale }}>
       {/* Enhanced Game Board - Biological Environment Style */}
       <div
         className="relative w-full h-96 border-2 border-border rounded-xl overflow-hidden bg-white cursor-crosshair game-board game-interactive"
-        style={{ touchAction: 'none', width: 800, height: 400 }}
+        style={{ touchAction: 'none', width: 800, height: 400, transform: `scale(${boardScale})`, transformOrigin: 'top left' }}
         tabIndex={0}
         role="region"
         aria-label="Immune defense playfield"
         onClick={handleBoardClick}
         onMouseMove={onMouseMove}
+        onTouchStart={onTouchMove}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
@@ -375,6 +383,7 @@ const GameBoard = ({
 
         {/* NEW: Immune Defender Ship (instead of space ship) */}
         <div
+          data-testid="player-ship"
           className="absolute transition-all duration-75 ease-out z-20"
           style={{
             left: `${playerShip?.x - playerShip?.width / 2}px`,

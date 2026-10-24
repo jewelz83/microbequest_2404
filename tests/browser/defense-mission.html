@@ -1,4 +1,4 @@
-<!doctype html><meta charset="utf-8"><title>Guest defense mission regression</title><style>body{font:16px system-ui;margin:24px}iframe{width:100%;height:850px}pre{white-space:pre-wrap}</style><h1>Guest defense mission regression</h1><button id="run">Run mission</button><pre id="results">Ready</pre><iframe></iframe><script type="module">
+<!doctype html><meta charset="utf-8"><title>Guest defense mission regression</title><style>body{font:16px system-ui;margin:24px}iframe{width:390px;max-width:100%;height:850px}pre{white-space:pre-wrap}</style><h1>Guest defense mission regression</h1><button id="run">Run mission</button><pre id="results">Ready</pre><iframe></iframe><script type="module">
 if(!['localhost','127.0.0.1'].includes(location.hostname))throw Error('Localhost only');
 const frame=document.querySelector('iframe'),out=document.querySelector('pre'),rows=[],wait=ms=>new Promise(r=>setTimeout(r,ms));
 const doc=()=>frame.contentDocument,buttons=()=>[...doc().querySelectorAll('button')],btn=t=>buttons().find(b=>b.textContent.trim()===t),body=()=>doc().body.textContent;
@@ -6,16 +6,16 @@ async function until(fn,label){for(let i=0;i<1000;i++){if(fn())return;await wait
 async function click(el){if(!el)throw Error('Missing control');el.click();await wait(100)}
 function pass(ok,label){if(!ok)throw Error(label);rows.push('PASS '+label);out.textContent=rows.join('\n')}
 document.querySelector('#run').onclick=async()=>{try{
-frame.src='/germ-buster-tower-defense';await until(()=>btn('Start Defense Mission'),'mission selector');await click(buttons().find(b=>b.textContent.includes('Gut Microbiome')));await click(btn('Start Defense Mission'));await click(buttons().find(b=>b.textContent.includes('Immune Missile')));
-for(let wave=1;wave<=3;wave++){
+frame.src='/germ-buster-tower-defense';await until(()=>btn('Start Defense Mission'),'mission selector');await click(buttons().find(b=>b.textContent.includes('Lungs & Respiratory')));await click(btn('Start Defense Mission'));await click(buttons().find(b=>b.textContent.includes('Immune Missile')));
+for(let wave=1;wave<=5;wave++){
 for(let tick=0;tick<100;tick++){
 if(btn('Next Wave')||btn('Finish Mission'))break;
 if(body().includes('Mission Incomplete'))throw Error('Mission lost');
-const enemies=[...doc().querySelectorAll('span')].find(el=>/\d+ enemies left/.test(el.textContent));
-if(enemies&&parseInt(enemies.textContent)>0)doc().querySelector('[aria-label="Immune defense playfield"]').click();
-await wait(700);
+const visibleThreat=[...doc().querySelectorAll('.game-board div')].some(el=>el.style.borderColor==='rgb(239, 68, 68)' && parseFloat(el.style.left)>=0);
+if(visibleThreat)doc().querySelector('[aria-label="Immune defense playfield"]').click();
+await wait(1200);
 }
-await until(()=>btn('Next Wave')||btn('Finish Mission'),'wave '+wave);pass(true,'wave '+wave+' cleared');await click(btn(wave===3?'Finish Mission':'Next Wave'));
+await until(()=>btn('Next Wave')||btn('Finish Mission'),'wave '+wave);pass(true,'wave '+wave+' cleared');await click(btn(wave===5?'Finish Mission':'Next Wave'));
 }
 await until(()=>body().includes('Mission Accomplished!'),'victory');pass(!body().includes('Bonus points:')&&!body().includes('+1Game Completed'),'victory has honest score summary');rows.push('DONE');out.textContent=rows.join('\n');
 }catch(e){rows.push('FAIL '+e.message);out.textContent=rows.join('\n')}};

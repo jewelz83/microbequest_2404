@@ -302,7 +302,7 @@ const GermBusterTowerDefense = () => {
   const useTool = enhancedBiologicalShoot;
   const handleMouseMove = event => {
     const rect = event.currentTarget.getBoundingClientRect();
-    const x = Math.max(20, Math.min(780, event.clientX - rect.left));
+    const x = Math.max(20, Math.min(780, (event.clientX - rect.left) * 800 / rect.width));
     setCombat(state => state.gameState === 'playing' ? {...state, playerShip:{...state.playerShip,x}} : state);
   };
   const handleTouchMove = event => {

@@ -1,0 +1,23 @@
+<!doctype html><meta charset="utf-8"><title>Mobile guest gameplay checks</title><style>body{font:16px system-ui;margin:16px}iframe{width:390px;height:844px;border:1px solid #888}pre{white-space:pre-wrap}</style><h1>Mobile guest gameplay checks</h1><button id="run">Run mobile checks</button><pre>Ready</pre><iframe></iframe><script type="module">
+if(!['localhost','127.0.0.1'].includes(location.hostname))throw Error('Localhost only');
+const f=document.querySelector('iframe'),out=document.querySelector('pre'),rows=[],wait=ms=>new Promise(r=>setTimeout(r,ms)),doc=()=>f.contentDocument,body=()=>doc()?.body?.textContent||'',buttons=()=>[...doc().querySelectorAll('button')],btn=t=>buttons().find(b=>b.textContent.trim()===t);
+async function until(fn,label){for(let i=0;i<900;i++){if(fn())return;await wait(100)}throw Error('Timeout '+label)}
+function pass(ok,label){if(!ok)throw Error(label);rows.push('PASS '+label);out.textContent=rows.join('\n')}
+async function click(el){if(!el)throw Error('Missing control');el.click();await wait(200)}
+async function open(route,ready){f.src='/'+route;await until(()=>f.contentWindow.location.pathname==='/'+route&&body().includes(ready),route);await wait(800)}
+function fits(label){pass(doc().documentElement.scrollWidth<=doc().documentElement.clientWidth+1,label)}
+document.querySelector('#run').onclick=async()=>{try{
+await open('germ-buster-tower-defense','Start Defense Mission');await click(buttons().find(b=>b.textContent.includes('Gut Microbiome')));await click(btn('Start Defense Mission'));await until(()=>doc().querySelector('.game-board'),'board');
+for(const width of [320,390,768]){f.style.width=width+'px';await wait(500);const board=doc().querySelector('.game-board'),r=board.getBoundingClientRect();pass(r.width<=width&&r.right<=width,'whole defense field visible at '+width+'px');fits('defense page fits '+width+'px');
+const w=f.contentWindow;board.dispatchEvent(new w.MouseEvent('mousemove',{bubbles:true,clientX:r.left+r.width*.75}));await wait(150);const ship=doc().querySelector('[data-testid="player-ship"]');pass(Math.abs(parseFloat(ship.style.left)+parseFloat(ship.style.width)/2-600)<2,'aim maps to board coordinates at '+width+'px');
+const touch=new w.Touch({identifier:1,target:board,clientX:r.left+r.width*.25,clientY:r.top+r.height*.8});board.dispatchEvent(new w.TouchEvent('touchstart',{bubbles:true,touches:[touch]}));await wait(150);pass(Math.abs(parseFloat(ship.style.left)+parseFloat(ship.style.width)/2-200)<2,'touch start positions ship at '+width+'px');board.dispatchEvent(new w.TouchEvent('touchend',{bubbles:true,cancelable:true,changedTouches:[touch]}));}
+f.style.width='390px';
+for(const [route,ready] of [['microbe-matching-game','Match'],['world-explorer-mode','Explore'],['quiz-challenge-system','Quiz'],['microscope-discovery-lab','Microscope']]){await open(route,ready);fits(route+' fits 390px');if(route==='microscope-discovery-lab'){for(const label of ['Zoom in','Zoom out','Increase focus','Decrease focus']){const c=doc().querySelector(`[aria-label="${label}"]`),r=c.getBoundingClientRect();pass(r.left>=0&&r.right<=390,label+' stays on screen');await click(c)}}}
+await open('microbe-timeline-adventure','Invents vaccination');
+for(const [title,steps] of [['Invents vaccination',['Observe milkmaids','Collect cowpox','Inject cowpox','Wait for James','Expose James','Report findings']],['Disproves spontaneous generation',['Fill flasks','Boil the broth','Seal one flask','Leave one flask','Wait several','Curved neck']]]){
+await click([...doc().querySelectorAll('h3')].find(h=>h.textContent===title));await until(()=>btn('Start Mini-Game'),'intro');await click(btn('Start Mini-Game'));await until(()=>doc().querySelector('[data-item]'),'ordering');fits(title+' fits 390px');
+for(let i=0;i<steps.length;i++){let list=[...doc().querySelectorAll('[data-item]')],index=list.findIndex(el=>el.textContent.includes(steps[i]));while(index>i){await click(list[index].querySelector('button'));list=[...doc().querySelectorAll('[data-item]')];index--}}
+await click(btn('Check Order'));await until(()=>body().includes('Excellent Work!'),'completed '+title);pass(true,title+' completes with mobile reorder buttons');await until(()=>!body().includes('Excellent Work!'),'return timeline');}
+fits('completed timeline fits 390px');rows.push('DONE');out.textContent=rows.join('\n');
+}catch(e){rows.push('FAIL '+e.message);out.textContent=rows.join('\n')}};
+</script>

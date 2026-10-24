@@ -102,9 +102,9 @@ const MicroscopeViewport = ({
   };
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative w-full min-w-0 pt-12 pb-28 ${className}`}>
       {/* Microscope Frame */}
-      <div className="relative w-80 h-80 mx-auto">
+      <div className="relative w-full max-w-80 aspect-square mx-auto">
         {/* Outer Ring */}
         <div className="absolute inset-0 rounded-full border-8 border-gray-800 shadow-pronounced bg-gradient-to-br from-gray-700 to-gray-900">
           {/* Focus Rings */}
@@ -296,7 +296,7 @@ const MicroscopeViewport = ({
         </div>
 
         {/* Control Buttons */}
-        <div className="absolute -right-16 top-1/2 transform -translate-y-1/2 space-y-2">
+        <div className="absolute right-0 top-full mt-14 flex gap-2">
           {/* Zoom Controls */}
           <button
             onClick={handleZoomIn}
@@ -318,7 +318,7 @@ const MicroscopeViewport = ({
         </div>
 
         {/* Focus Controls */}
-        <div className="absolute -left-16 top-1/2 transform -translate-y-1/2 space-y-2">
+        <div className="absolute left-0 top-full mt-14 flex gap-2">
           <button
             onClick={() => handleFocusAdjust('up')}
             disabled={focusLevel >= 100}
