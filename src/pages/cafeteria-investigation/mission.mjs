@@ -57,7 +57,8 @@ export const concluded = (s) =>
   s.limit === "more-evidence";
 export function canVisit(s, stage) {
   if (stage === "opening") return true;
-  if (["evidence", "compare"].includes(stage)) return s.firstPath !== null;
+  if (stage === "evidence") return s.firstPath !== null;
+  if (stage === "compare") return PATHS.every((k) => s.visited.includes(k));
   if (stage === "model") return compared(s);
   if (stage === "explain") return modeled(s);
   return stage === "complete" && concluded(s);

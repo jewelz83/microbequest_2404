@@ -1144,3 +1144,9 @@
     transition: none;
   }
 }
+
+.mq-route-map {padding: 20px; border: 1px solid #c9d4c8; border-radius: 14px; margin: 22px 0; background: #edf1e6;}
+.mq-route-map p {line-height: 1.8; margin-bottom: 0;}
+.mq-guidance-nav {display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; padding:16px 0; margin-bottom:24px; border-bottom:1px solid #d8dace; font-size:14px;}
+.mq-guidance-nav button {display:flex; align-items:center; gap:6px; min-height:44px;}
+@media(max-width:600px) {.mq-guidance-nav strong {order:-1; width:100%;} .mq-route-map {padding:16px;}}

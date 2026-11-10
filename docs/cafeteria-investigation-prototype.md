@@ -4,7 +4,8 @@ A connected investigation at `/investigations/cafeteria`, based on the First Inv
 
 ## Behavior
 
-- Three initial paths change evidence order and guidance.
+- Aunt Juju introduces the problem, invites the child to help, then asks the first question before a single starting action. Three clue cards have a guided Next sequence, with optional revisits. All three are visited before comparison.
+- Each activity has a question from Aunt Juju, contextual help, a Back control and an explicit current-step label. Predictions remain ungraded; later experiments and explanations retain child choice.
 - Twelve fictional survey records drive salad/apple/water comparisons. Equal illness counts and no comparison group receive distinct feedback.
 - Predictions are recorded, not graded. An unfair experiment setup can be repaired. The qualitative virtual model is explicitly not a test of the school's food.
 - Conclusions require the interview and storage observations to have been visited, the survey pattern, exactly two valid evidence statements, a bounded claim and acknowledgement that more evidence is needed. Extra incorrect evidence prevents completion.
@@ -21,4 +22,4 @@ https://www.fda.gov/food/buy-store-serve-safe-food/safe-food-handling
 
 ## Verification
 
-55 Node tests pass, including four new mission tests covering fixture counts, stage prerequisites, conclusion feedback criteria and saved-state validation. Final production build passes. A self-contained HTML package derived from the same mission component passes a simulated-DOM integration journey covering three food comparisons, unfair setup recovery, incorrect model interpretation, incorrect claim recovery, invalid extra evidence rejection, completion, guest saved-state reload, notebook Escape and pause/resume. This is interaction testing in JSDOM, not browser layout or physical-device verification. Both connected and cloud browsers reported connection refused for the local preview server; visual browser checks remain pending. Upload to the public GitHub repository was blocked by automatic approval review pending explicit owner authorization; no hosted prototype preview or production release is claimed. No production release or backend change.
+56 Node tests pass, including guided-stage gating and safe restoration of earlier partial saves. Production build passes. Earlier hosted QA covered the complete original mission, persistence, notebook and pause at desktop and 390px widths. The guided revision still needs hosted browser verification. No production release or backend change.

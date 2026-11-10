@@ -87,3 +87,16 @@ test("reload validates saved state, ignores malformed records and cannot invent 
   assert.equal(polluted.modelStep, 0);
   assert.deepEqual(polluted.evidence, []);
 });
+
+test("guided navigation requires all clue cards before comparison and restores older saves safely", () => {
+  const s = {...initialMission(), firstPath: "interviews", visited: ["interviews"]};
+  assert.equal(canVisit(s, "evidence"), true);
+  assert.equal(canVisit(s, "compare"), false);
+  s.visited.push("menu");
+  assert.equal(canVisit(s, "compare"), false);
+  s.visited.push("storage");
+  assert.equal(canVisit(s, "compare"), true);
+  const restored = hydrateMission(JSON.stringify({...s, stage: "compare", visited: ["interviews"]}));
+  assert.equal(restored.stage, "evidence");
+  assert.equal(restored.firstPath, "interviews");
+});

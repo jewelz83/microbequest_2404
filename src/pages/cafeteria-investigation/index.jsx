@@ -142,7 +142,7 @@ function Mission({ guest }) {
       return;
     }
     heading.current?.focus();
-  }, [s.stage]);
+  }, [s.stage, active]);
   const update = (patch) => {
     setS((p) => ({ ...p, ...patch }));
     setFeedback("");
@@ -225,7 +225,7 @@ function Mission({ guest }) {
       );
   };
   const doneStage = {
-    evidence: s.visited.length > 0,
+    evidence: PATHS.every((k) => s.visited.includes(k)),
     compare: compared(s),
     model: modeled(s),
     explain: s.complete,
@@ -267,7 +267,7 @@ function Mission({ guest }) {
           </Link>
           <div className="mq-case-label">CASE STUDY 01</div>
           <h1>
-            The Cafeteria
+            The Cafeteria{" "}
             <br />
             Clue<span>.</span>
           </h1>
@@ -314,6 +314,20 @@ function Mission({ guest }) {
             <span>YOUR NEXT DISCOVERY</span>
             <span>Fictional investigation · No timer</span>
           </div>
+          {s.stage !== "opening" && <div className="mq-guidance-nav">
+            <button className="mq-text-button" onClick={() => {
+              const previous = {evidence: "opening", compare: "evidence", model: "compare", explain: "model", complete: "explain"};
+              go(previous[s.stage]);
+            }}><ArrowLeft size={16} /> Back</button>
+            <strong role="status">{s.stage === "complete" ? "Investigation complete" : `You are here: Step ${{evidence: 1, compare: 2, model: 3, explain: 4}[s.stage]} of 4 · ${labels[s.stage]}`}</strong>
+            <button className="mq-text-button" aria-expanded={hint > 0} onClick={() => setHint(hint ? 0 : 1)}>Help me, Aunt Juju</button>
+          </div>}
+          {hint > 0 && s.stage !== "compare" && <Guide>{ {
+            evidence: "Read the clue card below. The Next button will take you to a clue you haven’t visited. Once you’ve visited all three, we’ll compare the lunches.",
+            model: "Choose a prediction, then a setup that changes only storage temperature. Press Advance model three times. Finally, choose what the model supports.",
+            explain: "Choose one claim, two supporting observations, and one statement about what remains unknown. You can use Back or your notebook to check the clues.",
+            complete: "You’ve finished! Open your notebook to revisit your discoveries, or explore another comparison."
+          }[s.stage]}</Guide>}
           {s.stage === "opening" && (
             <>
               <h2 ref={heading} tabIndex={-1} className="mq-hero-title">
@@ -322,9 +336,7 @@ function Mission({ guest }) {
                 after <em>lunch.</em>
               </h2>
               <p className="mq-intro">
-                Some students felt unwell. Others didn’t.
-                <br />
-                What could we learn by looking a little closer?
+                Aunt Juju has a mystery for our science team.
               </p>
               <div
                 className="mq-scene"
@@ -359,20 +371,24 @@ function Mission({ guest }) {
                 </div>
               </div>
               <Guide>
-                “The grown-ups are helping the students. Our science team is
-                looking for a pattern. What would you check first?”
+                “Something puzzling happened after lunch. Some students felt unwell,
+                but others didn’t. The grown-ups are helping them, and we’ve been
+                asked to look for clues. Will you help me figure out what the
+                science team should investigate?”
               </Guide>
-              <div className="mq-paths">
-                {PATHS.map((k) => {
-                  const P = cards[k].icon;
-                  return (
-                    <button key={k} onClick={() => visit(k)}>
-                      <P size={23} />
-                      <span>{cards[k].label}</span>
-                      <ArrowRight size={17} />
-                    </button>
-                  );
-                })}
+              <div className="mq-route-map" aria-label="Our investigation plan">
+                <strong>Our plan</strong>
+                <p>1. Collect clues → 2. Compare lunches → 3. Try a model → 4. Explain our thinking</p>
+              </div>
+              <Guide>
+                “First, let’s find out what everyone ate. Did students who felt
+                unwell eat the same things as students who felt well?”
+              </Guide>
+              <div className="mq-actions">
+                <span>Start here. I’ll help you along the way.</span>
+                <Primary onClick={() => visit("interviews")}>
+                  Look at the students’ lunches
+                </Primary>
               </div>
             </>
           )}
@@ -380,10 +396,10 @@ function Mission({ guest }) {
             <>
               <Eyebrow n="01" text="GATHER CLUES" />
               <h2 ref={heading} tabIndex={-1}>
-                Follow your curiosity.
+                Let’s collect our clues.
               </h2>
               <p className="mq-intro">
-                Choose a clue. Notice something. Ask what it could mean.
+                Read the student notes, look at the menu, then check the storage record. Aunt Juju will guide you through each clue.
               </p>
               <div className="mq-tabs" role="group" aria-label="Evidence paths">
                 {PATHS.map((k) => (
@@ -417,11 +433,14 @@ function Mission({ guest }) {
                     : "“We need both sides of the story: students who felt unwell and students who felt well.”"}
               </Guide>
               <div className="mq-actions">
-                <span>
-                  {s.visited.length} of 3 clues visited · You can return anytime
-                </span>
-                <Primary onClick={() => go("compare")}>
-                  Compare the lunches
+                <span>{s.visited.length} of 3 clues visited. You can revisit any clue.</span>
+                <Primary onClick={() => {
+                  const next = PATHS.find((k) => !s.visited.includes(k));
+                  if (next) visit(next); else go("compare");
+                }}>
+                  {PATHS.find((k) => !s.visited.includes(k))
+                    ? `Next: ${cards[PATHS.find((k) => !s.visited.includes(k))].label}`
+                    : "Next: Compare the lunches"}
                 </Primary>
               </div>
             </>
@@ -434,9 +453,8 @@ function Mission({ guest }) {
                 <br />
                 <em>Different stories.</em>
               </h2>
-              <p className="mq-intro">
-                Pick an item. Compare who ate it with who didn’t.
-              </p>
+              <Guide>“Did students who ate pasta salad feel unwell more often than students who didn’t? Count the Unwell labels in each group. Then choose the sentence that matches.”</Guide>
+              <p className="mq-intro">Start with pasta salad. Look at both groups, then choose a sentence below. You can explore apple and water too.</p>
               <div
                 className="mq-foods"
                 role="group"
@@ -520,7 +538,7 @@ function Mission({ guest }) {
                   </Guide>
                   <div className="mq-actions">
                     <span>You can compare other items too.</span>
-                    <Primary onClick={() => go("model")}>Test an idea</Primary>
+                    <Primary onClick={() => go("model")}>Next: Try an experiment</Primary>
                   </div>
                 </>
               )}
@@ -528,7 +546,7 @@ function Mission({ guest }) {
                 className="mq-hint"
                 onClick={() => setHint((n) => Math.min(3, n + 1))}
               >
-                Need a hint?
+                Help me compare, Aunt Juju
               </button>
               {hint > 0 && <p className="mq-hint-text">{hints[hint - 1]}</p>}
             </>
@@ -544,6 +562,7 @@ function Mission({ guest }) {
               <p className="mq-intro">
                 Explore a virtual model. It won’t test the school’s food.
               </p>
+              <Guide>“Could keeping food cold make a difference? First, choose what you think will happen. A prediction is an idea to explore, not a scored answer. Then we’ll choose a fair setup and advance the model three times.”</Guide>
               <h3 className="mq-question">First, make a prediction.</h3>
               <div className="mq-options">
                 {[
@@ -703,7 +722,7 @@ function Mission({ guest }) {
                       <div className="mq-actions">
                         <span>Now bring your evidence together.</span>
                         <Primary onClick={() => go("explain")}>
-                          Build your explanation
+                          Next: Explain what you found
                         </Primary>
                       </div>
                     </>
@@ -724,6 +743,7 @@ function Mission({ guest }) {
                 A good explanation connects a claim to evidence, and leaves room
                 for what we don’t know.
               </p>
+              <Guide>“Let’s tell the team what to check next. Choose one next step, select two observations that support it, then say what we still don’t know.”</Guide>
               <h3 className="mq-question">1. Choose your claim</h3>
               <Choices
                 value={s.claim}
