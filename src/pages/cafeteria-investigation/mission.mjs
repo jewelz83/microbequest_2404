@@ -136,3 +136,12 @@ export function comparisonFeedback(food, answer) {
       ? "Both salad groups have 6 students, but equal group sizes do not mean equal illness. Count only the unwell students: 5 of 6 (about 83%) in the salad group and 1 of 6 (about 17%) in the other group. Which group has the larger percentage? Choose the sentence that describes that difference."
       : "Both salad groups exist: 6 students ate salad and 6 did not. Now compare their unwell counts: 5 of 6 (about 83%) versus 1 of 6 (about 17%). A missing group would have no students at all. What pattern do these two groups show?";
 }
+
+export function predictionReflection(prediction) {
+  const ideas = {
+    cold: "You predicted that bacteria would multiply more slowly in the cold sample. Your prediction matched what this model showed. What evidence supports that explanation? A match in one model does not prove an idea is always true.",
+    same: "You predicted that both samples would have the same growth. In this model, both increased, but the cold sample increased more slowly. Your prediction did not match the result, and that is okay. Testing an idea helps us learn, even when the result surprises us.",
+    room: "You predicted that bacteria would multiply more slowly in the room-temperature sample. In this model, the room-temperature sample increased faster, while the cold sample increased more slowly. Your prediction did not match the result, and that is okay. New evidence gives us a reason to rethink an idea."
+  };
+  return ideas[prediction] || "Compare your prediction with what the model showed. Scientists learn by testing ideas and reconsidering them when evidence changes.";
+}

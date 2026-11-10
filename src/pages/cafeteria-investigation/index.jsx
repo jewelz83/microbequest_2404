@@ -24,6 +24,7 @@ import {
   STUDENTS,
   illnessSummary,
   comparisonFeedback,
+  predictionReflection,
   PATHS,
   initialMission,
   groupsFor,
@@ -548,7 +549,7 @@ function Mission({ guest }) {
               <p className="mq-intro">
                 Explore a virtual model. It won’t test the school’s food.
               </p>
-              <Guide>“Could keeping food cold make a difference? First, choose what you think will happen. A prediction is an idea to explore, not a scored answer. Then we’ll choose a fair setup and advance the model three times.”</Guide>
+              <Guide>“Could keeping food cold make a difference? First, choose what you think will happen. Scientists make predictions using what they know so far. The results might surprise us, and that’s okay. We’re here to find out. Choose a prediction, then we’ll test it with a fair setup and advance the model three times.”</Guide>
               <h3 className="mq-question">First, make a prediction.</h3>
               <div className="mq-options">
                 {[
@@ -562,12 +563,14 @@ function Mission({ guest }) {
                   <button
                     key={id}
                     aria-pressed={s.prediction === id}
+                    disabled={s.modelStep > 0}
                     onClick={() => update({ prediction: id })}
                   >
                     {label}
                   </button>
                 ))}
               </div>
+              {s.modelStep > 0 && <p className="mq-data-note">Your original prediction stays here so we can compare it with the result. To try a new prediction, reset the model first.</p>}
               {s.prediction && (
                 <>
                   <h3 className="mq-question">
@@ -667,7 +670,15 @@ function Mission({ guest }) {
               )}
               {s.modelStep === 3 && s.setup === "fair" && (
                 <>
-                  <h3 className="mq-question">What does this model support?</h3>
+                  <section className="mq-prediction-reflection" aria-label="Reflect on your prediction">
+                    <h3 className="mq-question">Let’s revisit your prediction.</h3>
+                    <Guide>{predictionReflection(s.prediction)}</Guide>
+                    <p><strong>What we observed:</strong> Both samples started at the same level and were observed for the same time. The cold sample’s indicator increased more slowly.</p>
+                    <p><strong>Why might that happen?</strong> Cold can slow the processes that help many bacteria grow and multiply. It does not stop every kind of growth or kill all germs. This simplified model explores that idea; it did not test the school’s food.</p>
+                    <p><strong>Look again:</strong> How do the two indicators help you explain the difference? What would you keep or change about your thinking?</p>
+                    <p>Scientists test ideas, examine the results and revise their explanations. A surprising result is something to learn from, not a failure.</p>
+                  </section>
+                  <h3 className="mq-question">Using the result, what does this model support?</h3>
                   <div className="mq-options">
                     {[
                       [

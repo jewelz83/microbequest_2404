@@ -4,6 +4,7 @@ import {
   STUDENTS,
   illnessSummary,
   comparisonFeedback,
+  predictionReflection,
   initialMission,
   groupsFor,
   hydrateMission,
@@ -114,4 +115,14 @@ test("illness percentages preserve denominators, rounding and missing groups", (
   assert.match(comparisonFeedback("apple", "pattern"), /50%/);
   assert.match(comparisonFeedback("water", "equal"), /unknown, not 0%/);
   assert.match(comparisonFeedback("salad", "pattern"), /not proof/);
+});
+
+test("prediction reflection revisits each original idea without penalizing a mismatch", () => {
+  assert.match(predictionReflection("same"), /both increased, but the cold sample increased more slowly/);
+  assert.match(predictionReflection("room"), /room-temperature sample increased faster/);
+  for (const prediction of ["same", "room"]) {
+    assert.match(predictionReflection(prediction), /that is okay/);
+    assert.equal(modeled({...ready(), prediction}), true);
+  }
+  assert.match(predictionReflection("cold"), /does not prove an idea is always true/);
 });
