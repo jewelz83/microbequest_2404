@@ -243,7 +243,7 @@ function Mission({ guest }) {
             <FlaskConical size={23} />
           </span>
           <span>
-            MicrobeQuest<small>THE DISCOVERY DESK</small>
+            MicrobeQuest<small>YOUR SCIENCE ADVENTURE</small>
           </span>
         </Link>
         <div className="mq-header-right">
@@ -269,7 +269,7 @@ function Mission({ guest }) {
           <Link className="mq-back" to="/microbe-detective-mystery-outbreak">
             <ArrowLeft size={16} /> Investigation home
           </Link>
-          <div className="mq-case-label">CASE STUDY 01</div>
+          <div className="mq-case-label">SCIENCE MYSTERY 01</div>
           <h1>
             The Cafeteria{" "}
             <br />
@@ -315,7 +315,7 @@ function Mission({ guest }) {
           inert={paused || notebook || restart ? "" : undefined}
         >
           <div className="mq-topline">
-            <span>YOUR NEXT DISCOVERY</span>
+            <span>LET’S INVESTIGATE</span>
             <span>Fictional investigation · No timer</span>
           </div>
           {s.stage !== "opening" && <div className="mq-guidance-nav">
