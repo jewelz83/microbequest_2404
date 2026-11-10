@@ -26,7 +26,7 @@ const Header = () => {
       label: 'Explore',
       path: '/world-explorer-mode',
       icon: 'Compass',
-      description: 'Discover hidden microbes'
+      description: 'Investigate microbial habitats'
     },
     {
       label: 'Quiz',
