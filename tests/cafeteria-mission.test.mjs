@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   STUDENTS,
+  illnessSummary,
+  comparisonFeedback,
   initialMission,
   groupsFor,
   hydrateMission,
@@ -99,4 +101,17 @@ test("guided navigation requires all clue cards before comparison and restores o
   const restored = hydrateMission(JSON.stringify({...s, stage: "compare", visited: ["interviews"]}));
   assert.equal(restored.stage, "evidence");
   assert.equal(restored.firstPath, "interviews");
+});
+
+test("illness percentages preserve denominators, rounding and missing groups", () => {
+  assert.deepEqual(illnessSummary(groupsFor("salad").ate), {total:6, unwell:5, percent:83});
+  assert.deepEqual(illnessSummary(groupsFor("salad").didNot), {total:6, unwell:1, percent:17});
+  assert.equal(illnessSummary(groupsFor("apple").ate).percent, 50);
+  assert.equal(illnessSummary(groupsFor("water").ate).percent, 50);
+  assert.equal(illnessSummary([]).percent, null);
+  assert.equal(illnessSummary([{unwell:false}]).percent, 0);
+  assert.match(comparisonFeedback("salad", "equal"), /equal group sizes do not mean equal illness/);
+  assert.match(comparisonFeedback("apple", "pattern"), /50%/);
+  assert.match(comparisonFeedback("water", "equal"), /unknown, not 0%/);
+  assert.match(comparisonFeedback("salad", "pattern"), /not proof/);
 });

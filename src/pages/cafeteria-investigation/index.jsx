@@ -22,6 +22,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import {
   FOODS,
   STUDENTS,
+  illnessSummary,
+  comparisonFeedback,
   PATHS,
   initialMission,
   groupsFor,
@@ -68,7 +70,7 @@ const cards = {
   },
 };
 function PersonGroup({ people, title }) {
-  const ill = people.filter((p) => p.unwell).length;
+  const {unwell: ill, total, percent} = illnessSummary(people);
   return (
     <div className="mq-group">
       <h3>{title}</h3>
@@ -88,13 +90,13 @@ function PersonGroup({ people, title }) {
               </div>
             ))}
           </div>
-          <p className="mq-group-total">
-            {ill} unwell <span>·</span> {people.length - ill} well
-          </p>
+          <p className="mq-group-total">{ill} unwell <span>·</span> {total - ill} well</p>
+          <p className="mq-rate"><strong>{ill} of {total} felt unwell</strong><span>{ill * 100 % total ? "About " : ""}{percent}% of this group</span></p>
+          <div className="mq-rate-bar" aria-hidden="true"><span style={{width: `${percent}%`}} /></div>
         </>
       ) : (
         <p className="mq-no-group">
-          No students in this group. We need a comparison.
+          No students in this group. We cannot calculate a percentage without a group to measure. This is not 0%.
         </p>
       )}
     </div>
@@ -191,7 +193,7 @@ function Mission({ guest }) {
   const hints = [
     "Who could you compare?",
     "Look at students who did not eat the pasta salad too.",
-    "Five of six salad eaters felt unwell. One of six who skipped it felt unwell. That pattern deserves another look.",
+    "Five of six salad eaters felt unwell (about 83%). One of six who skipped it felt unwell (about 17%). Which percentage is larger?",
   ];
   const submitConclusion = () => {
     if (concluded(s)) {
@@ -205,24 +207,24 @@ function Mission({ guest }) {
     else if (s.claim !== "investigate")
       setFeedback(
         s.claim === "everyone"
-          ? "One student who skipped salad also felt unwell. Look at both groups again."
-          : "Our clues suggest what to investigate. They do not identify a germ or prove the cause.",
+          ? "The word “only” means there should be no unwell students in the other group. But 1 of 6 students who skipped salad (about 17%) also felt unwell. Does the evidence support “only,” or does it suggest a pattern worth investigating? Revisit both groups before choosing your claim."
+          : "Think about what we actually measured: lunch choices, who felt unwell, and a storage record. We did not test the food or identify a germ. Which claim recommends a sensible next step without saying we know more than the evidence shows?",
       );
     else if (s.evidence.includes("model-proof"))
       setFeedback(
-        "The model explores a general idea. It did not test the school’s food. Remove that evidence and choose observations from the case.",
+        "The virtual model shows how temperature can affect growth under simplified conditions. It contains no sample of the school’s salad, so it cannot show whether that salad was contaminated. Which two observations came from this case itself? Remove the model-as-proof statement and reconsider your evidence.",
       );
     else if (s.evidence.includes("all-sick"))
       setFeedback(
-        "Not everyone who ate salad felt unwell. Check the group icons and remove this claim.",
+        "“Every student” would mean 6 of 6, or 100%. Our salad group has 5 of 6 unwell (about 83%) and 1 who felt well. How could you describe the pattern accurately without saying everyone became ill? Remove the statement that overstates the result.",
       );
     else if (!s.evidence.includes("survey") || !s.evidence.includes("storage"))
       setFeedback(
-        "Use both the survey pattern and the storage record to support the next step.",
+        "An explanation needs observations that support its next step. The survey tells us who felt unwell, while the storage record tells us something about how the salad was kept. How do those clues work together? Select those two case observations, then check that you have not added an unsupported statement.",
       );
     else
       setFeedback(
-        "What can’t we tell yet? Choose the statement that leaves room for more evidence.",
+        "Finding a pattern is a useful beginning, but several explanations may still fit. We have not identified a germ or confirmed the source of illness. What further information could help the team? Choose the statement that acknowledges what remains unknown.",
       );
   };
   const doneStage = {
@@ -484,9 +486,10 @@ function Mission({ guest }) {
                 />
               </div>
               <p className="mq-data-note">
-                Invented survey data for this game. One icon = one fictional
-                student.
+                Invented survey data for this game. One icon = one fictional student.
+                Percentages are rounded to the nearest whole percent.
               </p>
+              <details className="mq-percent-explainer"><summary>How would an epidemiologist report this?</summary><p>A percentage describes a part out of 100. Divide the number who felt unwell by everyone in that group, then multiply by 100.</p><p>For the salad group: 5 ÷ 6 × 100 ≈ 83%. For students who skipped salad: 1 ÷ 6 × 100 ≈ 17%. These are two ways to describe our actual counts, not 100 real students.</p><p>Epidemiologists compare the percentage who became ill in each group. Here we report the counts too, because each group has only six students. A pattern helps us ask the next question; it does not identify a germ or prove what caused illness.</p></details>
               <h3 className="mq-question">
                 What does this comparison tell you?
               </h3>
@@ -505,28 +508,8 @@ function Mission({ guest }) {
                   <button
                     key={id}
                     onClick={() => {
-                      const right = {
-                        salad: "pattern",
-                        apple: "equal",
-                        water: "missing",
-                      }[s.food];
-                      if (id !== right) {
-                        setFeedback(
-                          "Look at both groups again. Compare the unwell labels, and check whether both groups exist.",
-                        );
-                        return;
-                      }
-                      if (s.food === "salad") {
-                        update({ comparison: "salad-pattern" });
-                        setFeedback(
-                          "A pattern worth investigating: 5 of 6 who ate salad felt unwell, compared with 1 of 6 who did not. This is a clue, not proof.",
-                        );
-                      } else
-                        setFeedback(
-                          s.food === "apple"
-                            ? "Yes. Both groups have 3 unwell students. Try another item to find a stronger pattern."
-                            : "Yes. Everyone drank water, so this survey cannot compare drinkers with non-drinkers. It does not prove water is safe. Try another item.",
-                        );
+                      if (s.food === "salad" && id === "pattern") update({ comparison: "salad-pattern" });
+                      setFeedback(comparisonFeedback(s.food, id));
                     }}
                   >
                     {label}
@@ -613,7 +596,7 @@ function Mission({ guest }) {
                           modelRead: null,
                         });
                         setFeedback(
-                          "This changes the food and the temperature. Choose the same food in both samples to test storage fairly.",
+                          "This setup changes two things: the kind of food and its temperature. If growth differs, how would we know which change mattered? To investigate temperature, keep the food, starting bacteria and time the same. Which setup changes only storage temperature?",
                         );
                       }}
                     >
@@ -706,8 +689,8 @@ function Mission({ guest }) {
                             id === "slower"
                               ? "Yes. Cold can slow growth. It does not kill all germs, and this model did not test the school’s food."
                               : id === "safe"
-                                ? "Cold does not kill all germs or make every food safe. Compare the rates of change."
-                                : "This is a general model, not a lab test of the school’s food. What did it show about growth?",
+                                ? "Look closely at the cold sample: its indicator still increases, just more slowly. Slower growth is different from no germs or guaranteed safety. Does the model support “all food is safe,” or a more careful statement about how cold affects growth? Compare the two indicators again."
+                                : "We changed storage temperature in a simplified model. We did not test the school’s food or identify any organism. What can the different growth indicators tell us about temperature? Choose a statement about what the model actually demonstrates.",
                           );
                         }}
                       >
@@ -892,7 +875,7 @@ function Mission({ guest }) {
           {feedback && (
             <div className="mq-feedback" role="status" aria-live="polite">
               <MessageCircle size={21} />
-              <p>{feedback}</p>
+              <div><strong>Aunt Juju · Let’s think it through</strong><p>{feedback}</p></div>
             </div>
           )}
           <footer className="mq-footer">

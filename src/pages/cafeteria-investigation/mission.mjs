@@ -114,3 +114,25 @@ export function hydrateMission(raw) {
     return initialMission();
   }
 }
+
+// A missing comparison group has no rate, rather than a rate of zero.
+export function illnessSummary(people) {
+  const total = people.length;
+  const unwell = people.filter(person => person.unwell).length;
+  return {total, unwell, percent: total ? Math.round(unwell / total * 100) : null};
+}
+export function comparisonFeedback(food, answer) {
+  if (food === "water") return answer === "missing"
+    ? "Yes. All 12 students drank water, and 6 of 12 (50%) felt unwell. There are no non-drinkers, so we cannot calculate a percentage for that group or compare the two. This does not prove water was safe or unsafe. What other item gives us two groups?"
+    : "You noticed illness among students who drank water. But all 12 drank it, including 6 who felt well. There are zero students in the non-drinker group, so its percentage is unknown, not 0%. Can we say illness was more common in one group if the other group does not exist? Look for the answer about a missing comparison group.";
+  if (food === "apple") return answer === "equal"
+    ? "Yes. In each group, 3 of 6 students (50%) felt unwell. These equal percentages do not show an apple-related difference in this small survey. They do not prove apples could never be involved. Which other lunch item shows a different pattern?"
+    : answer === "missing"
+      ? "There are students in both apple groups: 6 ate an apple and 6 did not. Count the unwell students in each: 3 of 6 (50%) in both. Does this show a missing group, or two groups with matching results? Try the statement about their illness counts."
+      : "Look at the unwell students in both apple groups, not just one. Each has 3 unwell students out of 6, or 50%. If the percentages match, does this survey show that apple eaters felt unwell more often? Which sentence describes equal results?";
+  return answer === "pattern"
+    ? "A pattern worth investigating: 5 of 6 salad eaters felt unwell (about 83%), compared with 1 of 6 who did not eat salad (about 17%). Epidemiologists report both the counts and percentages so people can compare groups. This small, fictional survey shows an association, not proof of the cause. What else would the team need to investigate?"
+    : answer === "equal"
+      ? "Both salad groups have 6 students, but equal group sizes do not mean equal illness. Count only the unwell students: 5 of 6 (about 83%) in the salad group and 1 of 6 (about 17%) in the other group. Which group has the larger percentage? Choose the sentence that describes that difference."
+      : "Both salad groups exist: 6 students ate salad and 6 did not. Now compare their unwell counts: 5 of 6 (about 83%) versus 1 of 6 (about 17%). A missing group would have no students at all. What pattern do these two groups show?";
+}
