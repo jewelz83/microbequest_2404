@@ -984,9 +984,10 @@ function Mission({ guest }) {
                   The case does not identify a germ or prove the cause. The team
                   needs more evidence.
                 </p>
-                <button className="mq-text-button" onClick={closeOverlays}>
-                  Back to the investigation
-                </button>
+                <div className="mq-actions">
+                  <button className="mq-text-button" onClick={closeOverlays}>Back to the investigation</button>
+                  <button className="mq-text-button" onClick={() => { setNotebook(false); setRestart(true); }}>Start a new investigation</button>
+                </div>
               </>
             )}
           </section>
