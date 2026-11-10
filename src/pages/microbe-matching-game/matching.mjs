@@ -14,17 +14,18 @@ export function makeDeck(mode='pictures',size=3,ceiling='easy',random=Math.rando
  for(let i=deck.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
  return deck;
 }
-export const newRound=deck=>({deck,selected:[],matched:[],attempts:0,result:null,paused:false,complete:false});
+export const newRound=deck=>({deck,selected:[],matched:[],attempts:0,result:null,feedback:null,paused:false,complete:false});
 export function matchingReducer(state,action){
  if(action.type==='reset')return newRound(action.deck);
  if(action.type==='pause')return state.complete?state:{...state,paused:!state.paused};
  if(state.paused||state.complete)return state;
- if(action.type==='advance')return state.result?{...state,selected:[],result:null,complete:state.matched.length===state.deck.length}:state;
+ if(action.type==='advance')return state.result&&action.result===state.result?{...state,selected:[],result:null,complete:state.matched.length===state.deck.length}:state;
  if(action.type!=='select'||state.result||state.selected.includes(action.id)||state.matched.includes(action.id))return state;
  const card=state.deck.find(c=>c.id===action.id);if(!card)return state;
  const selected=[...state.selected,card.id];if(selected.length===1)return {...state,selected};
  const first=state.deck.find(c=>c.id===selected[0]),match=first.specimen===card.specimen;
- return {...state,selected,attempts:state.attempts+1,matched:match?[...state.matched,...selected]:state.matched,result:{match,first:first.specimen,second:card.specimen}};
+ const result={match,first:first.specimen,second:card.specimen};
+ return {...state,selected,attempts:state.attempts+1,matched:match?[...state.matched,...selected]:state.matched,result,feedback:result};
 }
 export function pairFeedback(result,mode){
  const a=specimens.find(s=>s.id===result.first),b=specimens.find(s=>s.id===result.second);
