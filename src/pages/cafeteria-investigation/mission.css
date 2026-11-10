@@ -1150,3 +1150,29 @@
 .mq-guidance-nav {display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; padding:16px 0; margin-bottom:24px; border-bottom:1px solid #d8dace; font-size:14px;}
 .mq-guidance-nav button {display:flex; align-items:center; gap:6px; min-height:44px;}
 @media(max-width:600px) {.mq-guidance-nav strong {order:-1; width:100%;} .mq-route-map {padding:16px;}}
+
+/* Character-led guidance and readable evidence illustrations. */
+.mq-guide {align-items:center; padding:20px; border:1px solid #dfd8c8; border-radius:18px; background:#fffdf7; gap:20px; animation:mq-guide-arrive .25s ease-out;}
+.mq-guide-avatar {width:112px; height:112px; object-fit:contain; border:0; border-radius:18px; background:white;}
+.mq-guide > div {min-width:0; flex:1;}
+.mq-guide > div > span {font-size:10px;}
+.mq-guide p {font-size:16px;}
+@keyframes mq-guide-arrive {from {opacity:0; transform:translateY(6px);} to {opacity:1;transform:translateY(0);}}
+.mq-clue-visual {margin:24px 0; padding:22px; border-radius:16px; background:#f1f3ea; border:1px solid #d7dfcd;}
+.mq-clue-visual figcaption {font-weight:700; font-size:18px; color:#244c46;}
+.mq-clue-visual figcaption small {display:block; font-size:13px; font-weight:400; margin:6px 0 18px;}
+.mq-interview-grid {display:grid; grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;}
+.mq-interview-person {display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;border:1px solid #bfd0c1;background:#e5eee3;border-radius:12px;}
+.mq-interview-person.unwell {background:#f5e5d4;border-color:#d7b999;}
+.mq-interview-person span {font-size:11px;text-align:center;}
+.mq-menu-pictures {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;}
+.mq-menu-pictures > div,.mq-storage-timeline > div {display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;background:#fffdf7;border-radius:12px;padding:16px;}
+.mq-menu-pictures svg,.mq-storage-timeline svg {width:120px;max-width:100%;height:100px;}
+.mq-menu-pictures span,.mq-storage-timeline span {font-size:13px;}
+.mq-storage-timeline {display:grid;grid-template-columns:1fr 1fr;gap:24px;position:relative;}
+.mq-storage-timeline:before {content:"";position:absolute;top:50%;left:45%;right:45%;border-top:3px dashed #a7b79e;}
+.mq-storage-gap {display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:18px;padding:14px;border:1px dashed #a9b797;border-radius:10px;}
+.mq-storage-gap span {width:100%;text-align:center;font-size:14px;}
+.mq-clue-visual > p {font-size:14px;margin:18px 0 0;}
+@media(max-width:600px) {.mq-guide {align-items:flex-start;gap:12px;padding:16px;flex-wrap:wrap;} .mq-guide-avatar {width:84px;height:84px;} .mq-guide > div {flex-basis:100%;} .mq-clue-visual {padding:14px;} .mq-interview-grid {grid-template-columns:repeat(3,minmax(0,1fr));} .mq-menu-pictures {gap:6px;} .mq-menu-pictures > div {padding:8px 4px;} .mq-menu-pictures strong {font-size:13px;} .mq-menu-pictures span {font-size:11px;} .mq-storage-timeline {gap:14px;}}
+@media(prefers-reduced-motion:reduce) {.mq-guide {animation:none;}}

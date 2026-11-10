@@ -21,6 +21,7 @@ import {
 import { useAuth } from "../../contexts/AuthContext";
 import {
   FOODS,
+  STUDENTS,
   PATHS,
   initialMission,
   groupsFor,
@@ -421,6 +422,7 @@ function Mission({ guest }) {
                 <p className="mq-eyebrow">{C.kicker}</p>
                 <h3>{C.title}</h3>
                 <p>{C.text}</p>
+                <ClueVisual kind={active} />
                 <div className="mq-clue">
                   <Search size={19} />
                   <p>{C.clue}</p>
@@ -473,11 +475,11 @@ function Mission({ guest }) {
               </div>
               <div className="mq-groups">
                 <PersonGroup
-                  title={`Ate ${FOODS[s.food].toLowerCase()}`}
+                  title={`${s.food === "water" ? "Drank" : "Ate"} ${FOODS[s.food].toLowerCase()}`}
                   people={group.ate}
                 />
                 <PersonGroup
-                  title={`Did not eat ${FOODS[s.food].toLowerCase()}`}
+                  title={`${s.food === "water" ? "Did not drink" : "Did not eat"} ${FOODS[s.food].toLowerCase()}`}
                   people={group.didNot}
                 />
               </div>
@@ -492,12 +494,12 @@ function Mission({ guest }) {
                 {[
                   [
                     "pattern",
-                    "More of the students who ate this item felt unwell.",
+                    s.food === "water" ? "More of the students who drank water felt unwell." : "More of the students who ate this item felt unwell.",
                   ],
                   ["equal", "The two groups have the same illness counts."],
                   [
                     "missing",
-                    "There is no group of students who skipped this item.",
+                    s.food === "water" ? "There is no group of students who did not drink water." : "There is no group of students who skipped this item.",
                   ],
                 ].map(([id, label]) => (
                   <button
@@ -1017,15 +1019,53 @@ function Primary({ children, ...props }) {
 function Guide({ children }) {
   return (
     <div className="mq-guide">
-      <span className="mq-guide-avatar" aria-hidden="true">
-        J
-      </span>
+      <img className="mq-guide-avatar" src="/assets/images/color_graduating_aunt_juju-1760838289072.png" alt="Cartoon Aunt Juju smiling, wearing glasses and holding a book" width="112" height="112" />
       <div>
         <span>AUNT JUJU · YOUR SCIENCE GUIDE</span>
         <p>{children}</p>
       </div>
     </div>
   );
+}
+function FoodPicture({ food }) {
+  return <svg viewBox="0 0 120 100" aria-hidden="true" focusable="false">
+    {food === "salad" ? <>
+      <ellipse cx="60" cy="75" rx="48" ry="15" fill="#d9dbcc" />
+      <path d="M16 44h88q-4 40-44 40T16 44" fill="#e7b975" stroke="#84633d" strokeWidth="3" />
+      <ellipse cx="60" cy="44" rx="44" ry="17" fill="#93aa72" />
+      {[25,45,65,85].map((x,i)=><g key={x} transform={`translate(${x} ${33+i%2*12}) rotate(-15)`}><path d="M0 0q12-6 14 4t-10 7" fill="none" stroke="#f5d690" strokeWidth="7" strokeLinecap="round" /></g>)}
+      <circle cx="42" cy="50" r="5" fill="#b45d43" /><circle cx="76" cy="34" r="5" fill="#b45d43" />
+    </> : food === "apple" ? <>
+      <path d="M60 29C25 10 12 47 29 74q15 22 31 11 18 11 32-11c17-27 4-64-32-45" fill="#ba624b" stroke="#88422f" strokeWidth="3" />
+      <path d="M60 29q-3-15 4-21" stroke="#6c5134" strokeWidth="5" fill="none" />
+      <path d="M65 18q2-20 24-12-6 18-24 12" fill="#6e8e5c" />
+      <path d="M36 39q-10 6-9 19" stroke="#e2a18a" strokeWidth="5" fill="none" strokeLinecap="round" />
+    </> : <>
+      <path d="M32 14h56L80 88H40Z" fill="#ecf5f3" stroke="#58888a" strokeWidth="3" />
+      <path d="M37 43h46l-5 41H42Z" fill="#9bcbd0" /><ellipse cx="60" cy="43" rx="23" ry="5" fill="#c3e2e4" />
+      <path d="M44 23l3 48" stroke="white" strokeWidth="5" strokeLinecap="round" />
+    </>}
+  </svg>;
+}
+function ClueVisual({ kind }) {
+  if (kind === "interviews") return <figure className="mq-clue-visual">
+    <figcaption>Our student interview cards <small>12 fictional students · The same questions for everyone</small></figcaption>
+    <div className="mq-interview-grid">{STUDENTS.map((student)=><div key={student.id} className={`mq-interview-person ${student.unwell ? "unwell" : "well"}`}>
+      <Users aria-hidden="true" size={28} /><strong>{student.id}</strong><span>{student.unwell ? "Felt unwell" : "Felt well"}</span>
+    </div>)}</div>
+    <p>Six felt unwell. Six felt well. We need to learn about both groups.</p>
+  </figure>;
+  if (kind === "menu") return <figure className="mq-clue-visual">
+    <figcaption>What was served at lunch?<small>Students could choose one food or both.</small></figcaption>
+    <div className="mq-menu-pictures">{Object.entries(FOODS).map(([food,name])=><div key={food}><FoodPicture food={food} /><strong>{name}</strong><span>{food === "water" ? "Everyone drank water" : "Some students chose this"}</span></div>)}</div>
+    <p>The menu shows what was offered. The interview records show who chose each item.</p>
+  </figure>;
+  return <figure className="mq-clue-visual">
+    <figcaption>Follow the storage record<small>The same pasta salad, at two recorded times.</small></figcaption>
+    <div className="mq-storage-timeline">{["10:00 AM", "12:30 PM"].map(time=><div key={time}><strong>{time}</strong><FoodPicture food="salad" /><span>On the counter</span></div>)}</div>
+    <div className="mq-storage-gap"><Snowflake size={22} aria-hidden="true" /><strong>2 hours, 30 minutes between records</strong><span>No setup to keep it cold was recorded.</span></div>
+    <p>A reason to investigate storage, not proof that this food caused illness.</p>
+  </figure>;
 }
 function Choices({ value, onChange, items }) {
   return (
