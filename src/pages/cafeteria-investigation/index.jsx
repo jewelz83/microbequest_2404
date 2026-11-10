@@ -343,10 +343,7 @@ function Mission({ guest }) {
                 Aunt Juju has a mystery for our science team.
               </p>
               <Guide>
-                “Something puzzling happened after lunch. Some students felt unwell,
-                but others didn’t. The grown-ups are helping them, and we’ve been
-                asked to look for clues. Will you help me figure out what the
-                science team should investigate?”
+                “Some students felt unwell after lunch, but others didn’t. The grown-ups are helping them. Will you help me look for clues?”
               </Guide>
               <div className="mq-route-map" aria-label="Our investigation plan">
                 <strong>Our plan</strong>
@@ -404,7 +401,7 @@ function Mission({ guest }) {
                 Let’s collect our clues.
               </h2>
               <p className="mq-intro">
-                Read the student notes, look at the menu, then check the storage record. Aunt Juju will guide you through each clue.
+                Read each clue, then use Next to keep investigating.
               </p>
               <div className="mq-tabs" role="group" aria-label="Evidence paths">
                 {PATHS.map((k) => (
@@ -459,8 +456,8 @@ function Mission({ guest }) {
                 <br />
                 <em>Different stories.</em>
               </h2>
-              <Guide>“Did students who ate pasta salad feel unwell more often than students who didn’t? Count the Unwell labels in each group. Then choose the sentence that matches.”</Guide>
-              <p className="mq-intro">Start with pasta salad. Look at both groups, then choose a sentence below. You can explore apple and water too.</p>
+              <Guide>“Did salad eaters feel unwell more often? Compare the Unwell labels in both groups.”</Guide>
+              <p className="mq-intro">Choose a lunch item, compare the groups, then describe the pattern.</p>
               <div
                 className="mq-foods"
                 role="group"
@@ -490,7 +487,7 @@ function Mission({ guest }) {
                 Invented survey data for this game. One icon = one fictional student.
                 Percentages are rounded to the nearest whole percent.
               </p>
-              <details className="mq-percent-explainer"><summary>How would an epidemiologist report this?</summary><p>A percentage describes a part out of 100. Divide the number who felt unwell by everyone in that group, then multiply by 100.</p><p>For the salad group: 5 ÷ 6 × 100 ≈ 83%. For students who skipped salad: 1 ÷ 6 × 100 ≈ 17%. These are two ways to describe our actual counts, not 100 real students.</p><p>Epidemiologists compare the percentage who became ill in each group. Here we report the counts too, because each group has only six students. A pattern helps us ask the next question; it does not identify a germ or prove what caused illness.</p></details>
+              <details className="mq-percent-explainer"><summary>Tell me more, Aunt Juju: reporting percentages</summary><p>A percentage describes a part out of 100. Divide the number who felt unwell by everyone in that group, then multiply by 100.</p><p>For the salad group: 5 ÷ 6 × 100 ≈ 83%. For students who skipped salad: 1 ÷ 6 × 100 ≈ 17%. These are two ways to describe our actual counts, not 100 real students.</p><p>Epidemiologists compare the percentage who became ill in each group. Here we report the counts too, because each group has only six students. A pattern helps us ask the next question; it does not identify a germ or prove what caused illness.</p></details>
               <h3 className="mq-question">
                 What does this comparison tell you?
               </h3>
@@ -549,7 +546,8 @@ function Mission({ guest }) {
               <p className="mq-intro">
                 Explore a virtual model. It won’t test the school’s food.
               </p>
-              <Guide>“Could keeping food cold make a difference? First, choose what you think will happen. Scientists make predictions using what they know so far. The results might surprise us, and that’s okay. We’re here to find out. Choose a prediction, then we’ll test it with a fair setup and advance the model three times.”</Guide>
+              <Guide>“Could keeping food cold make a difference? Choose a prediction. It’s okay if the result surprises you. We’re here to find out.”</Guide>
+              <More title="making and testing a prediction"><p>A prediction is what you think will happen, using what you know so far. We’ll choose a fair setup, advance the model three times and compare the result with your idea. Your prediction is not scored.</p><p>Scientists use observations to develop possible explanations, called hypotheses. A prediction tells us what we expect to observe when we test an explanation. Results can help us reconsider it.</p></More>
               <h3 className="mq-question">First, make a prediction.</h3>
               <div className="mq-options">
                 {[
@@ -673,10 +671,13 @@ function Mission({ guest }) {
                   <section className="mq-prediction-reflection" aria-label="Reflect on your prediction">
                     <h3 className="mq-question">Let’s revisit your prediction.</h3>
                     <Guide>{predictionReflection(s.prediction)}</Guide>
-                    <p><strong>What we observed:</strong> Both samples started at the same level and were observed for the same time. The cold sample’s indicator increased more slowly.</p>
-                    <p><strong>Why might that happen?</strong> Cold can slow the processes that help many bacteria grow and multiply. It does not stop every kind of growth or kill all germs. This simplified model explores that idea; it did not test the school’s food.</p>
-                    <p><strong>Look again:</strong> How do the two indicators help you explain the difference? What would you keep or change about your thinking?</p>
-                    <p>Scientists test ideas, examine the results and revise their explanations. A surprising result is something to learn from, not a failure.</p>
+                    <p><strong>Look again:</strong> What do the two indicators show? What would you keep or change about your thinking?</p>
+                    <More title="why cold can make a difference">
+                      <p><strong>What we observed:</strong> Both samples started at the same level and were observed for the same time. The cold sample’s indicator increased more slowly.</p>
+                      <p><strong>Why might that happen?</strong> Cold can slow the processes that help many bacteria grow and multiply. It does not stop every kind of growth or kill all germs.</p>
+                      <p>Scientists test ideas, examine results and revise explanations. A surprising result is something to learn from, not a failure.</p>
+                    </More>
+                    <p className="mq-data-note">This simplified model did not test the school’s food or identify the cause of illness.</p>
                   </section>
                   <h3 className="mq-question">Using the result, what does this model support?</h3>
                   <div className="mq-options">
@@ -737,10 +738,10 @@ function Mission({ guest }) {
                 team check <em>next?</em>
               </h2>
               <p className="mq-intro">
-                A good explanation connects a claim to evidence, and leaves room
-                for what we don’t know.
+                What should the team check next? Use your clues to explain.
               </p>
-              <Guide>“Let’s tell the team what to check next. Choose one next step, select two observations that support it, then say what we still don’t know.”</Guide>
+              <Guide>“Choose a next step, two supporting clues and what we still don’t know.”</Guide>
+              <More title="building a scientific explanation"><p>Your claim is the next step you recommend. Evidence is what you observed that supports it. Naming what remains unknown helps the team decide what to investigate next.</p><p>You can revisit the clues or open your notebook. A strong explanation says what the evidence supports without claiming more than we know.</p></More>
               <h3 className="mq-question">1. Choose your claim</h3>
               <Choices
                 value={s.claim}
@@ -886,7 +887,7 @@ function Mission({ guest }) {
           {feedback && (
             <div className="mq-feedback" role="status" aria-live="polite">
               <MessageCircle size={21} />
-              <div><strong>Aunt Juju · Let’s think it through</strong><p>{feedback}</p></div>
+              <FeedbackExplanation key={feedback} text={feedback} />
             </div>
           )}
           <footer className="mq-footer">
@@ -1060,6 +1061,16 @@ function ClueVisual({ kind }) {
     <div className="mq-storage-gap"><Snowflake size={22} aria-hidden="true" /><strong>2 hours, 30 minutes between records</strong><span>No setup to keep it cold was recorded.</span></div>
     <p>A reason to investigate storage, not proof that this food caused illness.</p>
   </figure>;
+}
+function More({ title, children }) {
+  return <details className="mq-percent-explainer"><summary>Tell me more, Aunt Juju: {title}</summary>{children}</details>;
+}
+function FeedbackExplanation({ text }) {
+  // Keep the observation and misconception visible; preserve the full reasoning on demand.
+  const sentences = text.match(/[^.!?]+[.!?]+(?:[”’])?|[^.!?]+$/g) || [text];
+  const lead = sentences.slice(0, 2).join(" ").trim();
+  const depth = sentences.slice(2).join(" ").trim();
+  return <div><strong>Aunt Juju · Let’s think it through</strong><p>{lead}</p>{depth && <More title="thinking through this choice"><p>{depth}</p></More>}</div>;
 }
 function Choices({ value, onChange, items }) {
   return (
