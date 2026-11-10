@@ -44,7 +44,7 @@ const Header = () => {
       label: 'Germ Buster',
       path: '/germ-buster-tower-defense',
       icon: 'Shield',
-      description: 'Tower defense against germs'
+      description: 'Selective-action arcade mission'
     },
     {
       label: 'Detective',

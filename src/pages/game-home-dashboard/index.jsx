@@ -47,7 +47,7 @@ export default function GameHomeDashboard() {
           <div className="cq-card-top"><span className="cq-art"><Icon size={46} strokeWidth={1.8} aria-hidden="true" /></span><span className="cq-tag">{tag}</span></div>
           <p className="cq-mood">{mood}</p><h3>{title}</h3><p className="cq-question">{question}</p><p className="cq-description">{text}</p>
           <Link className="cq-action" to={route}>{action}<ArrowRight size={18} aria-hidden="true" /></Link>
-          {id === 'challenge' && <details className="cq-more-games"><summary>More ways to play</summary><Link to="/quiz-challenge-system">Try a Quiz Challenge <ArrowRight size={16} aria-hidden="true" /></Link><Link to="/germ-buster-tower-defense">Play Germ Buster strategy <ArrowRight size={16} aria-hidden="true" /></Link></details>}
+          {id === 'challenge' && <details className="cq-more-games"><summary>More ways to play</summary><Link to="/quiz-challenge-system">Try a Quiz Challenge <ArrowRight size={16} aria-hidden="true" /></Link><Link to="/germ-buster-tower-defense">Play Germ Buster action <ArrowRight size={16} aria-hidden="true" /></Link></details>}
         </article>)}</div>
       </section>
 
