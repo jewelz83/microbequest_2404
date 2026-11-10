@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Link} from 'react-router-dom';
+import {Link,useSearchParams} from 'react-router-dom';
 import {Microscope, ArrowRight, Search} from 'lucide-react';
 import Header from '../../components/ui/Header';
 import TeachingModel from './components/TeachingModel';
@@ -8,7 +8,9 @@ import {micrographs,specimenIntroductions} from './micrographs.mjs';
 import {slides,movementObserved,movementFeedback} from './discovery.mjs';
 import './discovery.css';
 export default function MicroscopeDiscoveryLab() {
- const [mode,setMode]=useState(null),[selected,setSelected]=useState(null),[feature,setFeature]=useState(null),[seen,setSeen]=useState([]),[zoom,setZoom]=useState(1),[answer,setAnswer]=useState(null),[diagram,setDiagram]=useState(false);
+ const [params]=useSearchParams();
+ const incoming=slides.some(s=>s.id===params.get('specimen'))?params.get('specimen'):null;
+ const [mode,setMode]=useState(incoming?'free':null),[selected,setSelected]=useState(incoming),[feature,setFeature]=useState(null),[seen,setSeen]=useState([]),[zoom,setZoom]=useState(1),[answer,setAnswer]=useState(null),[diagram,setDiagram]=useState(false);
  const slide=slides.find(x=>x.id===selected), ready=movementObserved(seen);
  const choose=id=>{setSelected(id);setFeature(null);setZoom(1);setDiagram(false);};
  const observe=f=>{setFeature(f);if(!micrographs[selected].regions[f[0]])setDiagram(true);setSeen(p=>[...new Set([...p,`${selected}:${f[0]}`])]);};
