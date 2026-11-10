@@ -214,6 +214,7 @@ const GameHomeDashboard = () => {
             >
               {welcomeMessage}
             </motion.p>
+            <Link to="/meet-aunt-juju-charlie" className="inline-flex min-h-[44px] items-center gap-2 text-purple-800 font-semibold underline">Meet Aunt Juju &amp; Charlie, from book to discovery</Link>
 
             {/* Enhanced Time Display */}
             <motion.div

@@ -891,8 +891,8 @@ function Mission({ guest }) {
             </div>
           )}
           <footer className="mq-footer">
-            <span>Chase Street Press</span>
-            <span>Lead with curiosity.</span>
+            <Link to="/meet-aunt-juju-charlie">Meet Aunt Juju &amp; Charlie</Link>
+            <span>Chase Street Press · Lead with curiosity.</span>
           </footer>
         </main>
       </div>
