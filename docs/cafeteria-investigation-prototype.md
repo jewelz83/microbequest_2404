@@ -22,4 +22,4 @@ https://www.fda.gov/food/buy-store-serve-safe-food/safe-food-handling
 
 ## Verification
 
-56 Node tests pass, including guided-stage gating and safe restoration of earlier partial saves. Production build passes. Earlier hosted QA covered the complete original mission, persistence, notebook and pause at desktop and 390px widths. The guided revision still needs hosted browser verification. No production release or backend change.
+56 Node tests pass, including guided-stage gating and safe restoration of earlier partial saves. Production build passes. Earlier hosted QA covered the complete original mission, persistence, notebook and pause at desktop and 390px widths. The guided revision passed hosted Chrome checks for the single starting action, clue sequencing, locked comparison before all clues, contextual help, explicit next-step transitions, Back navigation and preserved predictions. The opening places Aunt Juju’s introduction and first question before the decorative scene. No production release or backend change.

@@ -338,6 +338,26 @@ function Mission({ guest }) {
               <p className="mq-intro">
                 Aunt Juju has a mystery for our science team.
               </p>
+              <Guide>
+                “Something puzzling happened after lunch. Some students felt unwell,
+                but others didn’t. The grown-ups are helping them, and we’ve been
+                asked to look for clues. Will you help me figure out what the
+                science team should investigate?”
+              </Guide>
+              <div className="mq-route-map" aria-label="Our investigation plan">
+                <strong>Our plan</strong>
+                <p>1. Collect clues → 2. Compare lunches → 3. Try a model → 4. Explain our thinking</p>
+              </div>
+              <Guide>
+                “First, let’s find out what everyone ate. Did students who felt
+                unwell eat the same things as students who felt well?”
+              </Guide>
+              <div className="mq-actions">
+                <span>Start here. I’ll help you along the way.</span>
+                <Primary onClick={() => visit("interviews")}>
+                  Look at the students’ lunches
+                </Primary>
+              </div>
               <div
                 className="mq-scene"
                 aria-label="Illustrated cafeteria desk with lunch tray, apple and interview notes"
@@ -370,26 +390,7 @@ function Mission({ guest }) {
                   <Search size={26} />
                 </div>
               </div>
-              <Guide>
-                “Something puzzling happened after lunch. Some students felt unwell,
-                but others didn’t. The grown-ups are helping them, and we’ve been
-                asked to look for clues. Will you help me figure out what the
-                science team should investigate?”
-              </Guide>
-              <div className="mq-route-map" aria-label="Our investigation plan">
-                <strong>Our plan</strong>
-                <p>1. Collect clues → 2. Compare lunches → 3. Try a model → 4. Explain our thinking</p>
-              </div>
-              <Guide>
-                “First, let’s find out what everyone ate. Did students who felt
-                unwell eat the same things as students who felt well?”
-              </Guide>
-              <div className="mq-actions">
-                <span>Start here. I’ll help you along the way.</span>
-                <Primary onClick={() => visit("interviews")}>
-                  Look at the students’ lunches
-                </Primary>
-              </div>
+
             </>
           )}
           {s.stage === "evidence" && (
