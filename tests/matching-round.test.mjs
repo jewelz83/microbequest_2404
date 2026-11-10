@@ -45,3 +45,12 @@ test('old pair callbacks cannot clear a new-round pair or a later pair',()=>{
  assert.equal(s.feedback,recent);assert.equal(s.result,null);assert.deepEqual(s.selected,[]);
  assert.equal(matchingReducer(s,{type:'advance',result:recent}),s);
 });
+
+test('pause freezes a pending automatic resolution and resume resolves the same pair once',()=>{
+ let s=newRound(makeDeck());const pair=s.deck.filter(c=>c.specimen===s.deck[0].specimen);
+ s=select(select(s,pair[0].id),pair[1].id);const result=s.result;
+ s=matchingReducer(s,{type:'pause'});assert.equal(matchingReducer(s,{type:'advance',result}),s);
+ s=matchingReducer(s,{type:'pause'});s=matchingReducer(s,{type:'advance',result});
+ assert.equal(s.result,null);assert.equal(s.matched.length,2);assert.equal(s.attempts,1);
+ assert.equal(matchingReducer(s,{type:'advance',result}),s);
+});
