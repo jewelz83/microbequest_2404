@@ -38,7 +38,7 @@ export default function GameHomeDashboard() {
         <div className="cq-helper-choices" role="group" aria-label="What sounds fun?">
           { [['notice','Noticing something new'],['puzzle','Figuring out a mystery'],['play','Trying a puzzle']].map(([id,label])=><button key={id} type="button" aria-pressed={preference === id} onClick={()=>setPreference(id)}>{label}</button>) }
         </div>
-        {suggested && <div className="cq-suggestion" role="status"><strong>How about {suggested.title.toLowerCase()}?</strong><p>{suggested.text}</p><Link to={suggested.route}>{suggested.action} <ArrowRight size={18} aria-hidden="true" /></Link><p className="cq-small">Just a suggestion. All the choices below are still yours.</p></div>}
+        {suggested && <div className="cq-suggestion" role="status"><strong>You could try: {suggested.title}</strong><p>{suggested.text}</p><Link to={suggested.route}>{suggested.action} <ArrowRight size={18} aria-hidden="true" /></Link><p className="cq-small">Just a suggestion. All the choices below are still yours.</p></div>}
       </details>
 
       <section id="curiosity-choices" className="cq-choices" aria-labelledby="choices-title">
