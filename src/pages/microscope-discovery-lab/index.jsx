@@ -11,7 +11,7 @@ export default function MicroscopeDiscoveryLab() {
  const [mode,setMode]=useState(null),[selected,setSelected]=useState(null),[feature,setFeature]=useState(null),[seen,setSeen]=useState([]),[zoom,setZoom]=useState(1),[answer,setAnswer]=useState(null),[diagram,setDiagram]=useState(false);
  const slide=slides.find(x=>x.id===selected), ready=movementObserved(seen);
  const choose=id=>{setSelected(id);setFeature(null);setZoom(1);setDiagram(false);};
- const observe=f=>{setFeature(f);setSeen(p=>[...new Set([...p,`${selected}:${f[0]}`])]);};
+ const observe=f=>{setFeature(f);if(!micrographs[selected].regions[f[0]])setDiagram(true);setSeen(p=>[...new Set([...p,`${selected}:${f[0]}`])]);};
  const guide = !mode ? 'What could help a tiny organism move? We can compare two microscope images together, or you can pick any specimen and explore.' : mode==='free' ? 'Choose any specimen. Look at the picture, then select a feature to learn what it does. What makes you wonder?' : !seen.includes('paramecium:cilia') ? 'First, open Paramecium and choose Cilia. Their movement makes the edge look fuzzy in this photo.' : !seen.includes('bacteria:flagella') ? 'Now open E. coli and choose Flagella. Compare these longer structures with the short cilia.' : 'You’ve examined both movement structures. Use the question below the images to describe what you discovered.';
  return <div className="ml-discovery"><Header/><main className="ml-main">
   <Link to="/game-home-dashboard" className="ml-back">← Back to your choices</Link>
