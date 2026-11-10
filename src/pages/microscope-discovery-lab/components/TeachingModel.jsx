@@ -1,5 +1,5 @@
 import React from 'react';
-export default function TeachingModel({id,zoom=1}) {
+export default function TeachingModel({id,zoom=1,feature}) {
  return <svg viewBox="0 0 360 270" role="img" aria-label={`${id === 'bacteria' ? 'E. coli' : id} simplified teaching diagram, with exaggerated structures and added colors`} style={{width:'100%',height:'100%'}}>
  <g transform={`translate(180 135) scale(${zoom}) translate(-180 -135)`}>
  {id === 'paramecium' && <>
@@ -17,5 +17,6 @@ export default function TeachingModel({id,zoom=1}) {
   {Array.from({length:16},(_,i)=>{const a=i*Math.PI/8;return <g key={i}><line x1={180+72*Math.cos(a)} y1={135+72*Math.sin(a)} x2={180+91*Math.cos(a)} y2={135+91*Math.sin(a)} stroke="#be185d" strokeWidth="5"/><circle cx={180+93*Math.cos(a)} cy={135+93*Math.sin(a)} r="6" fill="#be185d"/></g>;})}
   <circle cx="180" cy="135" r="72" fill="#fbcfe8" stroke="#be185d" strokeWidth="6"/><circle cx="180" cy="135" r="59" fill="#fce7f3" stroke="#f472b6" strokeWidth="3"/>{[0,1,2,3,4,5,6,7].map(i=><path key={i} d={`M${147+i*9} 110q-8 13 0 25t0 25`} fill="none" stroke="#7c3aed" strokeWidth="3"/>)}
  </>}
+ {feature && (()=>{const box={paramecium:{cilia:[180,135,124,78],vacuole:[136,145,21,21],nucleus:[189,128,31,22]},bacteria:{flagella:[300,142,54,82],wall:[161,135,99,62],dna:[164,135,57,30]},mold:{hyphae:[173,231,133,12],spores:[171,40,64,37],branch:[171,111,59,49]},virus:{proteins:[180,135,98,98],envelope:[180,135,75,75],rna:[180,135,43,39]}}[id]?.[feature];return box && <ellipse cx={box[0]} cy={box[1]} rx={box[2]} ry={box[3]} fill="none" stroke="#b45309" strokeWidth="4" strokeDasharray="7 4"/>;})()}
  </g></svg>;
 }

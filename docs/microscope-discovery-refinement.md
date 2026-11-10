@@ -15,3 +15,9 @@ Sources used to check structural teaching content:
 - CDC PHIL influenza electron micrograph: https://wwwn.cdc.gov/phil/Details.aspx?pid=8038
 
 No organism is identified or diagnosed from an actual specimen. There is no physical sample handling activity.
+
+## Real-image revision
+
+Real licensed micrographs now lead the experience, with optional diagram help. See public/assets/micrographs/LICENSE.md for image provenance, rights, preparation limits, and scale notes. Selected visible features get synchronized image-region outlines and accessible numbered controls; features not reliably resolved are marked diagram-only and do not receive invented image annotations. Diagram help also marks the selected structure.
+
+Every specimen now has a short introduction: what type of microbe it is, where it is found, why it matters (optional), and an observation mission. Additional factual sources: https://www.cdc.gov/ecoli/about/index.html ; https://www.cdc.gov/flu/about/disease/index.htm ; OpenStax protist and fungus chapters listed above. Image-region annotations remain teaching aids requiring specialist editorial review, not validated scientific segmentation.
