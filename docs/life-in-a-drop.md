@@ -20,7 +20,7 @@ Sources reviewed November 14 2026:
 - MicrobeQuest_Connected_Worlds_Adventure_Plan.docx, November 10, attached by Julianne for this work.
 
 ## Verification
-Unit tests cover leaf-safe route planning, encounter reachability, note gating/deduplication, pause/reset, manual takeover and camera/world bounds. Compilation is separate from hosted UI testing. Science/art editorial review, enjoyment/pacing with children, physical devices and broader accessibility remain before release. No production deployment or backend changes are authorized by this prototype.
+Unit tests cover direct leaf traversal, encounter entry, note gating/deduplication, pause/reset, cursor takeover, smooth stopping, leaf station visits, turn continuity and world/camera bounds. Compilation is separate from hosted UI testing. Science/art editorial review, enjoyment/pacing with children, physical devices and broader accessibility remain before release. No production deployment or backend changes are authorized by this prototype.
 
 
 ## Navigation and leaf encounter follow-up
