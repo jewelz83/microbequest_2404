@@ -1,346 +1,64 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import Icon from '../../components/AppIcon';
+import { Search, Microscope, Compass, Puzzle, BookOpen, ArrowRight, Sparkles, HelpCircle, Trophy, Waves } from 'lucide-react';
 import Header from '../../components/ui/Header';
-import CharacterGuide from '../../components/ui/CharacterGuide';
-import useGuideVisibility from '../../hooks/useGuideVisibility';
-import WelcomeCharacters from './components/WelcomeCharacters';
-import GameModeCards from './components/GameModeCards';
-import ReadTheBookSection from './components/ReadTheBookSection';
-import OnboardingTutorial from './components/OnboardingTutorial';
-import { useAuth } from '../../contexts/AuthContext';
-import { supabase } from '../../lib/supabase';
-import {
-  FloatingMicrobes,
-  PulsingButton,
-  GlowCard,
-  SuccessCelebration,
-  fadeInUp,
-  scaleIn,
-  staggerContainer
-} from '../../components/VisualEffects';
 import Footer from '../../components/ui/Footer';
+import './curiosity-home.css';
 
-const ONBOARDING_KEY = 'microbequest_onboarding_done';
-
-const GameHomeDashboard = () => {
-  const { shouldShowGuide, hideGuide } = useGuideVisibility('game-home-dashboard');
-  const { user, userProfile, isPremium } = useAuth();
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [welcomeMessage, setWelcomeMessage] = useState('');
-  const [showCelebration, setShowCelebration] = useState(false);
-  const [hasSeenWelcome, setHasSeenWelcome] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
-
-  // Determine if onboarding should show (first-time user)
-  useEffect(() => {
-    const localDone = localStorage.getItem(ONBOARDING_KEY);
-    if (localDone) return; // Already seen locally
-
-    if (user && userProfile) {
-      // Authenticated: check DB flag
-      if (userProfile?.onboarding_completed === false || userProfile?.onboarding_completed === null || userProfile?.onboarding_completed === undefined) {
-        setShowOnboarding(true);
-      }
-    } else if (!user) {
-      // Guest: show once per browser session
-      const sessionDone = sessionStorage.getItem(ONBOARDING_KEY);
-      if (!sessionDone) {
-        setShowOnboarding(true);
-      }
-    }
-  }, [user, userProfile]);
-
-  const handleOnboardingComplete = async () => {
-    setShowOnboarding(false);
-    localStorage.setItem(ONBOARDING_KEY, 'true');
-
-    if (user) {
-      try {
-        await supabase?.from('user_profiles')?.update({ onboarding_completed: true })?.eq('id', user?.id);
-      } catch (err) {
-        console.error('Failed to mark onboarding complete:', err);
-      }
-    } else {
-      sessionStorage.setItem(ONBOARDING_KEY, 'true');
-    }
-  };
-
-  // Update time and welcome message
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      setCurrentTime(now);
-
-      const hour = now?.getHours();
-      if (hour < 12) {
-        setWelcomeMessage('Good morning, young scientist! Ready to explore the microscopic world?');
-      } else if (hour < 17) {
-        setWelcomeMessage('Good afternoon! Let\'s continue our microbiology adventure!');
-      } else {
-        setWelcomeMessage('Good evening! Perfect time for some scientific discovery!');
-      }
-    };
-
-    updateTime();
-    const interval = setInterval(updateTime, 60000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Show welcome celebration on first visit
-  useEffect(() => {
-    if (!hasSeenWelcome) {
-      setShowCelebration(true);
-      setHasSeenWelcome(true);
-    }
-  }, [hasSeenWelcome]);
-
-  // Auto-hide character guide after 10 seconds
-  useEffect(() => {
-    if (!shouldShowGuide) return;
-    const timer = setTimeout(() => {
-      hideGuide();
-    }, 10000);
-    return () => clearTimeout(timer);
-  }, [shouldShowGuide, hideGuide]);
-
-  const quickActions = [
-    {
-      label: 'Play Matching',
-      route: '/microbe-matching-game',
-      icon: 'Play',
-      gradient: 'from-purple-600 to-blue-600',
-      description: 'Play Microbe Matching'
-    },
-    {
-      label: 'View Progress',
-      route: '/progress-achievement-hub',
-      icon: 'Trophy',
-      gradient: 'from-yellow-500 to-orange-600',
-      description: 'Check achievements and stats'
-    },
-    {
-      label: 'Discovery Lab',
-      route: '/microscope-discovery-lab',
-      icon: 'Microscope',
-      gradient: 'from-green-500 to-teal-600',
-      description: 'Explore with digital microscope'
-    }
-  ];
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-blue-50 relative overflow-hidden">
-      {/* Onboarding Modal */}
-      <AnimatePresence>
-        {showOnboarding && (
-          <OnboardingTutorial onComplete={handleOnboardingComplete} />
-        )}
-      </AnimatePresence>
-      {/* Floating Background Microbes */}
-      <FloatingMicrobes count={15} />
-      <Header />
-      <main className="pt-20 pb-24 lg:pb-8 relative z-10">
-        <div className="container mx-auto px-4 lg:px-6 space-y-6 lg:space-y-8">
-
-          {/* Welcome Section */}
-          <motion.section
-            className="text-center space-y-3 lg:space-y-4"
-            initial="hidden"
-            animate="visible"
-            variants={staggerContainer}
-          >
-            <motion.div
-              className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full shadow-lg"
-              variants={scaleIn}
-              whileHover={{ scale: 1.05 }}
-            >
-              <motion.div
-                animate={{ rotate: [0, 10, -10, 10, 0] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-              >
-                <Icon name="Sparkles" size={16} strokeWidth={2} />
-              </motion.div>
-              <span className="font-caption text-sm font-medium">
-                Welcome to MicrobeQuest
-              </span>
-            </motion.div>
-
-            {/* Premium Upgrade Banner — shown only to non-premium users */}
-            {!isPremium && (
-              <motion.div variants={fadeInUp}>
-                <Link to="/premium">
-                  <div className="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500 text-gray-900 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 cursor-pointer active:scale-95">
-                    <Icon name="Sparkles" size={18} strokeWidth={2.5} />
-                    <span className="font-body font-bold text-xs sm:text-sm">Unlock all 6 games &amp; 18 discoveries — Go Premium 🌻</span>
-                    <Icon name="ArrowRight" size={16} strokeWidth={2.5} />
-                  </div>
-                </Link>
-              </motion.div>
-            )}
-
-            {/* Author Credit Section with Glow */}
-            <motion.div
-              className="flex items-center justify-center mb-4"
-              variants={fadeInUp}
-            >
-              <GlowCard className="flex items-center space-x-3 px-4 sm:px-6 py-3 bg-white/90 backdrop-blur-sm border-2 border-purple-200 rounded-xl shadow-lg">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-purple-300 ring-2 ring-purple-100 flex-shrink-0">
-                  <img
-                    src="/assets/images/casual_big_smile_glasses-1760710103119.jpg"
-                    alt="Julianne Tajuba"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="text-left">
-                  <div className="flex items-center space-x-2 flex-wrap">
-                    <span className="font-heading text-sm text-gray-700">Created by</span>
-                    <span className="font-heading text-purple-600 font-bold">Julianne Tajuba</span>
-                  </div>
-                </div>
-              </GlowCard>
-            </motion.div>
-
-            <motion.h1
-              className="text-3xl sm:text-4xl lg:text-5xl font-heading text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-blue-600 to-teal-600 mb-3 font-extrabold px-2"
-              variants={fadeInUp}
-            >
-              Explore the World You Can't See!
-            </motion.h1>
-
-            <motion.p
-              className="font-body text-base lg:text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed px-2"
-              variants={fadeInUp}
-            >
-              {welcomeMessage}
-            </motion.p>
-
-            {/* Enhanced Time Display */}
-            <motion.div
-              className="flex items-center justify-center space-x-3 text-sm"
-              variants={fadeInUp}
-            >
-              <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm px-3 py-2 rounded-lg shadow-sm">
-                <Icon name="Clock" size={16} className="text-purple-600" />
-                <span className="font-mono text-gray-700">
-                  {currentTime?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </div>
-              <div className="w-1 h-1 bg-purple-400 rounded-full" />
-              <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm px-3 py-2 rounded-lg shadow-sm">
-                <Icon name="Calendar" size={16} className="text-purple-600" />
-                <span className="font-mono text-gray-700">
-                  {currentTime?.toLocaleDateString()}
-                </span>
-              </div>
-            </motion.div>
-          </motion.section>
-
-          {/* Enhanced Quick Actions */}
-          <motion.section
-            className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 sm:gap-4"
-            initial="hidden"
-            animate="visible"
-            variants={staggerContainer}
-          >
-            {quickActions?.map((action, index) => (
-              <Link
-                key={action?.label}
-                to={action?.route}
-                className="w-full sm:w-auto"
-              >
-                <motion.div
-                  variants={scaleIn}
-                  custom={index}
-                >
-                  <PulsingButton
-                    className={`
-                      w-full sm:w-auto flex items-center space-x-3 px-5 py-4 rounded-2xl shadow-lg
-                      bg-gradient-to-r ${action?.gradient} text-white
-                      group relative overflow-hidden active:scale-95 transition-transform
-                    `}
-                  >
-                    {/* Shimmer effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-
-                    <Icon name={action?.icon} size={24} strokeWidth={2.5} />
-                    <div className="text-left relative z-10 flex-1">
-                      <span className="font-body font-bold block">{action?.label}</span>
-                      <span className="font-caption text-xs opacity-90">{action?.description}</span>
-                    </div>
-                    <motion.div
-                      animate={{ x: [0, 5, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
-                    >
-                      <Icon name="ArrowRight" size={20} />
-                    </motion.div>
-                  </PulsingButton>
-                </motion.div>
-              </Link>
-            ))}
-          </motion.section>
-
-          {/* Welcome Characters */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-          >
-            <WelcomeCharacters />
-          </motion.div>
-
-          <section className="bg-card rounded-2xl p-6 border border-border shadow-moderate">
-            <h2 className="text-xl font-heading mb-2">Your saved progress</h2>
-            <p className="text-muted-foreground mb-4">See completed timeline events and earned achievements in your progress hub. Guest timeline progress stays in this browser; guest game scores are not saved.</p>
-            <Link to="/progress-achievement-hub" className="text-primary font-semibold underline">View saved progress</Link>
-          </section>
-
-          {/* Game Mode Cards */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.6 }}
-          >
-            <GameModeCards />
-          </motion.div>
-
-          {/* Read the Book Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.6 }}
-          >
-            <ReadTheBookSection />
-          </motion.div>
-
-          <section className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-3xl p-6 text-white">
-            <h2 className="text-2xl font-heading mb-2">Try World Explorer</h2>
-            <p className="mb-4">Visit different environments and discover the microorganisms that live there.</p>
-            <Link to="/world-explorer-mode" className="inline-block bg-white text-purple-700 font-semibold rounded-xl px-5 py-3">Start exploring</Link>
-          </section>
+const paths = [
+  { id: 'mystery', icon: Search, mood: 'I want to solve something', title: 'Solve a mystery', question: 'What happened after lunch?', text: 'Gather clues, compare lunches and test an idea with Aunt Juju.', action: 'Investigate the Cafeteria Clue', route: '/investigations/cafeteria', tag: 'Clues + experiments' },
+  { id: 'microscope', icon: Microscope, mood: 'I want a closer look', title: 'Look through a microscope', question: 'What can you notice up close?', text: 'Explore virtual specimens and discover details you might otherwise miss.', action: 'Open the Microscope Lab', route: '/microscope-discovery-lab', tag: 'Observe + discover' },
+  { id: 'world', icon: Compass, mood: 'I want to explore a place', title: 'Explore a tiny world', question: 'Where might microbes live?', text: 'Visit soil, a pond or the gut. Follow clues to learn how microbes live.', action: 'Visit World Explorer', route: '/world-explorer-mode', tag: 'Places + discoveries' },
+  { id: 'challenge', icon: Puzzle, mood: 'I want a quick challenge', title: 'Play with what you know', question: 'Can you make a match?', text: 'Match microbes and their characteristics. Or choose a quick quiz below.', action: 'Try Microbe Matching', route: '/microbe-matching-game', tag: 'Puzzles + practice' },
+  { id: 'adventure', icon: Waves, mood: 'I want an adventure', title: 'Enter a living world', question: 'Who lives in a drop of pond water?', text: 'Travel with Aunt Juju. Follow moving neighbors and discover how they live.', action: 'Explore Life in a Drop', route: '/life-in-a-drop', tag: 'Move + meet + wonder' },
+  { id: 'story', icon: BookOpen, mood: 'I want a story', title: 'Follow a discovery', question: 'How did scientists find out?', text: 'Travel through microbiology history and meet the people behind discoveries.', action: 'Explore the Timeline', route: '/microbe-timeline-adventure', tag: 'People + big ideas' },
+];
+const suggestions = { notice: paths[1], puzzle: paths[0], play: paths[3] };
+export default function GameHomeDashboard() {
+  const [preference, setPreference] = useState(null);
+  const suggested = suggestions[preference];
+  return <div className="mq-curiosity-home">
+    <Header />
+    <main className="cq-main">
+      <section className="cq-welcome" aria-labelledby="curiosity-title">
+        <div>
+          <span className="cq-kicker"><Sparkles size={18} aria-hidden="true" /> Welcome to MicrobeQuest</span>
+          <h1 id="curiosity-title">What are you curious<br className="cq-desktop-break" /> about today?</h1>
+          <p>Big questions. Tiny worlds. Your choice.</p>
+          <a className="cq-start" href="#curiosity-choices">Find your next discovery <ArrowRight size={19} aria-hidden="true" /></a>
         </div>
-      </main>
-      {/* Character Guide */}
-      <CharacterGuide
-        character="aunt-juju"
-        message="Welcome to your laboratory dashboard! Click on any game mode to start your microbiology adventure. I'll be here to guide you every step of the way!"
-        emotion="happy"
-        position="bottom-right"
-        isVisible={shouldShowGuide}
-        onClose={hideGuide}
-        showHint={true}
-        hintText="Try clicking on the Microbe Matching game to start with something fun and easy!"
-      />
-      {/* Discovery Collection Modal */}
+        <aside className="cq-juju" aria-label="Aunt Juju welcomes you">
+          <img src="/assets/images/color_graduating_aunt_juju-1760838289072.png" alt="Cartoon Aunt Juju smiling and holding a book" width="144" height="144" />
+          <div><strong>Aunt Juju says…</strong><p>“You don’t need to know all the answers. Pick something that makes you wonder. I’ll help you get started.”</p></div>
+        </aside>
+      </section>
 
-      {/* Welcome Celebration */}
-      <SuccessCelebration
-        show={showCelebration}
-        onComplete={() => setShowCelebration(false)}
-      />
-      <Footer />
-    </div>
-  );
-};
+      <details className="cq-helper">
+        <summary><HelpCircle size={21} aria-hidden="true" /> Help me choose, Aunt Juju</summary>
+        <p>What sounds fun right now? I can suggest a place to start. You can still choose anything.</p>
+        <div className="cq-helper-choices" role="group" aria-label="What sounds fun?">
+          { [['notice','Noticing something new'],['puzzle','Figuring out a mystery'],['play','Trying a puzzle']].map(([id,label])=><button key={id} type="button" aria-pressed={preference === id} onClick={()=>setPreference(id)}>{label}</button>) }
+        </div>
+        {suggested && <div className="cq-suggestion" role="status"><strong>You could try: {suggested.title}</strong><p>{suggested.text}</p><Link to={suggested.route}>{suggested.action} <ArrowRight size={18} aria-hidden="true" /></Link><p className="cq-small">Just a suggestion. All the choices below are still yours.</p></div>}
+      </details>
 
-export default GameHomeDashboard;
+      <section id="curiosity-choices" className="cq-choices" aria-labelledby="choices-title">
+        <div className="cq-section-heading"><h2 id="choices-title">So many ways to wonder</h2><p>Choose what interests you. There’s no required order.</p></div>
+        <div className="cq-grid">{paths.map(({id,icon:Icon,mood,title,question,text,action,route,tag})=><article className={`cq-card cq-${id}`} key={id}>
+          <div className="cq-card-top"><span className="cq-art"><Icon size={46} strokeWidth={1.8} aria-hidden="true" /></span><span className="cq-tag">{tag}</span></div>
+          <p className="cq-mood">{mood}</p><h3>{title}</h3><p className="cq-question">{question}</p><p className="cq-description">{text}</p>
+          <Link className="cq-action" to={route}>{action}<ArrowRight size={18} aria-hidden="true" /></Link>
+          {id === 'challenge' && <details className="cq-more-games"><summary>More ways to play</summary><Link to="/quiz-challenge-system">Try a Quiz Challenge <ArrowRight size={16} aria-hidden="true" /></Link></details>}
+        </article>)}</div>
+      </section>
+
+      <section className="cq-book" aria-labelledby="book-link-title">
+        <img src="/assets/images/IMG_2430-1760838191946.PNG" width="104" height="104" alt="Charlie the Zebra" loading="lazy" />
+        <div><p className="cq-kicker">The adventure can begin in a book, too</p><h2 id="book-link-title">Meet Aunt Juju &amp; Charlie</h2><p>Already know them from the book? Keep exploring. Meeting them for the first time? Come say hello.</p><Link to="/meet-aunt-juju-charlie">Meet the characters <ArrowRight size={18} aria-hidden="true" /></Link></div>
+      </section>
+      <nav className="cq-extras" aria-label="More MicrobeQuest options"><Link to="/progress-achievement-hub"><Trophy size={18} aria-hidden="true" /> View saved progress</Link><Link to="/microbe-detective-mystery-outbreak">More detective cases</Link><Link to="/parent-controls-dashboard">For grown-ups: Parent Controls</Link></nav>
+      <p className="cq-preview-note">We’re refining these experiences. The Cafeteria Clue shows our newest guided investigation; the other activities are being reviewed next.</p>
+    </main>
+    <Footer />
+  </div>;
+}

@@ -59,7 +59,7 @@ export function stepCombat(state, milliseconds, tools, difficulty='easy', keys={
         if(hit.type==='bad'){next.kills++;next.defensePoints=clamp(next.defensePoints+5,200);}
       }
       next.immuneHealth=clamp(next.immuneHealth+(tool.effect.immuneHealth||0));
-      next.bacterialBalance=clamp(next.bacterialBalance+(tool.effect.balance||0));
+      next.bacterialBalance=clamp(next.bacterialBalance+(tool.effect[hit.type==='good'?'balanceForGood':'balanceForBad']??tool.effect.balance??0));
     }else if(x>=-50&&x<=850&&y>=-50&&y<=450)projectiles.push({...p,x,y,angle});
   }
   next.bacteria=bacteria.filter(b=>b.isAlive);next.projectiles=projectiles;

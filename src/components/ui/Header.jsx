@@ -26,7 +26,7 @@ const Header = () => {
       label: 'Explore',
       path: '/world-explorer-mode',
       icon: 'Compass',
-      description: 'Discover hidden microbes'
+      description: 'Investigate microbial habitats'
     },
     {
       label: 'Quiz',
@@ -41,10 +41,10 @@ const Header = () => {
       description: 'Examine specimens closely'
     },
     {
-      label: 'Germ Buster',
-      path: '/germ-buster-tower-defense',
-      icon: 'Shield',
-      description: 'Tower defense against germs'
+      label: 'Pond Adventure',
+      path: '/life-in-a-drop',
+      icon: 'Waves',
+      description: 'Explore Life in a Drop'
     },
     {
       label: 'Detective',
