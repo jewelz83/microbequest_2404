@@ -55,6 +55,7 @@ const Routes = () => {
             <Route path="/quiz-challenge-system" element={<GameAccessGate mode="quiz"><QuizChallengeSystem /></GameAccessGate>} />
             <Route path="/game-home-dashboard" element={<GameHomeDashboard />} />
             <Route path="/microscope-discovery-lab" element={<GameAccessGate mode="lab"><MicroscopeDiscoveryLab /></GameAccessGate>} />
+            <Route path="/life-in-a-drop" element={<GameAccessGate mode="tower_defense"><GermBusterTowerDefense /></GameAccessGate>} />
             <Route path="/germ-buster-tower-defense" element={<GameAccessGate mode="tower_defense"><GermBusterTowerDefense /></GameAccessGate>} />
             <Route path="/meet-aunt-juju-charlie" element={<BookWorld />} />
             <Route path="/investigations/cafeteria" element={<GameAccessGate mode="detective"><CafeteriaInvestigation /></GameAccessGate>} />

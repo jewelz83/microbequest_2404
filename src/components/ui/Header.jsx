@@ -41,10 +41,10 @@ const Header = () => {
       description: 'Examine specimens closely'
     },
     {
-      label: 'Germ Buster',
-      path: '/germ-buster-tower-defense',
-      icon: 'Shield',
-      description: 'Selective-action arcade mission'
+      label: 'Pond Adventure',
+      path: '/life-in-a-drop',
+      icon: 'Waves',
+      description: 'Explore Life in a Drop'
     },
     {
       label: 'Detective',

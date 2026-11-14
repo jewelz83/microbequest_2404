@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Microscope, Compass, Puzzle, BookOpen, ArrowRight, Sparkles, HelpCircle, Trophy } from 'lucide-react';
+import { Search, Microscope, Compass, Puzzle, BookOpen, ArrowRight, Sparkles, HelpCircle, Trophy, Waves } from 'lucide-react';
 import Header from '../../components/ui/Header';
 import Footer from '../../components/ui/Footer';
 import './curiosity-home.css';
@@ -9,7 +9,8 @@ const paths = [
   { id: 'mystery', icon: Search, mood: 'I want to solve something', title: 'Solve a mystery', question: 'What happened after lunch?', text: 'Gather clues, compare lunches and test an idea with Aunt Juju.', action: 'Investigate the Cafeteria Clue', route: '/investigations/cafeteria', tag: 'Clues + experiments' },
   { id: 'microscope', icon: Microscope, mood: 'I want a closer look', title: 'Look through a microscope', question: 'What can you notice up close?', text: 'Explore virtual specimens and discover details you might otherwise miss.', action: 'Open the Microscope Lab', route: '/microscope-discovery-lab', tag: 'Observe + discover' },
   { id: 'world', icon: Compass, mood: 'I want to explore a place', title: 'Explore a tiny world', question: 'Where might microbes live?', text: 'Visit soil, a pond or the gut. Follow clues to learn how microbes live.', action: 'Visit World Explorer', route: '/world-explorer-mode', tag: 'Places + discoveries' },
-  { id: 'challenge', icon: Puzzle, mood: 'I want a quick challenge', title: 'Play with what you know', question: 'Can you make a match?', text: 'Match microbes and their characteristics. Or choose a quiz or strategy game below.', action: 'Try Microbe Matching', route: '/microbe-matching-game', tag: 'Puzzles + practice' },
+  { id: 'challenge', icon: Puzzle, mood: 'I want a quick challenge', title: 'Play with what you know', question: 'Can you make a match?', text: 'Match microbes and their characteristics. Or choose a quick quiz below.', action: 'Try Microbe Matching', route: '/microbe-matching-game', tag: 'Puzzles + practice' },
+  { id: 'adventure', icon: Waves, mood: 'I want an adventure', title: 'Enter a living world', question: 'Who lives in a drop of pond water?', text: 'Travel with Aunt Juju. Follow moving neighbors and discover how they live.', action: 'Explore Life in a Drop', route: '/life-in-a-drop', tag: 'Move + meet + wonder' },
   { id: 'story', icon: BookOpen, mood: 'I want a story', title: 'Follow a discovery', question: 'How did scientists find out?', text: 'Travel through microbiology history and meet the people behind discoveries.', action: 'Explore the Timeline', route: '/microbe-timeline-adventure', tag: 'People + big ideas' },
 ];
 const suggestions = { notice: paths[1], puzzle: paths[0], play: paths[3] };
@@ -47,7 +48,7 @@ export default function GameHomeDashboard() {
           <div className="cq-card-top"><span className="cq-art"><Icon size={46} strokeWidth={1.8} aria-hidden="true" /></span><span className="cq-tag">{tag}</span></div>
           <p className="cq-mood">{mood}</p><h3>{title}</h3><p className="cq-question">{question}</p><p className="cq-description">{text}</p>
           <Link className="cq-action" to={route}>{action}<ArrowRight size={18} aria-hidden="true" /></Link>
-          {id === 'challenge' && <details className="cq-more-games"><summary>More ways to play</summary><Link to="/quiz-challenge-system">Try a Quiz Challenge <ArrowRight size={16} aria-hidden="true" /></Link><Link to="/germ-buster-tower-defense">Play Germ Buster action <ArrowRight size={16} aria-hidden="true" /></Link></details>}
+          {id === 'challenge' && <details className="cq-more-games"><summary>More ways to play</summary><Link to="/quiz-challenge-system">Try a Quiz Challenge <ArrowRight size={16} aria-hidden="true" /></Link></details>}
         </article>)}</div>
       </section>
 

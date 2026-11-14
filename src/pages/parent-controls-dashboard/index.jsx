@@ -137,7 +137,7 @@ const GAME_MODE_LABELS = {
   lab: 'Microscope Lab',
   timeline: 'Timeline Adventure',
   detective: 'Detective Mystery',
-  tower_defense: 'Germ Buster',
+  tower_defense: 'Life in a Drop',
 };
 
 const InfoBadge = ({ text }) => (
