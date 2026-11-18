@@ -28,6 +28,8 @@ const PrivacyPolicy = lazy(() => import('./pages/privacy'));
 const TermsOfService = lazy(() => import('./pages/terms'));
 const RefundPolicy = lazy(() => import('./pages/refunds'));
 const LoginPage = lazy(() => import('./pages/login'));
+const BookWorld = lazy(() => import('./pages/book-world'));
+const CafeteriaInvestigation = lazy(() => import('./pages/cafeteria-investigation'));
 // Loading fallback component
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-indigo-950 to-purple-950">
@@ -53,7 +55,10 @@ const Routes = () => {
             <Route path="/quiz-challenge-system" element={<GameAccessGate mode="quiz"><QuizChallengeSystem /></GameAccessGate>} />
             <Route path="/game-home-dashboard" element={<GameHomeDashboard />} />
             <Route path="/microscope-discovery-lab" element={<GameAccessGate mode="lab"><MicroscopeDiscoveryLab /></GameAccessGate>} />
+            <Route path="/life-in-a-drop" element={<GameAccessGate mode="tower_defense"><GermBusterTowerDefense /></GameAccessGate>} />
             <Route path="/germ-buster-tower-defense" element={<GameAccessGate mode="tower_defense"><GermBusterTowerDefense /></GameAccessGate>} />
+            <Route path="/meet-aunt-juju-charlie" element={<BookWorld />} />
+            <Route path="/investigations/cafeteria" element={<GameAccessGate mode="detective"><CafeteriaInvestigation /></GameAccessGate>} />
             <Route path="/microbe-detective-mystery-outbreak" element={<GameAccessGate mode="detective"><MicrobeDetectiveMysteryOutbreak /></GameAccessGate>} />
             <Route path="/microbe-timeline-adventure" element={<GameAccessGate mode="timeline"><MicrobeTimelineAdventure /></GameAccessGate>} />
             <Route path="/parent-controls-dashboard" element={<ParentControlsDashboard />} />
